@@ -7,7 +7,7 @@ export function UUID() {
 // GENERAL
 export type ValueObject<T> = T | State<T>;
 
-function unwrapValue<T>(valueObject: ValueObject<T>) {
+export function unwrapValue<T>(valueObject: ValueObject<T>) {
     if (valueObject instanceof State) return valueObject.value;
     else return valueObject;
 }
@@ -16,10 +16,10 @@ function unwrapValue<T>(valueObject: ValueObject<T>) {
 export interface StateResponseDetails {
     safeToPropagate: boolean;
 }
-export type StateResponder = <T>(newValue: T, details: StateResponseDetails) => void;
+export type StateResponder<T> = (newValue: T, details: StateResponseDetails) => void;
 export interface StateBinder<T> {
-    uuid: typeof UUID;
-    responder: StateResponder;
+    uuid: string;
+    responder: StateResponder<T>;
 }
 
 export class State<T> {

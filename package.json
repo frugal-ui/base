@@ -4,7 +4,7 @@
   "description": "Base for frugal-ui-apps",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/frugal-ui/base#readme",
   "dependencies": {
+    "@types/node": "^20.2.3",
     "@types/uuid": "^9.0.1",
     "uuid": "^9.0.0"
   }
