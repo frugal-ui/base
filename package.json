@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/frugal-ui/base/issues"
   },
-  "homepage": "https://github.com/frugal-ui/base#readme"
+  "homepage": "https://github.com/frugal-ui/base#readme",
+  "dependencies": {
+    "@types/uuid": "^9.0.1",
+    "uuid": "^9.0.0"
+  }
 }
