@@ -1,0 +1,27 @@
+{
+  "name": "@frugal-ui/base",
+  "version": "0.0.0-alpha1",
+  "description": "Base for frugal-ui-apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frugal-ui/base.git"
+  },
+  "keywords": [
+    "minimal",
+    "web",
+    "ui",
+    "framework",
+    "reactive",
+    "component"
+  ],
+  "author": "viridian035",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/frugal-ui/base/issues"
+  },
+  "homepage": "https://github.com/frugal-ui/base#readme"
+}
