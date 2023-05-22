@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
 
-import { State, StateBinder, UUID, unwrapValue } from './index.js';
+import { State, Binding, UUID, unwrapValue } from './index.js';
 
 test('ValueObject', () => {
     const targetValue = 'Hello!';
@@ -20,7 +20,7 @@ test('Reactivity', () => {
         let changedValue = '';
 
         const state = new State(valueA);
-        const binder: StateBinder<string> = {
+        const binder: Binding<string> = {
             uuid: UUID(),
             responder(newValue) {
                 changedValue = newValue;
