@@ -5,6 +5,7 @@ export function UUID() {
 
 /* REACTIVITY */
 // GENERAL
+/** Object holding a value. Used by UI components. */
 export type ValueObject<T> = T | State<T>;
 
 export function unwrapValue<T>(valueObject: ValueObject<T>) {
@@ -13,15 +14,18 @@ export function unwrapValue<T>(valueObject: ValueObject<T>) {
 }
 
 // STATE
+/** Configures StateResponders. */
 export interface StateResponseDetails {
     safeToPropagate: boolean;
 }
+/** Triggered when bound State changes */
 export type StateResponder<T> = (newValue: T, details: StateResponseDetails) => void;
+/** Binds a state. Responder triggered when State changes. */
 export interface StateBinder<T> {
     uuid: string;
     responder: StateResponder<T>;
 }
-
+/** Reactive Variable. Binders will be triggered on change. */
 export class State<T> {
     private _value: T;
     private binders = new Map<StateBinder<T>['uuid'], StateBinder<T>['responder']>();
