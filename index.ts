@@ -4,76 +4,15 @@ export function UUID() {
     return uuidv4();
 }
 
-/* UTILITY */
-// GENERAL
-type Configuration<Default> = {
-    [key in keyof Default]: Default[keyof Default];
-};
-
 /* REACTIVITY */
 // GENERAL
 /** Object holding a value. Used by UI components. */
-export type ValueObject<T> = T | State<T>;
+export type ValueObject<T> = T | BindableObject<T>;
 
-/** Allows reactive programming. */
-export interface BindableObject<T> {
-    uuid: string;
-    value: T;
-    triggerBinder: (binder: Binding<T>) => void;
-    triggerAll: (options: BindingActionConfig) => void;
-    addBinder: (binder: Binding<T>) => void;
-    removeBinder: (binder: Binding<T>) => void;
-}
-
-export const defaultBindableResponderConfig = {
-    safeToPropagate: true,
-}
-type BindingActionConfig = Configuration<typeof defaultBindableResponderConfig>;
-export type BindingAction<T> = (newValue: T, details: BindingActionConfig) => void;
-
-/** Can be added to a BindableObject. */
-export interface Binding<T> {
-    uuid: string;
-    responder: BindingAction<T>;
-}
-
-/** Converts ValueObject to raw value. */
-export function unwrapValue<T>(valueObject: ValueObject<T>): T {
-    if (valueObject instanceof State) return valueObject.value;
-    else return valueObject;
-}
-/** Converts ValueObject to BindableObject. */
-export function unwrapBindable<T>(valueObject: ValueObject<T>): BindableObject<T> {
-    if (valueObject instanceof State) return valueObject;
-    else {
-        let responder: BindingAction<T> | undefined;
-
-        return {
-            value: valueObject,
-            uuid: UUID(),
-            triggerBinder: () => {
-                if (responder)
-                    responder(valueObject, defaultBindableResponderConfig);
-            },
-            triggerAll: () => {
-                if (responder)
-                    responder(valueObject, defaultBindableResponderConfig);
-            },
-            addBinder: (binder) => {
-                responder = binder.responder;
-            },
-            removeBinder: () => null,
-        }
-    }
-}
-
-// STATE
-/** Reactive Variable. Binders will be triggered on change. */
-export class State<T> implements BindableObject<T> {
+/** Can be bound, no further functionality. Should be extended by classes. */
+export class BindableObject<T> {
     uuid = UUID();
-
-    private _value: T;
-    private binders = new Map<Binding<T>['uuid'], Binding<T>['responder']>();
+    _value: T;
 
     constructor(value: T) {
         this._value = value;
@@ -86,24 +25,78 @@ export class State<T> implements BindableObject<T> {
 
     set value(newValue: T) {
         this._value = newValue;
-        this.triggerAll(defaultBindableResponderConfig);
+        this.triggerAll(defaultBindingConfig);
     }
 
     /* reactivity */
-    triggerBinder(binder: Binding<T>) {
-        binder.responder(this.value, defaultBindableResponderConfig);
+    triggerBinding(binding: Binding<T>) { }
+    triggerAll(options: BindingConfig) { }
+    addBinding(binding: Binding<T>) { }
+    removeBinding(binding: Binding<T>) { }
+}
+
+/**  Can be bound, working with one item. Used by unwrapBindable(). */
+export class BindableDummy<T> extends BindableObject<T> {
+    action: BindingAction<T> | undefined;
+
+    /* reactivity */
+    triggerBinding() {
+        if (this.action)
+            this.action(this._value, defaultBindingConfig);
     }
-    triggerAll(options: BindingActionConfig) {
-        this.binders.forEach(responder => {
-            responder(this.value, options);
+    triggerAll() {
+        if (this.action)
+            this.action(this._value, defaultBindingConfig);
+    }
+    addBinding(binding: Binding<T>) {
+        this.action = binding.action;
+    }
+}
+
+/** Reactive Variable. Bindings will be triggered on change. */
+export class State<T> extends BindableObject<T> {
+    private bindings = new Map<Binding<T>['uuid'], Binding<T>['action']>();
+
+    /* reactivity */
+    triggerBinding(binding: Binding<T>) {
+        binding.action(this.value, defaultBindingConfig);
+    }
+    triggerAll(options: BindingConfig) {
+        this.bindings.forEach(action => {
+            action(this.value, options);
         })
     }
-    addBinder(binder: Binding<T>) {
-        this.binders.set(binder.uuid, binder.responder);
+    addBinding(binding: Binding<T>) {
+        this.bindings.set(binding.uuid, binding.action);
     }
-    removeBinder(binder: Binding<T>) {
-        this.binders.delete(binder.uuid);
+    removeBinding(binding: Binding<T>) {
+        this.bindings.delete(binding.uuid);
     }
+}
+
+export interface BindingConfig {
+    isSafeToPropagate: boolean;
+}
+export const defaultBindingConfig: BindingConfig = {
+    isSafeToPropagate: true,
+}
+export type BindingAction<T> = (newValue: T, config: BindingConfig) => void;
+
+/** Can be added to a BindableObject. */
+export interface Binding<T> {
+    uuid: string;
+    action: BindingAction<T>;
+}
+
+/** Converts ValueObject to raw value. */
+export function unwrapValue<T>(valueObject: ValueObject<T>): T {
+    if (valueObject instanceof BindableObject) return valueObject.value;
+    else return valueObject;
+}
+/** Converts ValueObject to BindableObject. */
+export function unwrapBindable<T>(valueObject: ValueObject<T>): BindableObject<T> {
+    if (valueObject instanceof BindableObject) return valueObject;
+    else return new BindableDummy(unwrapValue(valueObject));
 }
 
 /* COMPONENTS */
@@ -142,9 +135,9 @@ export interface Component extends HTMLElement {
     ignore: <T extends Event>(eventName: keyof HTMLElementEventMap, handler: ComponentEventHandler) => this;
 
     //state
-    /** Tracks binders of the component. Key is BindableObject.uuid, value is the Binder. */
-    binders: Map<string, Binding<any>>;
-    bind: <T>(bindable: BindableObject<T>, responder: BindingAction<T>) => this;
+    /** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
+    bindings: Map<string, Binding<any>>;
+    bind: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
     unbind: <T>(bindable: BindableObject<T>) => this;
     update: <T>(bindable: BindableObject<T>) => this;
 }
@@ -209,7 +202,7 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         component.bind(bindable, newValue => {
             component.classList.toggle(className, newValue);
         })
-        .update(bindable);
+            .update(bindable);
 
         return component;
     }
@@ -274,38 +267,38 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         return component;
     }
 
-    component.binders = new Map();
-    component.bind = (bindable, responder) => {
-        const binder = {
+    component.bindings = new Map();
+    component.bind = (bindable, action) => {
+        const binding = {
             uuid: UUID(),
-            responder,
+            action,
         };
 
-        bindable.addBinder(binder);
-        component.binders.set(bindable.uuid, binder)
+        bindable.addBinding(binding);
+        component.bindings.set(bindable.uuid, binding)
 
         return component;
     }
     component.unbind = (bindable) => {
-        const binder = component.binders.get(bindable.uuid);
-        if (!binder) {
+        const binding = component.bindings.get(bindable.uuid);
+        if (!binding) {
             console.error(`Failed to unbind ${bindable.uuid} but bindable is unknown.`);
             return component;
         }
 
-        bindable.removeBinder(binder);
-        component.binders.delete(bindable.uuid);
+        bindable.removeBinding(binding);
+        component.bindings.delete(bindable.uuid);
 
         return component;
     }
     component.update = (bindable) => {
-        const binder = component.binders.get(bindable.uuid);
-        if (!binder) {
+        const binding = component.bindings.get(bindable.uuid);
+        if (!binding) {
             console.error(`Failed to update on bindable ${bindable.uuid} but bindable is unknown.`);
             return component;
         }
 
-        bindable.triggerBinder(binder);
+        bindable.triggerBinding(binding);
 
         return component;
     }

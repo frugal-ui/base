@@ -22,11 +22,11 @@ test('Reactivity', () => {
         const state = new State(valueA);
         const binder: Binding<string> = {
             uuid: UUID(),
-            responder(newValue) {
+            action(newValue) {
                 changedValue = newValue;
             }
         }
-        state.addBinder(binder);
+        state.addBinding(binder);
         state.value = valueB;
 
         setTimeout(() => {
