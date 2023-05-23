@@ -4,11 +4,19 @@ export function UUID() {
     return uuidv4();
 }
 
-/* REACTIVITY */
-// GENERAL
+/*
+    GENERAL
+*/
+export type Configuration = { [key: string]: any };
+
+/* 
+    REACTIVITY 
+*/
+// VALUE
 /** Object holding a value. Used by UI components. */
 export type ValueObject<T> = T | BindableObject<T>;
 
+// BINDABLE
 /** Can be bound, no further functionality. Should be extended by classes. */
 export class BindableObject<T> {
     uuid = UUID();
@@ -25,12 +33,12 @@ export class BindableObject<T> {
 
     set value(newValue: T) {
         this._value = newValue;
-        this.triggerAll(defaultBindingConfig);
+        this.triggerAll(defaultBindingConfiguration);
     }
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) { }
-    triggerAll(options: BindingConfig) { }
+    triggerAll(options: BindingConfiguration) { }
     addBinding(binding: Binding<T>) { }
     removeBinding(binding: Binding<T>) { }
 }
@@ -42,11 +50,11 @@ export class BindableDummy<T> extends BindableObject<T> {
     /* reactivity */
     triggerBinding() {
         if (this.action)
-            this.action(this._value, defaultBindingConfig);
+            this.action(this._value, defaultBindingConfiguration);
     }
     triggerAll() {
         if (this.action)
-            this.action(this._value, defaultBindingConfig);
+            this.action(this._value, defaultBindingConfiguration);
     }
     addBinding(binding: Binding<T>) {
         this.action = binding.action;
@@ -59,9 +67,9 @@ export class State<T> extends BindableObject<T> {
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) {
-        binding.action(this.value, defaultBindingConfig);
+        binding.action(this.value, defaultBindingConfiguration);
     }
-    triggerAll(options: BindingConfig) {
+    triggerAll(options: BindingConfiguration) {
         this.bindings.forEach(action => {
             action(this.value, options);
         })
@@ -74,13 +82,14 @@ export class State<T> extends BindableObject<T> {
     }
 }
 
-export interface BindingConfig {
+// BINDING
+export interface BindingConfiguration extends Configuration {
     isSafeToPropagate: boolean;
 }
-export const defaultBindingConfig: BindingConfig = {
+export const defaultBindingConfiguration: BindingConfiguration = {
     isSafeToPropagate: true,
 }
-export type BindingAction<T> = (newValue: T, config: BindingConfig) => void;
+export type BindingAction<T> = (newValue: T, configuration: BindingConfiguration) => void;
 
 /** Can be added to a BindableObject. */
 export interface Binding<T> {
@@ -88,6 +97,7 @@ export interface Binding<T> {
     action: BindingAction<T>;
 }
 
+// HELPERS
 /** Converts ValueObject to raw value. */
 export function unwrapValue<T>(valueObject: ValueObject<T>): T {
     if (valueObject instanceof BindableObject) return valueObject.value;
@@ -99,7 +109,9 @@ export function unwrapBindable<T>(valueObject: ValueObject<T>): BindableObject<T
     else return new BindableDummy(unwrapValue(valueObject));
 }
 
-/* COMPONENTS */
+/* 
+    COMPONENTS 
+*/
 // GENERAL
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 
@@ -113,7 +125,7 @@ export interface Component extends HTMLElement {
 
     //attributes
     setID: (id: string) => this;
-    setAttr: (key: string, value?: string) => this;
+    setAttr: (key: string, value?: ValueObject<string>) => this;
     rmAttr: (key: string) => this;
     toggleAttr: (key: string, condition: ValueObject<boolean>) => this;
     resetClasses: (value: string) => this;
@@ -166,7 +178,14 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         return component;
     }
     component.setAttr = (key, value = '') => {
-        component.setAttribute(key, value);
+        const bindable = unwrapBindable(value);
+
+        component
+            .bind(bindable, newValue => {
+                component.setAttribute(key, newValue);
+            })
+            .update(bindable);
+
         return component;
     }
     component.rmAttr = (key) => {
@@ -307,3 +326,57 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
 }
 
 // SPECIFIC
+/* Button */
+export enum ButtonStyles {
+    Transparent = 'button-style-transparent',
+    Normal = 'button-style-normal',
+    Primary = 'button-style-primary',
+    Destructive = 'button-style-destructive',
+}
+
+export interface ButtonConfiguration extends Configuration {
+    style: ButtonStyles;
+    text: ValueObject<string>;
+    iconName: string;
+    ariaLabel: ValueObject<string>;
+    action: (e: Event) => void;
+}
+
+export class TextualButtonConfiguration implements ButtonConfiguration {
+    style = ButtonStyles.Normal;
+    text: ValueObject<string>;
+    iconName = '';
+    ariaLabel: ValueObject<string>;
+    action = (e: Event) => console.warn('Button action not defined', e.target);
+
+    constructor(text: ButtonConfiguration['text'], action?: ButtonConfiguration['action']) {
+        this.text = text;
+        this.ariaLabel = text;
+        if (action) this.action = action;
+    }
+}
+
+export function Button(configuration: ButtonConfiguration) {
+    return Component('button')
+        .addItems(
+            Icon(configuration.iconName),
+            Text(configuration.text),
+        )
+        
+        .setAttr('aria-label', configuration.ariaLabel)
+        .addToClass(configuration.style)
+        
+        .listen('click', configuration.action);
+}
+
+/* Icon */
+export function Icon(iconName: string) {
+    return Text(iconName)
+        .addToClass('icon'); //TODO
+}
+
+/* Text */
+export function Text(value: ValueObject<string>, tagName: keyof HTMLElementTagNameMap = 'span') {
+    return Component(tagName)
+        .setText(value);
+}
