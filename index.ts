@@ -86,9 +86,39 @@ export class State<T> extends BindableObject<T> {
 export interface BindingConfiguration extends Configuration {
     isSafeToPropagate: boolean;
 }
+
 export const defaultBindingConfiguration: BindingConfiguration = {
     isSafeToPropagate: true,
 }
+
+export interface TwoWayBindingConfiguration<T> extends BindingConfiguration {
+    getProperty: () => T,
+    setProperty: (newValue: T) => void,
+    eventName: keyof HTMLElementEventMap,
+}
+
+export class InputTwoWayBindingConfiguration<T> implements TwoWayBindingConfiguration<T> {
+    isSafeToPropagate = true;
+    
+    component: Component<T>;
+    defaultValue: T;
+
+    eventName: keyof HTMLElementEventMap = 'input';
+
+    constructor(component: Component<T>, defaultValue: T) {
+        this.component = component;
+        this.defaultValue = defaultValue;
+    }
+
+    getProperty = () => {
+        return this.component.value ?? this.defaultValue;
+    }
+    setProperty = (newValue: T) => {
+        this.component.value = newValue;
+    }
+}
+
+/** Action executed when bound object changes. */
 export type BindingAction<T> = (newValue: T, configuration: BindingConfiguration) => void;
 
 /** Can be added to a BindableObject. */
@@ -116,13 +146,16 @@ export function unwrapBindable<T>(valueObject: ValueObject<T>): BindableObject<T
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 
 /** UI Component. */
-export interface Component extends HTMLElement {
+export interface Component<ValueType> extends HTMLElement {
+    value: ValueType | undefined,
     access: (accessFn: (self: this) => void) => this;
 
     //children
-    addItems: (...children: Component[]) => this;
-    addItemsBefore: (...children: Component[]) => this;
+    addItems: (...children: Component<any>[]) => this;
+    addItemsBefore: (...children: Component<any>[]) => this;
     clear: () => this;
+    setItems: (children: ValueObject<Component<any>[]>) => this;
+    computeItems: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => Component<any>[]) => this;
 
     //attributes
     setID: (id: string) => this;
@@ -139,25 +172,31 @@ export interface Component extends HTMLElement {
     setText: (text: ValueObject<string>) => this;
     /** Passes unwrapped value into compute() function. Result of compute() will be textContent. */
     computeText: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => string) => this;
+
+    setValue: (value: ValueObject<ValueType>) => this;
+    /** Passes unwrapped value into compute() function. Result of compute() will be textContent. */
+    computeValue: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => ValueType) => this;
+
     setHTML: (text: ValueObject<string>) => this;
     /** Passes unwrapped value into compute() function. Result of compute() will be innerHTML. */
     computeHTML: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => string) => this;
 
     //events
-    listen: <T extends Event>(eventName: keyof HTMLElementEventMap, handler: ComponentEventHandler) => this;
-    ignore: <T extends Event>(eventName: keyof HTMLElementEventMap, handler: ComponentEventHandler) => this;
+    listen: (eventName: keyof HTMLElementEventMap, handler: ComponentEventHandler) => this;
+    ignore: (eventName: keyof HTMLElementEventMap, handler: ComponentEventHandler) => this;
 
     //state
     /** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
     bindings: Map<string, Binding<any>>;
-    bind: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
-    unbind: <T>(bindable: BindableObject<T>) => this;
-    update: <T>(bindable: BindableObject<T>) => this;
+    addBinding: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
+    createTwoWayBinding: <T>(bindable: BindableObject<T>, configuration: TwoWayBindingConfiguration<T>) => this;
+    removeBinding: <T>(bindable: BindableObject<T>) => this;
+    updateBinding: <T>(bindable: BindableObject<T>) => this;
 }
 
-export function Component(tagName: keyof HTMLElementTagNameMap): Component {
+export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Component<ValueType> {
     //create
-    const component = document.createElement(tagName) as Component;
+    const component = document.createElement(tagName) as Component<ValueType>;
 
     //methods
     component.access = (fn) => {
@@ -177,6 +216,34 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         component.innerHTML = '';
         return component;
     }
+    component.setItems = (children) => {
+        const bindable = unwrapBindable(children);
+
+        component
+            .addBinding(bindable, children => {
+                component
+                    .clear()
+                    .addItems(...children)
+            })
+            .updateBinding(bindable);
+
+        return component;
+    }
+    component.computeItems = (object, compute) => {
+        const bindable = unwrapBindable(object);
+
+        component
+            .addBinding(bindable, object => {
+                component
+                    .clear()
+                    .addItems(
+                        ...compute(object)
+                    )
+            })
+            .updateBinding(bindable);
+
+        return component;
+    }
 
     component.setID = (id) => {
         component.id = id;
@@ -186,10 +253,10 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         const bindable = unwrapBindable(value);
 
         component
-            .bind(bindable, newValue => {
+            .addBinding(bindable, newValue => {
                 component.setAttribute(key, newValue);
             })
-            .update(bindable);
+            .updateBinding(bindable);
 
         return component;
     }
@@ -201,10 +268,10 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         const bindable = unwrapBindable(condition);
 
         component
-            .bind(bindable, newValue => {
+            .addBinding(bindable, newValue => {
                 component.toggleAttribute(key, newValue);
             })
-            .update(bindable);
+            .updateBinding(bindable);
 
         return component;
     }
@@ -223,10 +290,10 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
     component.addToClassConditionally = (className, condition) => {
         const bindable = unwrapBindable(condition);
 
-        component.bind(bindable, newValue => {
+        component.addBinding(bindable, newValue => {
             component.classList.toggle(className, newValue);
         })
-            .update(bindable);
+            .updateBinding(bindable);
 
         return component;
     }
@@ -239,10 +306,10 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         const bindable = unwrapBindable(text);
 
         component
-            .bind(bindable, newValue => {
+            .addBinding(bindable, newValue => {
                 component.textContent = newValue;
             })
-            .update(bindable);
+            .updateBinding(bindable);
 
         return component;
     }
@@ -250,11 +317,34 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         const bindable = unwrapBindable(object);
 
         component
-            .bind(bindable, () => {
+            .addBinding(bindable, () => {
                 const computedValue = compute(unwrapValue(object));
                 component.textContent = computedValue;
             })
-            .update(bindable);
+            .updateBinding(bindable);
+
+        return component;
+    }
+    component.setValue = (value) => {
+        const bindable = unwrapBindable(value);
+
+        component
+            .addBinding(bindable, newValue => {
+                component.value = newValue;
+            })
+            .updateBinding(bindable);
+
+        return component;
+    }
+    component.computeValue = (object, compute) => {
+        const bindable = unwrapBindable(object);
+
+        component
+            .addBinding(bindable, () => {
+                const computedValue = compute(unwrapValue(object));
+                component.value = computedValue;
+            })
+            .updateBinding(bindable);
 
         return component;
     }
@@ -262,10 +352,10 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         const bindable = unwrapBindable(text);
 
         component
-            .bind(bindable, newValue => {
+            .addBinding(bindable, newValue => {
                 component.innerHTML = newValue;
             })
-            .update(bindable);
+            .updateBinding(bindable);
 
         return component;
     }
@@ -273,11 +363,11 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
         const bindable = unwrapBindable(object);
 
         component
-            .bind(bindable, newValue => {
+            .addBinding(bindable, newValue => {
                 const computedValue = compute(unwrapValue(object));
                 component.innerHTML = computedValue;
             })
-            .update(bindable);
+            .updateBinding(bindable);
 
         return component;
     }
@@ -292,18 +382,29 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
     }
 
     component.bindings = new Map();
-    component.bind = (bindable, action) => {
+    component.addBinding = (bindable, action) => {
         const binding = {
             uuid: UUID(),
             action,
         };
 
         bindable.addBinding(binding);
-        component.bindings.set(bindable.uuid, binding)
+        component.bindings.set(bindable.uuid, binding);
 
         return component;
     }
-    component.unbind = (bindable) => {
+    component.createTwoWayBinding = (bindable, configuration) => {
+        component
+            .addBinding(bindable, newValue => {
+                configuration.setProperty(newValue);
+            })
+            .listen(configuration.eventName, () => {
+                bindable.value = configuration.getProperty();
+            });
+
+        return component;
+    }
+    component.removeBinding = (bindable) => {
         const binding = component.bindings.get(bindable.uuid);
         if (!binding) {
             console.error(`Failed to unbind ${bindable.uuid} but bindable is unknown.`);
@@ -315,7 +416,7 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
 
         return component;
     }
-    component.update = (bindable) => {
+    component.updateBinding = (bindable) => {
         const binding = component.bindings.get(bindable.uuid);
         if (!binding) {
             console.error(`Failed to update on bindable ${bindable.uuid} but bindable is unknown.`);
