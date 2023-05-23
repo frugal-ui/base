@@ -38,7 +38,7 @@ export class BindableObject<T> {
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) { }
-    triggerAll(options: BindingConfiguration) { }
+    triggerAll(options?: BindingConfiguration) { }
     addBinding(binding: Binding<T>) { }
     removeBinding(binding: Binding<T>) { }
 }
@@ -69,7 +69,7 @@ export class State<T> extends BindableObject<T> {
     triggerBinding(binding: Binding<T>) {
         binding.action(this.value, defaultBindingConfiguration);
     }
-    triggerAll(options: BindingConfiguration) {
+    triggerAll(options: BindingConfiguration = defaultBindingConfiguration) {
         this.bindings.forEach(action => {
             action(this.value, options);
         })
@@ -122,6 +122,7 @@ export interface Component extends HTMLElement {
     //children
     addItems: (...children: Component[]) => this;
     addItemsBefore: (...children: Component[]) => this;
+    clear: () => this;
 
     //attributes
     setID: (id: string) => this;
@@ -170,6 +171,10 @@ export function Component(tagName: keyof HTMLElementTagNameMap): Component {
     }
     component.addItemsBefore = (...children) => {
         component.append(...children);
+        return component;
+    }
+    component.clear = () => {
+        component.innerHTML = '';
         return component;
     }
 
@@ -362,10 +367,10 @@ export function Button(configuration: ButtonConfiguration) {
             Icon(configuration.iconName),
             Text(configuration.text),
         )
-        
+
         .setAttr('aria-label', configuration.ariaLabel)
         .addToClass(configuration.style)
-        
+
         .listen('click', configuration.action);
 }
 
