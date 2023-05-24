@@ -42,11 +42,14 @@ test('State & Binding', () => {
 
 test('ComputedState', () => {
     const stateA = new State('A');
-    const stateB = new ComputedState<string>([stateA], '', (self) => {
-        self.value = stateA.value + 'b';
+    const stateB = new ComputedState<string>({
+        statesToBind: [stateA],
+        initialValue: '',
+        compute: (self) => {
+            self.value = stateA.value + 'b';
+        },
     });
 
-    
     assert(stateB.value, stateA.value + 'b');
     stateA.value = 'B';
     assert(stateB.value, stateA.value + 'b');
@@ -54,10 +57,11 @@ test('ComputedState', () => {
 
 test('ProxyState', () => {
     const originalState = new State(true);
-    const proxyState = new ProxyState(originalState,
-        (originalValue) => originalValue == true ? 'Yes' : 'No',
-        (value) => value == 'Yes',
-    );
+    const proxyState = new ProxyState({
+        original: originalState,
+        convertFromOriginal: (originalValue) => originalValue == true ? 'Yes' : 'No',
+        convertToOriginal: (value) => value == 'Yes',
+    })
 
     assert('Yes', proxyState.value);
     originalState.value = false;

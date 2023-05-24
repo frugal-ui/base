@@ -85,7 +85,7 @@ export class State<T> extends BindableObject<T> {
 }
 
 export interface ComputedStateCfg<T> {
-    bindables: BindableObject<any>[];
+    statesToBind: BindableObject<any>[];
     initialValue: T;
     compute: (self: ComputedState<T>) => void;
 }
@@ -99,7 +99,7 @@ export class ComputedState<T> extends State<T> {
             action: () => configuration.compute(this),
         }
 
-        configuration.bindables.forEach(bindable => {
+        configuration.statesToBind.forEach(bindable => {
             bindable.addBinding(binding);
             bindable.triggerBinding(binding);
         });
@@ -771,7 +771,7 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* RadioButton */
-export function RadioButton<T>(selectionOptions: BindableObject<T[]>, ownIndex: T, name: string) {
+export function RadioButton<T>(selectedItems: BindableObject<T[]>, ownIndex: T, groupName: string) {
     return (Input({
         type: 'radio',
         fallbackValue: undefined,
@@ -780,12 +780,13 @@ export function RadioButton<T>(selectionOptions: BindableObject<T[]>, ownIndex: 
     }) as CheckableComponent<undefined>)
         .access(self => self
             .createSelectionBinding(new UICheckSelectionCfg({
-                bindable: selectionOptions,
+                bindable: selectedItems,
                 component: self,
                 value: ownIndex,
+                isExclusive: true,
             }))
         )
-        .setAttr('name', name);
+        .setAttr('name', groupName);
 }
 
 /* Slider */
@@ -795,7 +796,7 @@ export interface SliderCfgExt {
     step?: number;
 }
 
-export function Slider(value: BindableObject<number>, configurationExtension: SliderCfgExt) {
+export function Slider(value: BindableObject<number>, configurationExtension: SliderCfgExt = {}) {
     return Input<number>({
         type: 'range',
         fallbackValue: 0,
