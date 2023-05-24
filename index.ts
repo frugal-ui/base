@@ -7,8 +7,8 @@ export function UUID() {
 /*
     GENERAL
 */
-export interface DataModel {
-    readonly uuid: string;
+export class DataModel {
+    readonly uuid = UUID();
 }
 
 /* 
@@ -38,14 +38,9 @@ export class BindableObject<T> {
         this.triggerAll();
     }
 
-    setValue(newValue: T, options: BindingOptions) {
-        this._value = newValue;
-        this.triggerAll(options);
-    }
-
     /* reactivity */
     triggerBinding(binding: Binding<T>) { }
-    triggerAll(options?: BindingOptions) { }
+    triggerAll() { }
     addBinding(binding: Binding<T>) { }
     removeBinding(binding: Binding<T>) { }
 }
@@ -57,11 +52,11 @@ export class BindableDummy<T> extends BindableObject<T> {
     /* reactivity */
     triggerBinding() {
         if (this.action)
-            this.action(this._value, new DefaultBindingOptions);
+            this.action(this._value);
     }
     triggerAll() {
         if (this.action)
-            this.action(this._value, new DefaultBindingOptions);
+            this.action(this._value);
     }
     addBinding(binding: Binding<T>) {
         this.action = binding.action;
@@ -74,11 +69,11 @@ export class State<T> extends BindableObject<T> {
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) {
-        binding.action(this.value, new DefaultBindingOptions);
+        binding.action(this.value);
     }
-    triggerAll(options: BindingOptions = new DefaultBindingOptions) {
+    triggerAll() {
         this.bindings.forEach(action => {
-            action(this.value, options);
+            action(this.value);
         })
     }
     addBinding(binding: Binding<T>) {
@@ -89,44 +84,55 @@ export class State<T> extends BindableObject<T> {
     }
 }
 
+export interface ComputedStateCfg<T> {
+    bindables: BindableObject<any>[];
+    initialValue: T;
+    compute: (self: ComputedState<T>) => void;
+}
+/** State binding another state. Mono-directional. */
 export class ComputedState<T> extends State<T> {
-    constructor(bindables: BindableObject<any>[], initialValue: T, compute: (self: ComputedState<T>) => void) {
-        super(initialValue);
+    constructor(configuration: ComputedStateCfg<T>) {
+        super(configuration.initialValue);
 
         const binding = {
             uuid: UUID(),
-            action: () => compute(this),
+            action: () => configuration.compute(this),
         }
 
-        bindables.forEach(bindable => {
+        configuration.bindables.forEach(bindable => {
             bindable.addBinding(binding);
             bindable.triggerBinding(binding);
         });
     }
 }
 
+export interface ProxyStateCfg<T, O> {
+    original: BindableObject<O>;
+    convertFromOriginal: (originalValue: O) => T;
+    convertToOriginal: (value: T) => O;
+}
+/** State binding and updating another state. Bi-directional. */
 export class ProxyState<T, O> extends State<T> {
     original: BindableObject<O>;
     convertFromOriginal: (proxyValue: O) => T;
     convertToOriginal: (proxyValue: T) => O;
 
-    constructor(original: BindableObject<O>, convertFromOriginal: (originalValue: O) => T, convertToOriginal: (value: T) => O) {
-        super(convertFromOriginal(original.value));
+    constructor(configuration: ProxyStateCfg<T, O>) {
+        super(configuration.convertFromOriginal(configuration.original.value));
 
-        this.original = original;
-
-        this.convertFromOriginal = convertFromOriginal;
-        this.convertToOriginal = convertToOriginal;
+        this.original = configuration.original;
+        this.convertFromOriginal = configuration.convertFromOriginal;
+        this.convertToOriginal = configuration.convertToOriginal;
 
         const binding: Binding<O> = {
             uuid: UUID(),
-            action: (_, options) => {
-                this._value = convertFromOriginal(original.value);
+            action: () => {
+                this._value = configuration.convertFromOriginal(this.original.value);
                 this.triggerAll();
             },
         }
-        original.addBinding(binding);
-        original.triggerBinding(binding);
+        this.original.addBinding(binding);
+        this.original.triggerBinding(binding);
     }
 
     set value(newValue: T) {
@@ -140,30 +146,102 @@ export class ProxyState<T, O> extends State<T> {
 }
 
 // BINDING
-/** Can be added to a BindableObject. */
+/** Binds a BindableObject. */
 export interface Binding<T> {
     uuid: string;
     action: BindingAction<T>;
 }
 
 /** Action executed when bound object changes. */
-export type BindingAction<T> = (newValue: T, details: BindingOptions) => void;
+export type BindingAction<T> = (newValue: T) => void;
 
-export interface BindingOptions {
-    uuid: string,
-    isSafeToPropagate: boolean;
+export interface UIBindingCfgOpts<T> {
+    data: BindableObject<T>;
+    component: Component<T>;
+    fallbackValue: T;
+    changeEventName: keyof HTMLElementEventMap;
+
+    getViewProperty: () => T;
+    setViewProperty: (newValue: T) => void;
+}
+/** Configure a binding for bi-directional changes. */
+export class UIBindingCfg<T> {
+    data: BindableObject<T>;
+    component: Component<T>;
+    defaultValue: T;
+    changeEventName: keyof HTMLElementEventMap;
+
+    constructor(configuration: UIBindingCfgOpts<T>) {
+        this.data = configuration.data;
+        this.component = configuration.component;
+        this.defaultValue = configuration.fallbackValue;
+        this.changeEventName = configuration.changeEventName;
+
+        this.getViewProperty = configuration.getViewProperty;
+        this.setViewProperty = configuration.setViewProperty;
+    }
+
+    getViewProperty: () => T;
+    setViewProperty: (newValue: T) => void;
 }
 
-class DefaultBindingOptions implements BindingOptions {
-    uuid = UUID();
-    isSafeToPropagate = true;
+export interface UIValueCfgOpts<T> {
+    data: BindableObject<T>;
+    component: Component<T>;
+    fallbackValue: T;
+}
+/** Tightly binds a component's value. */
+export class UIValueCfg<T> extends UIBindingCfg<T> {
+    constructor(configuration: UIValueCfgOpts<T>) {
+        super({
+            data: configuration.data,
+            component: configuration.component,
+            fallbackValue: configuration.fallbackValue,
+            changeEventName: 'input',
+
+            getViewProperty: () => {
+                return this.component.value ?? this.defaultValue;
+            },
+            setViewProperty: (newValue: T) => {
+                this.component.value = newValue;
+            },
+        })
+    }
 }
 
-export interface SelectionBindingVM<T> extends BindingOptions {
-    bindable: BindableObject<T[]>;
-    value: T;
-    exclusive: boolean;
-    eventName: keyof HTMLElementEventMap;
+export interface UICheckCfgOpts {
+    isChecked: BindableObject<boolean>;
+    component: CheckableComponent<any>;
+}
+/** Tightly bind a component's 'checked' property. */
+export class UICheckCfg extends UIValueCfg<boolean> {
+    component: CheckableComponent<any>;
+
+    changeEventName: keyof HTMLElementEventMap = 'change';
+
+    constructor(configuration: UICheckCfgOpts) {
+        super({
+            data: configuration.isChecked,
+            component: configuration.component,
+            fallbackValue: false,
+        })
+        this.component = configuration.component;
+    }
+
+    getViewProperty = () => {
+        return this.component.checked;
+    }
+    setViewProperty = (newValue: boolean) => {
+        this.component.checked = newValue
+    }
+}
+
+/** Add or remove ownValue on selectedItems */
+export interface UISelectionCfg<T> {
+    selectedItems: BindableObject<T[]>;
+    ownValue: T;
+    isExclusive: boolean;
+    changeEventName: keyof HTMLElementEventMap;
 
     getIndex: () => number;
 
@@ -174,27 +252,32 @@ export interface SelectionBindingVM<T> extends BindingOptions {
     setModel: (isSelected: boolean) => void;
 }
 
-export class CheckableSelectionBindingVM<T> implements SelectionBindingVM<T> {
-    uuid = UUID();
-    isSafeToPropagate = true;
-    
+export interface UICheckSelectionCfgOpts<T> {
     component: CheckableComponent<undefined>;
-    
-    bindable: BindableObject<T[]>;
     value: T;
-    exclusive = false;
-    eventName: keyof HTMLElementEventMap = 'change';
+    bindable: BindableObject<T[]>;
+    isExclusive?: boolean;
+}
+/** SelectionCfg for checkable components */
+export class UICheckSelectionCfg<T> implements UISelectionCfg<T> {
+    isSafeToPropagate = true;
 
-    constructor(component: CheckableComponent<undefined>, value: T, bindable: BindableObject<T[]>, exclusive?: boolean) {
-        this.component = component;
-        this.bindable = bindable;
-        this.value = value;
+    component: CheckableComponent<undefined>;
+    selectedItems: BindableObject<T[]>;
+    ownValue: T;
+    isExclusive = false;
+    changeEventName: keyof HTMLElementEventMap = 'change';
 
-        if (exclusive) this.exclusive = exclusive;
+    constructor(configuration: UICheckSelectionCfgOpts<T>) {
+        this.component = configuration.component;
+        this.selectedItems = configuration.bindable;
+        this.ownValue = configuration.value;
+
+        if (configuration.isExclusive) this.isExclusive = configuration.isExclusive;
     }
 
     getIndex = () => {
-        return this.bindable.value.indexOf(this.value);
+        return this.selectedItems.value.indexOf(this.ownValue);
     }
 
     getView = () => {
@@ -211,66 +294,16 @@ export class CheckableSelectionBindingVM<T> implements SelectionBindingVM<T> {
         if (isSelected) {
             if (this.getIndex() != -1) return; //already selected
 
-            if (this.exclusive == true)
-                return this.bindable.value = [this.value]
+            if (this.isExclusive == true)
+                return this.selectedItems.value = [this.ownValue]
             else
-                this.bindable.value.push(this.value);
+                this.selectedItems.value.push(this.ownValue);
         } else {
             if (this.getIndex() == -1) return; //already deselected
-            this.bindable.value.splice(this.getIndex(), 1);
+            this.selectedItems.value.splice(this.getIndex(), 1);
         }
 
-        this.bindable.triggerAll();
-    }
-}
-
-export interface TwoWayBindingVM<T> extends BindingOptions {
-    bindable: BindableObject<T>,
-    getViewProperty: () => T,
-    setViewProperty: (newValue: T) => void,
-    eventName: keyof HTMLElementEventMap,
-}
-
-export class InputTwoWayBindingVM<T> implements TwoWayBindingVM<T> {
-    uuid = UUID();
-    isSafeToPropagate = true;
-
-    bindable: BindableObject<T>;
-
-    component: Component<T>;
-    defaultValue: T;
-
-    eventName: keyof HTMLElementEventMap = 'input';
-
-    constructor(component: Component<T>, bindable: BindableObject<T>, defaultValue: T) {
-        this.bindable = bindable;
-        this.component = component;
-        this.defaultValue = defaultValue;
-    }
-
-    getViewProperty = () => {
-        return this.component.value ?? this.defaultValue;
-    }
-    setViewProperty = (newValue: T) => {
-        this.component.value = newValue;
-    }
-}
-
-export class CheckableTwoWayBindingVM extends InputTwoWayBindingVM<boolean> {
-    component: CheckableComponent<any>;
-
-    eventName: keyof HTMLElementEventMap = 'change';
-
-    constructor(component: CheckableComponent<any>, bindable: BindableObject<boolean>) {
-        super(component, bindable, false);
-        this.component = component;
-    }
-
-    getViewProperty = () => {
-        return this.component.checked;
-    }
-    setViewProperty = (newValue: boolean) => {
-        this.component.checked = newValue
+        this.selectedItems.triggerAll();
     }
 }
 
@@ -336,8 +369,8 @@ export interface Component<ValueType> extends HTMLElement {
     /** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
     bindings: Map<string, Binding<any>>;
     addBinding: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
-    createSelectionBinding: <T>(viewModel: SelectionBindingVM<T>) => this;
-    createTwoWayBinding: <T>(viewModel: TwoWayBindingVM<T>) => this;
+    createSelectionBinding: <T>(viewModel: UISelectionCfg<T>) => this;
+    createTwoWayBinding: <T>(viewModel: UIBindingCfg<T>) => this;
     removeBinding: <T>(bindable: BindableObject<T>) => this;
     updateBinding: <T>(bindable: BindableObject<T>) => this;
 }
@@ -547,12 +580,12 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
     }
     component.createSelectionBinding = (viewModel) => {
         component
-            .addBinding(viewModel.bindable, () => {
+            .addBinding(viewModel.selectedItems, () => {
                 const isSelected = viewModel.getIndex() != -1;
                 viewModel.setView(isSelected);
             })
-            .updateBinding(viewModel.bindable)
-            .listen(viewModel.eventName, () => {
+            .updateBinding(viewModel.selectedItems)
+            .listen(viewModel.changeEventName, () => {
                 const isSelectedInView = viewModel.getView();
                 viewModel.setModel(isSelectedInView);
             });
@@ -561,12 +594,12 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
     }
     component.createTwoWayBinding = (viewModel) => {
         component
-            .addBinding(viewModel.bindable, newValue => {
+            .addBinding(viewModel.data, newValue => {
                 viewModel.setViewProperty(newValue);
             })
-            .updateBinding(viewModel.bindable)
-            .listen(viewModel.eventName, () => {
-                viewModel.bindable.value = viewModel.getViewProperty();
+            .updateBinding(viewModel.data)
+            .listen(viewModel.changeEventName, () => {
+                viewModel.data.value = viewModel.getViewProperty();
             });
 
         return component;
@@ -607,7 +640,7 @@ export enum ButtonStyles {
     Destructive = 'button-style-destructive',
 }
 
-export interface ButtonVM {
+export interface ButtonCfg {
     style: ButtonStyles;
     text: ValueObject<string>;
     iconName: string;
@@ -615,14 +648,14 @@ export interface ButtonVM {
     action: (e: Event) => void;
 }
 
-export class TextualButtonVM implements ButtonVM {
+export class TextualButtonCfg implements ButtonCfg {
     style = ButtonStyles.Normal;
     text: ValueObject<string>;
     iconName = '';
     ariaLabel: ValueObject<string>;
     action = (e: Event) => console.warn('Button action not defined', e.target);
 
-    constructor(text: ButtonVM['text'], action?: ButtonVM['action'], style?: ButtonVM['style']) {
+    constructor(text: ButtonCfg['text'], action?: ButtonCfg['action'], style?: ButtonCfg['style']) {
         this.text = text;
         this.ariaLabel = text;
         if (style) this.style = style;
@@ -630,7 +663,7 @@ export class TextualButtonVM implements ButtonVM {
     }
 }
 
-export function Button(viewModel: ButtonVM) {
+export function Button(viewModel: ButtonCfg) {
     return Component('button')
         .addItems(
             Icon(viewModel.iconName),
@@ -643,19 +676,36 @@ export function Button(viewModel: ButtonVM) {
         .listen('click', viewModel.action);
 }
 
+/* ButtonGroup */
+export function ButtonGroup(...buttons: Component<any>[]) {
+    return Div(...buttons)
+        .addToClass('buttongroup');
+}
+
 /* Checkbox */
-export function Checkbox(bindable: BindableObject<string[]>, value: string) {
+export function Checkbox(isChecked: BindableObject<boolean>) {
     return (Input({
         type: 'checkbox',
-        defaultValue: undefined,
+        fallbackValue: undefined,
         value: undefined,
         placeholder: undefined,
     }) as CheckableComponent<undefined>)
         .access(self => self
-            .createSelectionBinding(new CheckableSelectionBindingVM(
-                self, value, bindable, false
-            ))
+            .createTwoWayBinding(new UICheckCfg({
+                isChecked: isChecked,
+                component: self,
+            }))
         );
+}
+
+/* Container */
+export function Container(tagName: keyof HTMLElementTagNameMap, ...children: Component<any>[]) {
+    return Component(tagName)
+        .addItems(...children);
+}
+
+export function Div(...children: Component<any>[]) {
+    return Container('div', ...children);
 }
 
 /* Icon */
@@ -665,79 +715,97 @@ export function Icon(iconName: string) {
 }
 
 /* Input */
-export interface InputVM<T> {
+export interface InputCfg<T> {
     type: string;
-    defaultValue: T | undefined;
     value: BindableObject<T> | undefined;
+    fallbackValue: T | undefined;
     placeholder: string | undefined;
 }
 
-export class TextInputVM implements InputVM<string> {
+export class TextInputCfg implements InputCfg<string> {
     type = 'text';
-    defaultValue: string;
     value: BindableObject<string>;
+    fallbackValue: string;
     placeholder: string;
 
     constructor(value: BindableObject<string>, placeholder = '') {
-        this.defaultValue = value.value;
+        this.fallbackValue = value.value;
         this.value = value;
         this.placeholder = placeholder;
     }
 }
 
-export class NumberInputVM implements InputVM<number> {
+export class NumberInputCfg implements InputCfg<number> {
     type = 'number';
-    defaultValue: number;
     value: BindableObject<number>;
+    fallbackValue: number;
     placeholder: string;
 
     constructor(value: BindableObject<number>, placeholder = '') {
-        this.defaultValue = value.value;
+        this.fallbackValue = value.value;
         this.value = value;
         this.placeholder = placeholder;
     }
 }
 
-export function Input<T>(viewModel: InputVM<T>) {
+export function Input<T>(configuration: InputCfg<T>) {
     return Component<T>('input')
         .access(self => {
             self
-                .setAttr('type', viewModel.type)
-                .setAttr('placeholder', viewModel.placeholder ?? '');
+                .setAttr('type', configuration.type)
+                .setAttr('placeholder', configuration.placeholder ?? '');
 
-            if (viewModel.value != undefined && viewModel.defaultValue != undefined) self
-                .createTwoWayBinding(new InputTwoWayBindingVM(self, viewModel.value, viewModel.defaultValue));
+            if (configuration.value != undefined && configuration.fallbackValue != undefined) self
+                .createTwoWayBinding(new UIValueCfg({
+                    data: configuration.value,
+                    component: self,
+                    fallbackValue: configuration.fallbackValue,
+                }));
         });
 }
 
+/* Link */
+export function Link(label: ValueObject<string>, href: string) {
+    return Text(label, 'a')
+        .setAttr('href', href);
+}
+
 /* RadioButton */
-export function RadioButton(bindable: BindableObject<number[]>, ownIndex: number, name: string) {
+export function RadioButton<T>(selectionOptions: BindableObject<T[]>, ownIndex: T, name: string) {
     return (Input({
         type: 'radio',
-        defaultValue: undefined,
+        fallbackValue: undefined,
         value: undefined,
         placeholder: undefined,
     }) as CheckableComponent<undefined>)
         .access(self => self
-            .createSelectionBinding(new CheckableSelectionBindingVM(
-                self, ownIndex, bindable, true
-            ))
+            .createSelectionBinding(new UICheckSelectionCfg({
+                bindable: selectionOptions,
+                component: self,
+                value: ownIndex,
+            }))
         )
         .setAttr('name', name);
 }
 
 /* Slider */
-export function Slider(value: BindableObject<number>, min: number = 0, max: number = 100, step: number = 1) {
+export interface SliderCfgExt {
+    min?: number;
+    max?: number;
+    step?: number;
+}
+
+export function Slider(value: BindableObject<number>, configurationExtension: SliderCfgExt) {
     return Input<number>({
         type: 'range',
-        defaultValue: 0,
+        fallbackValue: 0,
         value,
         placeholder: undefined,
     })
         .access(self => self
-            .setAttr('min', min.toString())
-            .setAttr('max', max.toString())
-            .setAttr('step', step.toString())
+            .setAttr('min', (configurationExtension.min ?? 0).toString())
+            .setAttr('max', (configurationExtension.max ?? 100).toString())
+            .setAttr('step', (configurationExtension.step ?? 1).toString())
         )
 }
 
