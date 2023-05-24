@@ -33,12 +33,12 @@ export class BindableObject<T> {
 
     set value(newValue: T) {
         this._value = newValue;
-        this.triggerAll(defaultBindingVM);
+        this.triggerAll(defaultBindingDetails);
     }
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) { }
-    triggerAll(options?: BindingVM) { }
+    triggerAll(options?: BindingDetails) { }
     addBinding(binding: Binding<T>) { }
     removeBinding(binding: Binding<T>) { }
 }
@@ -50,11 +50,11 @@ export class BindableDummy<T> extends BindableObject<T> {
     /* reactivity */
     triggerBinding() {
         if (this.action)
-            this.action(this._value, defaultBindingVM);
+            this.action(this._value, defaultBindingDetails);
     }
     triggerAll() {
         if (this.action)
-            this.action(this._value, defaultBindingVM);
+            this.action(this._value, defaultBindingDetails);
     }
     addBinding(binding: Binding<T>) {
         this.action = binding.action;
@@ -67,9 +67,9 @@ export class State<T> extends BindableObject<T> {
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) {
-        binding.action(this.value, defaultBindingVM);
+        binding.action(this.value, defaultBindingDetails);
     }
-    triggerAll(options: BindingVM = defaultBindingVM) {
+    triggerAll(options: BindingDetails = defaultBindingDetails) {
         this.bindings.forEach(action => {
             action(this.value, options);
         })
@@ -82,16 +82,38 @@ export class State<T> extends BindableObject<T> {
     }
 }
 
+export class ComputedState<T> extends State<T> {
+    constructor(bindables: BindableObject<any>[], initialValue: T, compute: (self: ComputedState<T>) => void) {
+        super(initialValue);
+
+        bindables.forEach(bindable => {
+            bindable.addBinding({
+                uuid: UUID(),
+                action: () => compute(this),
+            });
+        });
+    }
+}
+
 // BINDING
-export interface BindingVM extends ViewModel {
+/** Can be added to a BindableObject. */
+export interface Binding<T> {
+    uuid: string;
+    action: BindingAction<T>;
+}
+
+/** Action executed when bound object changes. */
+export type BindingAction<T> = (newValue: T, details: BindingDetails) => void;
+
+export interface BindingDetails extends ViewModel {
     isSafeToPropagate: boolean;
 }
 
-export const defaultBindingVM: BindingVM = {
+export const defaultBindingDetails: BindingDetails = {
     isSafeToPropagate: true,
 }
 
-export interface SelectionBindingVM<T> extends BindingVM {
+export interface SelectionBindingVM<T> extends BindingDetails {
     bindable: BindableObject<T[]>;
     value: T;
     exclusive: boolean;
@@ -137,7 +159,7 @@ export class CheckableSelectionBindingVM<T> implements SelectionBindingVM<T> {
     setModel = (isSelected: boolean) => {
         if (isSelected) {
             if (this.getIndex() != -1) return; //already selected
-            
+
             if (this.exclusive == true)
                 return this.bindable.value = [this.value]
             else
@@ -151,7 +173,7 @@ export class CheckableSelectionBindingVM<T> implements SelectionBindingVM<T> {
     }
 }
 
-export interface TwoWayBindingVM<T> extends BindingVM {
+export interface TwoWayBindingVM<T> extends BindingDetails {
     bindable: BindableObject<T>,
     getViewProperty: () => T,
     setViewProperty: (newValue: T) => void,
@@ -197,15 +219,6 @@ export class CheckableTwoWayBindingVM extends InputTwoWayBindingVM<boolean> {
     setViewProperty = (newValue: boolean) => {
         this.component.checked = newValue
     }
-}
-
-/** Action executed when bound object changes. */
-export type BindingAction<T> = (newValue: T, viewModel: BindingVM) => void;
-
-/** Can be added to a BindableObject. */
-export interface Binding<T> {
-    uuid: string;
-    action: BindingAction<T>;
 }
 
 // HELPERS
