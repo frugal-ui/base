@@ -7,7 +7,7 @@ export function UUID() {
 /*
     GENERAL
 */
-export type Configuration = { [key: string]: any };
+export type ViewModel = { [key: string]: any };
 
 /* 
     REACTIVITY 
@@ -33,12 +33,12 @@ export class BindableObject<T> {
 
     set value(newValue: T) {
         this._value = newValue;
-        this.triggerAll(defaultBindingConfiguration);
+        this.triggerAll(defaultBindingVM);
     }
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) { }
-    triggerAll(options?: BindingConfiguration) { }
+    triggerAll(options?: BindingVM) { }
     addBinding(binding: Binding<T>) { }
     removeBinding(binding: Binding<T>) { }
 }
@@ -50,11 +50,11 @@ export class BindableDummy<T> extends BindableObject<T> {
     /* reactivity */
     triggerBinding() {
         if (this.action)
-            this.action(this._value, defaultBindingConfiguration);
+            this.action(this._value, defaultBindingVM);
     }
     triggerAll() {
         if (this.action)
-            this.action(this._value, defaultBindingConfiguration);
+            this.action(this._value, defaultBindingVM);
     }
     addBinding(binding: Binding<T>) {
         this.action = binding.action;
@@ -67,9 +67,9 @@ export class State<T> extends BindableObject<T> {
 
     /* reactivity */
     triggerBinding(binding: Binding<T>) {
-        binding.action(this.value, defaultBindingConfiguration);
+        binding.action(this.value, defaultBindingVM);
     }
-    triggerAll(options: BindingConfiguration = defaultBindingConfiguration) {
+    triggerAll(options: BindingVM = defaultBindingVM) {
         this.bindings.forEach(action => {
             action(this.value, options);
         })
@@ -83,43 +83,124 @@ export class State<T> extends BindableObject<T> {
 }
 
 // BINDING
-export interface BindingConfiguration extends Configuration {
+export interface BindingVM extends ViewModel {
     isSafeToPropagate: boolean;
 }
 
-export const defaultBindingConfiguration: BindingConfiguration = {
+export const defaultBindingVM: BindingVM = {
     isSafeToPropagate: true,
 }
 
-export interface TwoWayBindingConfiguration<T> extends BindingConfiguration {
-    getProperty: () => T,
-    setProperty: (newValue: T) => void,
+export interface SelectionBindingVM<T> extends BindingVM {
+    bindable: BindableObject<T[]>;
+    value: T;
+    exclusive: boolean;
+    eventName: keyof HTMLElementEventMap;
+
+    getView: () => boolean;
+    setView: (isSelected: boolean) => void;
+
+    getModel: () => boolean;
+    setModel: (isSelected: boolean) => void;
+}
+
+export class CheckableSelectionBindingVM<T> implements SelectionBindingVM<T> {
+    component: CheckableComponent<undefined>;
+
+    isSafeToPropagate = true;
+    bindable: BindableObject<T[]>;
+    value: T;
+    exclusive = false;
+    eventName: keyof HTMLElementEventMap = 'change';
+
+    constructor(component: CheckableComponent<undefined>, value: T, bindable: BindableObject<T[]>, exclusive?: boolean) {
+        this.component = component;
+        this.bindable = bindable;
+        this.value = value;
+
+        if (exclusive) this.exclusive = exclusive;
+    }
+
+    getView = () => {
+        return this.component.checked;
+    }
+    setView = (isSelected: boolean) => {
+        this.component.checked = isSelected;
+    }
+
+    private getIndex = () => {
+        return this.bindable.value.indexOf(this.value);
+    }
+    getModel = () => {
+        return this.getIndex() != -1;
+    }
+    setModel = (isSelected: boolean) => {
+        if (isSelected) {
+            if (this.getIndex() != -1) return; //already selected
+            
+            if (this.exclusive == true)
+                return this.bindable.value = [this.value]
+            else
+                this.bindable.value.push(this.value);
+        } else {
+            if (this.getIndex() == -1) return; //already deselected
+            this.bindable.value.splice(this.getIndex(), 1);
+        }
+
+        this.bindable.triggerAll();
+    }
+}
+
+export interface TwoWayBindingVM<T> extends BindingVM {
+    bindable: BindableObject<T>,
+    getViewProperty: () => T,
+    setViewProperty: (newValue: T) => void,
     eventName: keyof HTMLElementEventMap,
 }
 
-export class InputTwoWayBindingConfiguration<T> implements TwoWayBindingConfiguration<T> {
+export class InputTwoWayBindingVM<T> implements TwoWayBindingVM<T> {
     isSafeToPropagate = true;
-    
+    bindable: BindableObject<T>;
+
     component: Component<T>;
     defaultValue: T;
 
     eventName: keyof HTMLElementEventMap = 'input';
 
-    constructor(component: Component<T>, defaultValue: T) {
+    constructor(component: Component<T>, bindable: BindableObject<T>, defaultValue: T) {
+        this.bindable = bindable;
         this.component = component;
         this.defaultValue = defaultValue;
     }
 
-    getProperty = () => {
+    getViewProperty = () => {
         return this.component.value ?? this.defaultValue;
     }
-    setProperty = (newValue: T) => {
+    setViewProperty = (newValue: T) => {
         this.component.value = newValue;
     }
 }
 
+export class CheckableTwoWayBindingVM extends InputTwoWayBindingVM<boolean> {
+    component: CheckableComponent<any>;
+
+    eventName: keyof HTMLElementEventMap = 'change';
+
+    constructor(component: CheckableComponent<any>, bindable: BindableObject<boolean>) {
+        super(component, bindable, false);
+        this.component = component;
+    }
+
+    getViewProperty = () => {
+        return this.component.checked;
+    }
+    setViewProperty = (newValue: boolean) => {
+        this.component.checked = newValue
+    }
+}
+
 /** Action executed when bound object changes. */
-export type BindingAction<T> = (newValue: T, configuration: BindingConfiguration) => void;
+export type BindingAction<T> = (newValue: T, viewModel: BindingVM) => void;
 
 /** Can be added to a BindableObject. */
 export interface Binding<T> {
@@ -189,9 +270,14 @@ export interface Component<ValueType> extends HTMLElement {
     /** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
     bindings: Map<string, Binding<any>>;
     addBinding: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
-    createTwoWayBinding: <T>(bindable: BindableObject<T>, configuration: TwoWayBindingConfiguration<T>) => this;
+    createSelectionBinding: <T>(viewModel: SelectionBindingVM<T>) => this;
+    createTwoWayBinding: <T>(viewModel: TwoWayBindingVM<T>) => this;
     removeBinding: <T>(bindable: BindableObject<T>) => this;
     updateBinding: <T>(bindable: BindableObject<T>) => this;
+}
+
+export interface CheckableComponent<T> extends Component<T> {
+    checked: boolean;
 }
 
 export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Component<ValueType> {
@@ -393,13 +479,28 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 
         return component;
     }
-    component.createTwoWayBinding = (bindable, configuration) => {
+    component.createSelectionBinding = (viewModel) => {
         component
-            .addBinding(bindable, newValue => {
-                configuration.setProperty(newValue);
+            .addBinding(viewModel.bindable, () => {
+                const isSelected = viewModel.getIndex() != -1;
+                viewModel.setView(isSelected);
             })
-            .listen(configuration.eventName, () => {
-                bindable.value = configuration.getProperty();
+            .updateBinding(viewModel.bindable)
+            .listen(viewModel.eventName, () => {
+                const isSelectedInView = viewModel.getView();
+                viewModel.setModel(isSelectedInView);
+            });
+
+        return component;
+    }
+    component.createTwoWayBinding = (viewModel) => {
+        component
+            .addBinding(viewModel.bindable, newValue => {
+                viewModel.setViewProperty(newValue);
+            })
+            .updateBinding(viewModel.bindable)
+            .listen(viewModel.eventName, () => {
+                viewModel.bindable.value = viewModel.getViewProperty();
             });
 
         return component;
@@ -440,7 +541,7 @@ export enum ButtonStyles {
     Destructive = 'button-style-destructive',
 }
 
-export interface ButtonConfiguration extends Configuration {
+export interface ButtonVM extends ViewModel {
     style: ButtonStyles;
     text: ValueObject<string>;
     iconName: string;
@@ -448,37 +549,120 @@ export interface ButtonConfiguration extends Configuration {
     action: (e: Event) => void;
 }
 
-export class TextualButtonConfiguration implements ButtonConfiguration {
+export class TextualButtonVM implements ButtonVM {
     style = ButtonStyles.Normal;
     text: ValueObject<string>;
     iconName = '';
     ariaLabel: ValueObject<string>;
     action = (e: Event) => console.warn('Button action not defined', e.target);
 
-    constructor(text: ButtonConfiguration['text'], action?: ButtonConfiguration['action']) {
+    constructor(text: ButtonVM['text'], action?: ButtonVM['action'], style?: ButtonVM['style']) {
         this.text = text;
         this.ariaLabel = text;
+        if (style) this.style = style;
         if (action) this.action = action;
     }
 }
 
-export function Button(configuration: ButtonConfiguration) {
+export function Button(viewModel: ButtonVM) {
     return Component('button')
         .addItems(
-            Icon(configuration.iconName),
-            Text(configuration.text),
+            Icon(viewModel.iconName),
+            Text(viewModel.text),
         )
 
-        .setAttr('aria-label', configuration.ariaLabel)
-        .addToClass(configuration.style)
+        .setAttr('aria-label', viewModel.ariaLabel)
+        .addToClass(viewModel.style)
 
-        .listen('click', configuration.action);
+        .listen('click', viewModel.action);
+}
+
+/* Checkbox */
+export function Checkbox(bindable: BindableObject<string[]>, value: string) {
+    return (Input({
+        type: 'checkbox',
+        defaultValue: undefined,
+        value: undefined,
+    }) as CheckableComponent<undefined>)
+        .access(self => self
+            .createSelectionBinding(new CheckableSelectionBindingVM(
+                self, value, bindable, false
+            ))
+        );
 }
 
 /* Icon */
 export function Icon(iconName: string) {
     return Text(iconName)
         .addToClass('icon'); //TODO
+}
+
+/* Input */
+export interface InputVM<T> {
+    type: string;
+    defaultValue: T | undefined;
+    value: BindableObject<T> | undefined;
+}
+
+export class TextInputVM implements InputVM<string> {
+    type = 'text';
+    defaultValue: string;
+    value: BindableObject<string>;
+
+    constructor(value: BindableObject<string>) {
+        this.defaultValue = value.value;
+        this.value = value;
+    }
+}
+
+export class NumberInputVM implements InputVM<number> {
+    type = 'number';
+    defaultValue: number;
+    value: BindableObject<number>;
+
+    constructor(value: BindableObject<number>) {
+        this.defaultValue = value.value;
+        this.value = value;
+    }
+}
+
+export function Input<T>(viewModel: InputVM<T>) {
+    return Component<T>('input')
+        .access(self => {
+            self.setAttr('type', viewModel.type);
+
+            if (viewModel.value != undefined && viewModel.defaultValue != undefined) self
+                .createTwoWayBinding(new InputTwoWayBindingVM(self, viewModel.value, viewModel.defaultValue));
+        });
+}
+
+/* RadioButton */
+export function RadioButton(bindable: BindableObject<number[]>, ownIndex: number, name: string) {
+    return (Input({
+        type: 'radio',
+        defaultValue: undefined,
+        value: undefined,
+    }) as CheckableComponent<undefined>)
+        .access(self => self
+            .createSelectionBinding(new CheckableSelectionBindingVM(
+                self, ownIndex, bindable, true
+            ))
+        )
+        .setAttr('name', name);
+}
+
+/* Slider */
+export function Slider(value: BindableObject<number>, min: number = 0, max: number = 100, step: number = 1) {
+    return Input<number>({
+        type: 'range',
+        defaultValue: 0,
+        value,
+    })
+        .access(self => self
+            .setAttr('min', min.toString())
+            .setAttr('max', max.toString())
+            .setAttr('step', step.toString())
+        )
 }
 
 /* Text */
