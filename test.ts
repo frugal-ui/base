@@ -1,7 +1,11 @@
 import test from 'node:test';
-import assert from 'node:assert';
 
-import { State, Binding, UUID, unwrapValue } from './index.js';
+function assert<T>(a: T, b: T) {
+    console.log(a, b);
+    if (a != b) throw 'nomatch';
+}
+
+import { State, Binding, UUID, unwrapValue, ComputedState, ProxyState } from './index.js';
 
 test('ValueObject', () => {
     const targetValue = 'Hello!';
@@ -13,7 +17,7 @@ test('ValueObject', () => {
     assert(unwrapValue(targetValue), targetValue);
 });
 
-test('Reactivity', () => {
+test('State & Binding', () => {
     return new Promise(res => {
         const valueA = 'A';
         const valueB = 'B';
@@ -35,3 +39,29 @@ test('Reactivity', () => {
         }, 200)
     })
 });
+
+test('ComputedState', () => {
+    const stateA = new State('A');
+    const stateB = new ComputedState<string>([stateA], '', (self) => {
+        self.value = stateA.value + 'b';
+    });
+
+    
+    assert(stateB.value, stateA.value + 'b');
+    stateA.value = 'B';
+    assert(stateB.value, stateA.value + 'b');
+})
+
+test('ProxyState', () => {
+    const originalState = new State(true);
+    const proxyState = new ProxyState(originalState,
+        (originalValue) => originalValue == true ? 'Yes' : 'No',
+        (value) => value == 'Yes',
+    );
+
+    assert('Yes', proxyState.value);
+    originalState.value = false;
+    assert('No', proxyState.value);
+    proxyState.value = 'Yes';
+    assert(true, originalState.value);
+})
