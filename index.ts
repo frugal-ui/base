@@ -468,7 +468,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 
         component
             .createBinding(bindable, newValue => {
-                component.textContent = newValue;
+                component.innerText = newValue;
             })
             .updateBinding(bindable);
 
@@ -572,6 +572,29 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 }
 
 // SPECIFIC
+/* AutoComplete */
+export function AutoComplete<T>(optionData: BindableObject<Set<string>>, input: Component<T>) {
+    const uuid = UUID();
+    const optionViews = new ComputedState<Component<any>[]>({
+        statesToBind: [optionData],
+        initialValue: [],
+        compute: (self) => {
+            self.value = [...optionData.value.values()].map(option =>
+                Text(option, 'option')
+            );
+        }
+    });
+
+    return Div(
+        Component('datalist')
+            .setID(uuid)
+            .setItems(optionViews),
+
+        input
+            .setAttr('list', uuid),
+    );
+}
+
 /* Button */
 export enum ButtonStyles {
     Transparent = 'button-style-transparent',
@@ -644,7 +667,7 @@ export interface InputCfg<T> {
     type: string;
     value: BindableObject<T> | undefined;
     fallbackValue: T | undefined;
-    placeholder: string | undefined;
+    placeholder?: string | undefined;
 }
 
 export class TextInputCfg implements InputCfg<string> {
@@ -703,19 +726,19 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* List */
-export function List<T>(dataItems: BindableObject<T[]>, compute: (dataItem: T) => Component<any>) {
-    const viewItems = new ComputedState<Component<any>[]>({
-        statesToBind: [dataItems],
+export function List<T>(itemData: BindableObject<Set<T>>, compute: (dataItem: T) => Component<any>) {
+    const itemViews = new ComputedState<Component<any>[]>({
+        statesToBind: [itemData],
         initialValue: [],
         compute: (self) => {
-            self.value = dataItems.value.map(item => 
+            self.value = [...itemData.value.values()].map(item =>
                 compute(item)
             );
         },
     })
 
     return Div()
-        .setItems(viewItems);
+        .setItems(itemViews);
 }
 
 /* RadioButton */
@@ -766,7 +789,7 @@ export function Text(value: ValueObject<string>, tagName: keyof HTMLElementTagNa
 
 /* Textarea */
 export function Textarea(value: BindableObject<string>, placeholder: string) {
-    return Component('textarea')
+    return Component<string>('textarea')
         .access(self => self
             .createTightBinding(new ValueTBCfg({
                 component: self,
