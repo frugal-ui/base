@@ -155,7 +155,7 @@ export interface Binding<T> {
 /** Action executed when bound object changes. */
 export type BindingAction<T> = (newValue: T) => void;
 
-export interface UIBindingCfgOpts<T> {
+export interface TightBindingCfgOpts<T> {
     data: BindableObject<T>;
     component: Component<T>;
     fallbackValue: T;
@@ -166,12 +166,14 @@ export interface UIBindingCfgOpts<T> {
 }
 /** Configure a binding for bi-directional changes. */
 export class TightBindingCfg<T> {
+    uuid = UUID();
+
     data: BindableObject<T>;
     component: Component<T>;
     defaultValue: T;
     changeEventName: keyof HTMLElementEventMap;
 
-    constructor(configuration: UIBindingCfgOpts<T>) {
+    constructor(configuration: TightBindingCfgOpts<T>) {
         this.data = configuration.data;
         this.component = configuration.component;
         this.defaultValue = configuration.fallbackValue;
@@ -236,9 +238,14 @@ export class CheckTBCfg extends ValueTBCfg<boolean> {
     }
 }
 
+export interface SelectionCfg<T> {
+    uuid: string;
+    selectedItems: BindableObject<T[]>;
+}
+
 /** Add or remove ownValue on selectedItems */
 export interface SelectionTBCfg<T> {
-    selectedItems: BindableObject<T[]>;
+    selectionCfg: SelectionCfg<T>;
     ownValue: T;
     isExclusive: boolean;
     changeEventName: keyof HTMLElementEventMap;
@@ -255,29 +262,27 @@ export interface SelectionTBCfg<T> {
 export interface CheckSelectionTBCfgOpts<T> {
     component: CheckableComponent<undefined>;
     value: T;
-    bindable: BindableObject<T[]>;
+    selectionCfg: SelectionCfg<T>;
     isExclusive?: boolean;
 }
 /** SelectionCfg for checkable components */
 export class CheckSelectionTBCfg<T> implements SelectionTBCfg<T> {
-    isSafeToPropagate = true;
-
     component: CheckableComponent<undefined>;
-    selectedItems: BindableObject<T[]>;
+    selectionCfg: SelectionCfg<T>;
     ownValue: T;
     isExclusive = false;
     changeEventName: keyof HTMLElementEventMap = 'change';
 
     constructor(configuration: CheckSelectionTBCfgOpts<T>) {
         this.component = configuration.component;
-        this.selectedItems = configuration.bindable;
+        this.selectionCfg = configuration.selectionCfg;
         this.ownValue = configuration.value;
 
         if (configuration.isExclusive) this.isExclusive = configuration.isExclusive;
     }
 
     getIndex = () => {
-        return this.selectedItems.value.indexOf(this.ownValue);
+        return this.selectionCfg.selectedItems.value.indexOf(this.ownValue);
     }
 
     getView = () => {
@@ -295,15 +300,15 @@ export class CheckSelectionTBCfg<T> implements SelectionTBCfg<T> {
             if (this.getIndex() != -1) return; //already selected
 
             if (this.isExclusive == true)
-                return this.selectedItems.value = [this.ownValue]
+                return this.selectionCfg.selectedItems.value = [this.ownValue]
             else
-                this.selectedItems.value.push(this.ownValue);
+                this.selectionCfg.selectedItems.value.push(this.ownValue);
         } else {
             if (this.getIndex() == -1) return; //already deselected
-            this.selectedItems.value.splice(this.getIndex(), 1);
+            this.selectionCfg.selectedItems.value.splice(this.getIndex(), 1);
         }
 
-        this.selectedItems.triggerAll();
+        this.selectionCfg.selectedItems.triggerAll();
     }
 }
 
@@ -518,28 +523,28 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 
         return component;
     }
-    component.createTightBinding = (viewModel) => {
+    component.createTightBinding = (configuration) => {
         component
-            .createBinding(viewModel.data, newValue => {
-                viewModel.setViewProperty(newValue);
+            .createBinding(configuration.data, newValue => {
+                configuration.setViewProperty(newValue);
             })
-            .updateBinding(viewModel.data)
-            .listen(viewModel.changeEventName, () => {
-                viewModel.data.value = viewModel.getViewProperty();
+            .updateBinding(configuration.data)
+            .listen(configuration.changeEventName, () => {
+                configuration.data.value = configuration.getViewProperty();
             });
 
         return component;
     }
-    component.createSelectionBinding = (viewModel) => {
+    component.createSelectionBinding = (configuration) => {
         component
-            .createBinding(viewModel.selectedItems, () => {
-                const isSelected = viewModel.getIndex() != -1;
-                viewModel.setView(isSelected);
+            .createBinding(configuration.selectionCfg.selectedItems, () => {
+                const isSelected = configuration.getIndex() != -1;
+                configuration.setView(isSelected);
             })
-            .updateBinding(viewModel.selectedItems)
-            .listen(viewModel.changeEventName, () => {
-                const isSelectedInView = viewModel.getView();
-                viewModel.setModel(isSelectedInView);
+            .updateBinding(configuration.selectionCfg.selectedItems)
+            .listen(configuration.changeEventName, () => {
+                const isSelectedInView = configuration.getView();
+                configuration.setModel(isSelectedInView);
             });
 
         return component;
@@ -742,7 +747,7 @@ export function List<T>(itemData: BindableObject<Set<T>>, compute: (dataItem: T)
 }
 
 /* RadioButton */
-export function RadioButton<T>(selectedItems: BindableObject<T[]>, ownIndex: T, groupName: string) {
+export function RadioButton<T>(selectionCfg: SelectionCfg<T>, value: T) {
     return (Input({
         type: 'radio',
         fallbackValue: undefined,
@@ -751,13 +756,13 @@ export function RadioButton<T>(selectedItems: BindableObject<T[]>, ownIndex: T, 
     }) as CheckableComponent<undefined>)
         .access(self => self
             .createSelectionBinding(new CheckSelectionTBCfg({
-                bindable: selectedItems,
+                selectionCfg,
                 component: self,
-                value: ownIndex,
+                value: value,
                 isExclusive: true,
             }))
         )
-        .setAttr('name', groupName);
+        .setAttr('name', selectionCfg.uuid);
 }
 
 /* Slider */
