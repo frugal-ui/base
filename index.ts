@@ -334,6 +334,7 @@ export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 export interface Component<ValueType> extends HTMLElement {
     value: ValueType | undefined,
     access: (accessFn: (self: this) => void) => this;
+    setAccessibilityRole: (roleName: string) => this;
 
     //children
     addItems: (...children: Component<any>[]) => this;
@@ -382,6 +383,10 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
     //methods
     component.access = (fn) => {
         fn(component);
+        return component;
+    }
+    component.setAccessibilityRole = (roleName) => {
+        component.setAttr('role', roleName);
         return component;
     }
 
@@ -772,8 +777,24 @@ export function List<T>(listData: BindableObject<T[]>, compute: (itemData: T) =>
 /* ListBox */
 export function ListBox<T>(listData: BindableObject<T[]>, compute: (itemData: T) => Component<any>) {
     return Box(
-        List(listData, compute),
+        List(listData, compute)
+            .setAccessibilityRole('listbox')
     );
+}
+
+/* ListItem */
+export function ListItem(isHighlighted: ValueObject<boolean>, ...children: Component<any>[]) {
+    const bindableIsHighlighted = unwrapBindable(isHighlighted);
+
+    return Div(...children)
+        .access(self => self
+            .addToClass('listitems')
+            .createBinding(bindableIsHighlighted, () => self
+                .addToClassConditionally('listitems-highlighted', bindableIsHighlighted.value)
+                .setAttr('aria-selected', bindableIsHighlighted.value.toString())
+            )
+            .setAccessibilityRole('option')
+        )
 }
 
 /* Meter */
