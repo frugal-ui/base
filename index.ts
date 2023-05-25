@@ -581,37 +581,22 @@ export enum ButtonStyles {
 }
 
 export interface ButtonCfg {
-    style: ButtonStyles;
-    text: ValueObject<string>;
-    iconName: string;
+    style?: ButtonStyles;
+    text?: ValueObject<string>;
+    iconName?: string;
     ariaLabel: ValueObject<string>;
     action: (e: Event) => void;
-}
-
-export class TextualButtonCfg implements ButtonCfg {
-    style = ButtonStyles.Normal;
-    text: ValueObject<string>;
-    iconName = '';
-    ariaLabel: ValueObject<string>;
-    action = (e: Event) => console.warn('Button action not defined', e.target);
-
-    constructor(text: ButtonCfg['text'], action?: ButtonCfg['action'], style?: ButtonCfg['style']) {
-        this.text = text;
-        this.ariaLabel = text;
-        if (style) this.style = style;
-        if (action) this.action = action;
-    }
 }
 
 export function Button(viewModel: ButtonCfg) {
     return Component('button')
         .addItems(
-            Icon(viewModel.iconName),
-            Text(viewModel.text),
+            Icon(viewModel.iconName ?? ''),
+            Text(viewModel.text ?? ''),
         )
 
         .setAttr('aria-label', viewModel.ariaLabel)
-        .addToClass(viewModel.style)
+        .addToClass(viewModel.style ?? ButtonStyles.Normal)
 
         .listen('click', viewModel.action);
 }
@@ -708,6 +693,22 @@ export function Input<T>(configuration: InputCfg<T>) {
 export function Link(label: ValueObject<string>, href: string) {
     return Text(label, 'a')
         .setAttr('href', href);
+}
+
+/* List */
+export function List<T>(dataItems: BindableObject<T[]>, compute: (dataItem: T) => Component<any>) {
+    const viewItems = new ComputedState<Component<any>[]>({
+        statesToBind: [dataItems],
+        initialValue: [],
+        compute: (self) => {
+            self.value = dataItems.value.map(item => 
+                compute(item)
+            );
+        },
+    })
+
+    return Div()
+        .setItems(viewItems);
 }
 
 /* RadioButton */
