@@ -603,15 +603,15 @@ export function AutoComplete<T>(optionData: BindableObject<string[]>, input: Com
 /* Box */
 export function Box(...children: Component<any>[]) {
     return Div(...children)
-        .addToClass('box');
+        .addToClass('boxes');
 }
 
 /* Button */
 export enum ButtonStyles {
-    Transparent = 'button-style-transparent',
-    Normal = 'button-style-normal',
-    Primary = 'button-style-primary',
-    Destructive = 'button-style-destructive',
+    Transparent = 'buttons-transparent',
+    Normal = 'buttons-normal',
+    Primary = 'buttons-primary',
+    Destructive = 'buttons-destructive',
 }
 
 export interface ButtonCfg {
@@ -638,7 +638,7 @@ export function Button(viewModel: ButtonCfg) {
 /* ButtonGroup */
 export function ButtonGroup(...buttons: Component<any>[]) {
     return Div(...buttons)
-        .addToClass('buttongroup');
+        .addToClass('buttongroups');
 }
 
 /* Checkbox */
@@ -670,7 +670,7 @@ export function Div(...children: Component<any>[]) {
 /* Icon */
 export function Icon(iconName: string) {
     return Text(iconName)
-        .addToClass('icon'); //TODO
+        .addToClass('icons'); //TODO
 }
 
 /* Input */
@@ -893,4 +893,10 @@ export function Textarea(value: BindableObject<string>, placeholder: string) {
 
             .setAttr('placeholder', placeholder),
         );
+}
+
+/* Toggle */
+export function Toggle(isChecked: BindableObject<boolean>) {
+    return Checkbox(isChecked)
+        .addToClass('toggles');
 }
