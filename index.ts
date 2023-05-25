@@ -747,9 +747,26 @@ export function List<T>(itemData: BindableObject<T[]>, compute: (dataItem: T) =>
 }
 
 /* Meter */
-export function Meter(value: BindableObject<number>) {
+export interface MeterOpts {
+    min?: number,
+    max?: number,
+    low?: number;
+    high?: number;
+}
+
+export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
+    const min = options.min ?? 0;
+    const max = options.max ?? 1;
+    const low = options.low ?? min;
+    const high = options.high ?? max;
+
     return Component<number>('meter')
-        .setValue(value);
+        .setValue(value)
+        
+        .setAttr('min', min.toString())
+        .setAttr('max', max.toString())
+        .setAttr('low', low.toString())
+        .setAttr('high', high.toString());
 }
 
 /* ProgressBar */
