@@ -165,7 +165,7 @@ export interface UIBindingCfgOpts<T> {
     setViewProperty: (newValue: T) => void;
 }
 /** Configure a binding for bi-directional changes. */
-export class UIBindingCfg<T> {
+export class TightBindingCfg<T> {
     data: BindableObject<T>;
     component: Component<T>;
     defaultValue: T;
@@ -185,14 +185,14 @@ export class UIBindingCfg<T> {
     setViewProperty: (newValue: T) => void;
 }
 
-export interface UIValueCfgOpts<T> {
+export interface ValueTBCfgOpts<T> {
     data: BindableObject<T>;
     component: Component<T>;
     fallbackValue: T;
 }
 /** Tightly binds a component's value. */
-export class UIValueCfg<T> extends UIBindingCfg<T> {
-    constructor(configuration: UIValueCfgOpts<T>) {
+export class ValueTBCfg<T> extends TightBindingCfg<T> {
+    constructor(configuration: ValueTBCfgOpts<T>) {
         super({
             data: configuration.data,
             component: configuration.component,
@@ -209,17 +209,17 @@ export class UIValueCfg<T> extends UIBindingCfg<T> {
     }
 }
 
-export interface UICheckCfgOpts {
+export interface CheckTBCfgOpts {
     isChecked: BindableObject<boolean>;
     component: CheckableComponent<any>;
 }
 /** Tightly bind a component's 'checked' property. */
-export class UICheckCfg extends UIValueCfg<boolean> {
+export class CheckTBCfg extends ValueTBCfg<boolean> {
     component: CheckableComponent<any>;
 
     changeEventName: keyof HTMLElementEventMap = 'change';
 
-    constructor(configuration: UICheckCfgOpts) {
+    constructor(configuration: CheckTBCfgOpts) {
         super({
             data: configuration.isChecked,
             component: configuration.component,
@@ -237,7 +237,7 @@ export class UICheckCfg extends UIValueCfg<boolean> {
 }
 
 /** Add or remove ownValue on selectedItems */
-export interface UISelectionCfg<T> {
+export interface SelectionTBCfg<T> {
     selectedItems: BindableObject<T[]>;
     ownValue: T;
     isExclusive: boolean;
@@ -252,14 +252,14 @@ export interface UISelectionCfg<T> {
     setModel: (isSelected: boolean) => void;
 }
 
-export interface UICheckSelectionCfgOpts<T> {
+export interface CheckSelectionTBCfgOpts<T> {
     component: CheckableComponent<undefined>;
     value: T;
     bindable: BindableObject<T[]>;
     isExclusive?: boolean;
 }
 /** SelectionCfg for checkable components */
-export class UICheckSelectionCfg<T> implements UISelectionCfg<T> {
+export class CheckSelectionTBCfg<T> implements SelectionTBCfg<T> {
     isSafeToPropagate = true;
 
     component: CheckableComponent<undefined>;
@@ -268,7 +268,7 @@ export class UICheckSelectionCfg<T> implements UISelectionCfg<T> {
     isExclusive = false;
     changeEventName: keyof HTMLElementEventMap = 'change';
 
-    constructor(configuration: UICheckSelectionCfgOpts<T>) {
+    constructor(configuration: CheckSelectionTBCfgOpts<T>) {
         this.component = configuration.component;
         this.selectedItems = configuration.bindable;
         this.ownValue = configuration.value;
@@ -359,9 +359,9 @@ export interface Component<ValueType> extends HTMLElement {
     //state
     /** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
     bindings: Map<string, Binding<any>>;
-    addBinding: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
-    createSelectionBinding: <T>(viewModel: UISelectionCfg<T>) => this;
-    createTwoWayBinding: <T>(viewModel: UIBindingCfg<T>) => this;
+    createBinding: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
+    createSelectionBinding: <T>(viewModel: SelectionTBCfg<T>) => this;
+    createTightBinding: <T>(viewModel: TightBindingCfg<T>) => this;
     removeBinding: <T>(bindable: BindableObject<T>) => this;
     updateBinding: <T>(bindable: BindableObject<T>) => this;
 }
@@ -396,7 +396,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
         const bindable = unwrapBindable(children);
 
         component
-            .addBinding(bindable, children => {
+            .createBinding(bindable, children => {
                 component
                     .clear()
                     .addItems(...children)
@@ -414,7 +414,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
         const bindable = unwrapBindable(value);
 
         component
-            .addBinding(bindable, newValue => {
+            .createBinding(bindable, newValue => {
                 component.setAttribute(key, newValue);
             })
             .updateBinding(bindable);
@@ -429,7 +429,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
         const bindable = unwrapBindable(condition);
 
         component
-            .addBinding(bindable, newValue => {
+            .createBinding(bindable, newValue => {
                 component.toggleAttribute(key, newValue);
             })
             .updateBinding(bindable);
@@ -451,7 +451,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
     component.addToClassConditionally = (className, condition) => {
         const bindable = unwrapBindable(condition);
 
-        component.addBinding(bindable, newValue => {
+        component.createBinding(bindable, newValue => {
             component.classList.toggle(className, newValue);
         })
             .updateBinding(bindable);
@@ -467,7 +467,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
         const bindable = unwrapBindable(text);
 
         component
-            .addBinding(bindable, newValue => {
+            .createBinding(bindable, newValue => {
                 component.textContent = newValue;
             })
             .updateBinding(bindable);
@@ -478,7 +478,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
         const bindable = unwrapBindable(value);
 
         component
-            .addBinding(bindable, newValue => {
+            .createBinding(bindable, newValue => {
                 component.value = newValue;
             })
             .updateBinding(bindable);
@@ -489,7 +489,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
         const bindable = unwrapBindable(text);
 
         component
-            .addBinding(bindable, newValue => {
+            .createBinding(bindable, newValue => {
                 component.innerHTML = newValue;
             })
             .updateBinding(bindable);
@@ -507,7 +507,7 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
     }
 
     component.bindings = new Map();
-    component.addBinding = (bindable, action) => {
+    component.createBinding = (bindable, action) => {
         const binding = {
             uuid: UUID(),
             action,
@@ -518,9 +518,21 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 
         return component;
     }
+    component.createTightBinding = (viewModel) => {
+        component
+            .createBinding(viewModel.data, newValue => {
+                viewModel.setViewProperty(newValue);
+            })
+            .updateBinding(viewModel.data)
+            .listen(viewModel.changeEventName, () => {
+                viewModel.data.value = viewModel.getViewProperty();
+            });
+
+        return component;
+    }
     component.createSelectionBinding = (viewModel) => {
         component
-            .addBinding(viewModel.selectedItems, () => {
+            .createBinding(viewModel.selectedItems, () => {
                 const isSelected = viewModel.getIndex() != -1;
                 viewModel.setView(isSelected);
             })
@@ -528,18 +540,6 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
             .listen(viewModel.changeEventName, () => {
                 const isSelectedInView = viewModel.getView();
                 viewModel.setModel(isSelectedInView);
-            });
-
-        return component;
-    }
-    component.createTwoWayBinding = (viewModel) => {
-        component
-            .addBinding(viewModel.data, newValue => {
-                viewModel.setViewProperty(newValue);
-            })
-            .updateBinding(viewModel.data)
-            .listen(viewModel.changeEventName, () => {
-                viewModel.data.value = viewModel.getViewProperty();
             });
 
         return component;
@@ -616,7 +616,7 @@ export function Checkbox(isChecked: BindableObject<boolean>) {
         placeholder: undefined,
     }) as CheckableComponent<undefined>)
         .access(self => self
-            .createTwoWayBinding(new UICheckCfg({
+            .createTightBinding(new CheckTBCfg({
                 isChecked: isChecked,
                 component: self,
             }))
@@ -681,12 +681,19 @@ export function Input<T>(configuration: InputCfg<T>) {
                 .setAttr('placeholder', configuration.placeholder ?? '');
 
             if (configuration.value != undefined && configuration.fallbackValue != undefined) self
-                .createTwoWayBinding(new UIValueCfg({
+                .createTightBinding(new ValueTBCfg({
                     data: configuration.value,
                     component: self,
                     fallbackValue: configuration.fallbackValue,
                 }));
         });
+}
+
+/* Label */
+export function Label(labelText: string, labeledItem: Component<any>) {
+    return Component('label')
+        .setText(labelText)
+        .addItems(labeledItem);
 }
 
 /* Link */
@@ -720,7 +727,7 @@ export function RadioButton<T>(selectedItems: BindableObject<T[]>, ownIndex: T, 
         placeholder: undefined,
     }) as CheckableComponent<undefined>)
         .access(self => self
-            .createSelectionBinding(new UICheckSelectionCfg({
+            .createSelectionBinding(new CheckSelectionTBCfg({
                 bindable: selectedItems,
                 component: self,
                 value: ownIndex,
@@ -755,4 +762,18 @@ export function Slider(value: BindableObject<number>, configurationExtension: Sl
 export function Text(value: ValueObject<string>, tagName: keyof HTMLElementTagNameMap = 'span') {
     return Component(tagName)
         .setText(value);
+}
+
+/* Textarea */
+export function Textarea(value: BindableObject<string>, placeholder: string) {
+    return Component('textarea')
+        .access(self => self
+            .createTightBinding(new ValueTBCfg({
+                component: self,
+                data: value,
+                fallbackValue: '',
+            }))
+
+            .setAttr('placeholder', placeholder),
+        );
 }
