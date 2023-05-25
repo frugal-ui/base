@@ -618,7 +618,7 @@ export interface ButtonCfg {
     style?: ButtonStyles;
     text?: ValueObject<string>;
     iconName?: string;
-    ariaLabel: ValueObject<string>;
+    accessibilityLabel: ValueObject<string>;
     action: (e: Event) => void;
 }
 
@@ -629,7 +629,7 @@ export function Button(viewModel: ButtonCfg) {
             Text(viewModel.text ?? ''),
         )
 
-        .setAttr('aria-label', viewModel.ariaLabel)
+        .setAttr('aria-label', viewModel.accessibilityLabel)
         .addToClass(viewModel.style ?? ButtonStyles.Normal)
 
         .listen('click', viewModel.action);
