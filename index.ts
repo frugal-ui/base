@@ -746,6 +746,12 @@ export function List<T>(itemData: BindableObject<T[]>, compute: (dataItem: T) =>
         .setItems(itemViews);
 }
 
+/* Meter */
+export function Meter(value: BindableObject<number>) {
+    return Component<number>('meter')
+        .setValue(value);
+}
+
 /* ProgressBar */
 export enum ProgressBarStates {
     Normal,
@@ -753,7 +759,7 @@ export enum ProgressBarStates {
 }
 
 export function ProgressBar(value: BindableObject<number>, state: BindableObject<ProgressBarStates>) {
-    return Component('progress')
+    return Component<number>('progress')
         .setValue(value)
         .access(self => self
             .createBinding(state, state => {
