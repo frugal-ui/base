@@ -913,6 +913,12 @@ export function Slider(value: BindableObject<number>, options: SliderOpts = {}) 
         )
 }
 
+/* Spacer */
+export function Spacer() {
+    return Div()
+        .addToClass('spacers');
+}
+
 /* Text */
 export function Text(value: ValueObject<string>, tagName: keyof HTMLElementTagNameMap = 'span') {
     return Component(tagName)
