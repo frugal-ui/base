@@ -27,6 +27,7 @@ body {
 .popover-contents {
     position: absolute;
     top: 0px;
+    left: 0px;
     visibility: hidden;
 }
 

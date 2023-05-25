@@ -583,6 +583,15 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 }
 
 // SPECIFIC
+/* Accordion */
+export function Accordion(label: string, ...children: Component<any>[]) {
+    return Container('details',
+        Text(label, 'summary'),
+
+        ...children,
+    );
+}
+
 /* AutoComplete */
 export function AutoComplete<T>(optionData: BindableObject<string[]>, input: Component<T>) {
     const uuid = UUID();
