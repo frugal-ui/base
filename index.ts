@@ -335,7 +335,6 @@ export interface Component<ValueType> extends HTMLElement {
     addItemsBefore: (...children: Component<any>[]) => this;
     clear: () => this;
     setItems: (children: ValueObject<Component<any>[]>) => this;
-    computeItems: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => Component<any>[]) => this;
 
     //attributes
     setID: (id: string) => this;
@@ -350,16 +349,8 @@ export interface Component<ValueType> extends HTMLElement {
 
     //content
     setText: (text: ValueObject<string>) => this;
-    /** Passes unwrapped value into compute() function. Result of compute() will be textContent. */
-    computeText: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => string) => this;
-
     setValue: (value: ValueObject<ValueType>) => this;
-    /** Passes unwrapped value into compute() function. Result of compute() will be textContent. */
-    computeValue: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => ValueType) => this;
-
     setHTML: (text: ValueObject<string>) => this;
-    /** Passes unwrapped value into compute() function. Result of compute() will be innerHTML. */
-    computeHTML: <T>(object: ValueObject<T>, compute: (unwrappedObject: T) => string) => this;
 
     //events
     listen: (eventName: keyof HTMLElementEventMap, handler: ComponentEventHandler) => this;
@@ -409,21 +400,6 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
                 component
                     .clear()
                     .addItems(...children)
-            })
-            .updateBinding(bindable);
-
-        return component;
-    }
-    component.computeItems = (object, compute) => {
-        const bindable = unwrapBindable(object);
-
-        component
-            .addBinding(bindable, object => {
-                component
-                    .clear()
-                    .addItems(
-                        ...compute(object)
-                    )
             })
             .updateBinding(bindable);
 
@@ -498,18 +474,6 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 
         return component;
     }
-    component.computeText = (object, compute) => {
-        const bindable = unwrapBindable(object);
-
-        component
-            .addBinding(bindable, () => {
-                const computedValue = compute(unwrapValue(object));
-                component.textContent = computedValue;
-            })
-            .updateBinding(bindable);
-
-        return component;
-    }
     component.setValue = (value) => {
         const bindable = unwrapBindable(value);
 
@@ -521,36 +485,12 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 
         return component;
     }
-    component.computeValue = (object, compute) => {
-        const bindable = unwrapBindable(object);
-
-        component
-            .addBinding(bindable, () => {
-                const computedValue = compute(unwrapValue(object));
-                component.value = computedValue;
-            })
-            .updateBinding(bindable);
-
-        return component;
-    }
     component.setHTML = (text) => {
         const bindable = unwrapBindable(text);
 
         component
             .addBinding(bindable, newValue => {
                 component.innerHTML = newValue;
-            })
-            .updateBinding(bindable);
-
-        return component;
-    }
-    component.computeHTML = (object, compute) => {
-        const bindable = unwrapBindable(object);
-
-        component
-            .addBinding(bindable, newValue => {
-                const computedValue = compute(unwrapValue(object));
-                component.innerHTML = computedValue;
             })
             .updateBinding(bindable);
 
