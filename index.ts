@@ -892,6 +892,16 @@ export function Separator() {
     return Component('hr');
 }
 
+/* Sheet */
+export function Sheet(isOpen: BindableObject<boolean>, ...children: Component<any>[]) {
+    return Container('dialog',
+        Div(...children)
+            .addToClass('sheet-body')
+    )
+        .addToClass('sheet-containers')
+        .toggleAttr('open', isOpen);
+}
+
 /* Slider */
 export interface SliderOpts {
     min?: number;
