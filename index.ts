@@ -578,13 +578,13 @@ export function Component<ValueType>(tagName: keyof HTMLElementTagNameMap): Comp
 
 // SPECIFIC
 /* AutoComplete */
-export function AutoComplete<T>(optionData: BindableObject<Set<string>>, input: Component<T>) {
+export function AutoComplete<T>(optionData: BindableObject<string[]>, input: Component<T>) {
     const uuid = UUID();
     const optionViews = new ComputedState<Component<any>[]>({
         statesToBind: [optionData],
         initialValue: [],
         compute: (self) => {
-            self.value = [...optionData.value.values()].map(option =>
+            self.value = optionData.value.map(option =>
                 Text(option, 'option')
             );
         }
@@ -731,12 +731,12 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* List */
-export function List<T>(itemData: BindableObject<Set<T>>, compute: (dataItem: T) => Component<any>) {
+export function List<T>(itemData: BindableObject<T[]>, compute: (dataItem: T) => Component<any>) {
     const itemViews = new ComputedState<Component<any>[]>({
         statesToBind: [itemData],
         initialValue: [],
         compute: (self) => {
-            self.value = [...itemData.value.values()].map(item =>
+            self.value = itemData.value.map(item =>
                 compute(item)
             );
         },
