@@ -157,7 +157,7 @@ export type BindingAction<T> = (newValue: T) => void;
 
 export interface TightBindingCfgOpts<T> {
     data: BindableObject<T>;
-    component: Component<T>;
+    component: Component<any>;
     fallbackValue: T;
     changeEventName: keyof HTMLElementEventMap;
 
@@ -169,7 +169,7 @@ export class TightBindingCfg<T> {
     uuid = UUID();
 
     data: BindableObject<T>;
-    component: Component<T>;
+    component: Component<any>;
     defaultValue: T;
     changeEventName: keyof HTMLElementEventMap;
 
@@ -642,19 +642,30 @@ export function ButtonGroup(...buttons: Component<any>[]) {
 }
 
 /* Checkbox */
-export function Checkbox(isChecked: BindableObject<boolean>) {
+export function Checkbox(isChecked: BindableObject<boolean>, isIndeterminate?: BindableObject<boolean>) {
     return (Input({
         type: 'checkbox',
         fallbackValue: undefined,
         value: undefined,
         placeholder: undefined,
     }) as CheckableComponent<undefined>)
-        .access(self => self
-            .createTightBinding(new CheckTBCfg({
+        .access(self => {
+            self.createTightBinding(new CheckTBCfg({
                 isChecked: isChecked,
                 component: self,
             }))
-        );
+
+            if (isIndeterminate != undefined)
+                self.createTightBinding(new TightBindingCfg<boolean>({
+                    component: self,
+                    data: isIndeterminate,
+                    fallbackValue: false,
+                    changeEventName: 'change',
+
+                    getViewProperty: () => (self as any).indeterminate,
+                    setViewProperty: (newValue) => (self as any).indeterminate = newValue,
+                }));
+        });
 }
 
 /* Container */
@@ -781,7 +792,7 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 
     return Component<number>('meter')
         .setValue(value)
-        
+
         .setAttr('min', min.toString())
         .setAttr('max', max.toString())
         .setAttr('low', low.toString())
