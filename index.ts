@@ -746,6 +746,25 @@ export function List<T>(itemData: BindableObject<T[]>, compute: (dataItem: T) =>
         .setItems(itemViews);
 }
 
+/* ProgressBar */
+export enum ProgressBarStates {
+    Normal,
+    Indeterminate,
+}
+
+export function ProgressBar(value: BindableObject<number>, state: BindableObject<ProgressBarStates>) {
+    return Component('progress')
+        .setValue(value)
+        .access(self => self
+            .createBinding(state, state => {
+                const isIndeterminate = state == ProgressBarStates.Indeterminate;
+                if (isIndeterminate) self.rmAttr('value');
+                else self.value = value.value;
+            })
+            .updateBinding(state),
+        );
+}
+
 /* RadioButton */
 export function RadioButton<T>(selectionCfg: SelectionCfg<T>, value: T) {
     return (Input({
