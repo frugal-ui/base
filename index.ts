@@ -600,6 +600,12 @@ export function AutoComplete<T>(optionData: BindableObject<string[]>, input: Com
     );
 }
 
+/* Box */
+export function Box(...children: Component<any>[]) {
+    return Div(...children)
+        .addToClass('box');
+}
+
 /* Button */
 export enum ButtonStyles {
     Transparent = 'button-style-transparent',
@@ -731,12 +737,12 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* List */
-export function List<T>(itemData: BindableObject<T[]>, compute: (dataItem: T) => Component<any>) {
+export function List<T>(listData: BindableObject<T[]>, compute: (itemData: T) => Component<any>) {
     const itemViews = new ComputedState<Component<any>[]>({
-        statesToBind: [itemData],
+        statesToBind: [listData],
         initialValue: [],
         compute: (self) => {
-            self.value = itemData.value.map(item =>
+            self.value = listData.value.map(item =>
                 compute(item)
             );
         },
@@ -744,6 +750,13 @@ export function List<T>(itemData: BindableObject<T[]>, compute: (dataItem: T) =>
 
     return Div()
         .setItems(itemViews);
+}
+
+/* ListBox */
+export function ListBox<T>(listData: BindableObject<T[]>, compute: (itemData: T) => Component<any>) {
+    return Box(
+        List(listData, compute),
+    );
 }
 
 /* Meter */
