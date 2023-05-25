@@ -1,8 +1,9 @@
-import { UUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 export function UUID() {
     return uuidv4();
 }
+
+import './styles.css';
 
 /*
     GENERAL
@@ -366,8 +367,8 @@ export interface Component<ValueType> extends HTMLElement {
     /** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
     bindings: Map<string, Binding<any>>;
     createBinding: <T>(bindable: BindableObject<T>, action: BindingAction<T>) => this;
-    createSelectionBinding: <T>(viewModel: SelectionTBCfg<T>) => this;
-    createTightBinding: <T>(viewModel: TightBindingCfg<T>) => this;
+    createSelectionBinding: <T>(configuration: SelectionTBCfg<T>) => this;
+    createTightBinding: <T>(configuration: TightBindingCfg<T>) => this;
     removeBinding: <T>(bindable: BindableObject<T>) => this;
     updateBinding: <T>(bindable: BindableObject<T>) => this;
 }
@@ -627,17 +628,17 @@ export interface ButtonCfg {
     action: (e: Event) => void;
 }
 
-export function Button(viewModel: ButtonCfg) {
+export function Button(configuration: ButtonCfg) {
     return Component('button')
         .addItems(
-            Icon(viewModel.iconName ?? ''),
-            Text(viewModel.text ?? ''),
+            Icon(configuration.iconName ?? ''),
+            Text(configuration.text ?? ''),
         )
 
-        .setAttr('aria-label', viewModel.accessibilityLabel)
-        .addToClass(viewModel.style ?? ButtonStyles.Normal)
+        .setAttr('aria-label', configuration.accessibilityLabel)
+        .addToClass(configuration.style ?? ButtonStyles.Normal)
 
-        .listen('click', viewModel.action);
+        .listen('click', configuration.action);
 }
 
 /* ButtonGroup */
@@ -818,6 +819,150 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
         .setAttr('max', max.toString())
         .setAttr('low', low.toString())
         .setAttr('high', high.toString());
+}
+
+/* Popover */
+export interface PopoverCfg {
+    isOpen: BindableObject<boolean>;
+    width: string;
+    toggle: Component<any>;
+    content: Component<any>;
+}
+
+export function Popover(configuration: PopoverCfg) {
+    // Alignment
+    const PADDING = '.5rem';
+
+    const rectOfToggle = () => configuration.toggle.getBoundingClientRect();
+    const rectOfContent = () => configuration.content.getBoundingClientRect();
+    const rectOfWindow = document.body.getBoundingClientRect();
+
+    function checkIsOK() {
+        const rect = rectOfContent();
+
+        return !(
+            rect.top < rectOfWindow.top
+            || rect.left < rectOfWindow.left
+            || rect.right > rectOfWindow.right
+            || rect.bottom > rectOfWindow.bottom
+        )
+    }
+
+    function alignToRightFromLeftEdge() {
+        configuration.content
+            .setStyle('left', `${rectOfToggle().left}px`);
+    }
+
+    function alignToRightFromRightEdge() {
+        configuration.content
+            .setStyle('left', `${rectOfToggle().right}px`);
+    }
+
+    function alignToLeftFromLeftEdge() {
+        configuration.content
+            .setStyle('left', `${rectOfToggle().left - rectOfContent().width}px`);
+    }
+
+    function alignToLeftFromRightEdge() {
+        configuration.content
+            .setStyle('left', `${rectOfToggle().right - rectOfContent().width}px`);
+    }
+
+    function tryXAxisFix() {
+        alignToRightFromLeftEdge();
+        if (checkIsOK() == true) return;
+
+        alignToLeftFromRightEdge();
+        if (checkIsOK() == true) return;
+    }
+
+    function alignY() {
+        //down
+        configuration.content
+            .setStyle('left', 'unset')
+            .setStyle('top', `${rectOfToggle().bottom}px`);
+        if (checkIsOK() == true) return;
+
+        tryXAxisFix();
+        if (checkIsOK() == true) return;
+
+        //up
+        configuration.content
+            .setStyle('left', 'unset')
+            .setStyle('top', `${rectOfToggle().top - rectOfContent().height}px`);
+        if (checkIsOK() == true) return;
+
+        tryXAxisFix();
+    }
+
+    function alignX() {
+        //to left
+        configuration.content
+            .setStyle('top', 'unset')
+
+        alignToRightFromRightEdge();
+        if (checkIsOK() == true) return;
+
+        //to right
+        configuration.content
+            .setStyle('top', 'unset')
+
+        alignToLeftFromLeftEdge();
+    }
+
+    function applyFallbackAlignment() {
+        configuration.content
+        .setStyle('bottom', PADDING)
+        .setStyle('maxHeight', `calc(100% - 2*${PADDING})`);
+
+        if (rectOfContent().left < rectOfWindow.left) //content overflows left edge
+            configuration.content.setStyle('left', PADDING);
+        if (rectOfContent().left < rectOfWindow.left) //content overflows right edge
+            configuration.content.setStyle('right', PADDING);
+    }
+
+    function updateContentPosition() {
+        if (configuration.isOpen.value == false) return;
+
+        const alignmentFunctions = [
+            alignY,
+            alignX,
+            applyFallbackAlignment,
+        ];
+
+        for (const fn of alignmentFunctions) {
+            fn();
+            if (checkIsOK() == true) return;
+        }
+    }
+
+    // Reactivity
+    function closePopover() {
+        configuration.isOpen.value = false;
+    }
+
+    configuration.isOpen.addBinding({
+        uuid: UUID(),
+        action: (wasOpened) => {
+            if (wasOpened) {
+                document.body.addEventListener('click', closePopover);
+                updateContentPosition();
+            } else {
+                document.body.removeEventListener('click', closePopover);
+            }
+        }
+    })
+
+    // Main
+    return Div(
+        configuration.toggle,
+        configuration.content
+            .addToClass('popover-contents')
+            .setStyle('width', configuration.width),
+    )
+        .addToClass('popover-containers')
+        .toggleAttr('open', configuration.isOpen)
+        .listen('click', (e) => e.stopPropagation());
 }
 
 /* ProgressBar */

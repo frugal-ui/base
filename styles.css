@@ -1,0 +1,60 @@
+/* 
+    BASIC
+*/
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0rem;
+}
+
+/*
+    COMPONENTS
+*/
+
+/* Popover */
+.popover-containers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popover-contents {
+    position: absolute;
+    top: 0px;
+    visibility: hidden;
+}
+
+.popover-containers[open] .popover-contents {
+    visibility: visible;
+}
+
+/* Spacer */
+.spacers {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex: 1;
+}
+
+/* Stacks */
+.stacks-vertical,
+.stacks-horizontal {
+    display: flex;
+    flex: 1;
+}
+
+.stacks-vertical {
+    height: 100%;
+    flex-direction: column;
+}
+
+.stacks-horizontal {
+    width: 100%;
+    flex-direction: row;
+}
