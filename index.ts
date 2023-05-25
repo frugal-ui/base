@@ -819,6 +819,11 @@ export function Select(value: BindableObject<string>, options: BindableObject<Se
         )
 }
 
+/* Separator */
+export function Separator() {
+    return Component('hr');
+}
+
 /* Slider */
 export interface SliderOpts {
     min?: number;
