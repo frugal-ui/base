@@ -795,13 +795,13 @@ export function Select(value: BindableObject<string>, options: BindableObject<Se
 }
 
 /* Slider */
-export interface SliderCfgExt {
+export interface SliderOpts {
     min?: number;
     max?: number;
     step?: number;
 }
 
-export function Slider(value: BindableObject<number>, configurationExtension: SliderCfgExt = {}) {
+export function Slider(value: BindableObject<number>, options: SliderOpts = {}) {
     return Input<number>({
         type: 'range',
         fallbackValue: 0,
@@ -809,9 +809,9 @@ export function Slider(value: BindableObject<number>, configurationExtension: Sl
         placeholder: undefined,
     })
         .access(self => self
-            .setAttr('min', (configurationExtension.min ?? 0).toString())
-            .setAttr('max', (configurationExtension.max ?? 100).toString())
-            .setAttr('step', (configurationExtension.step ?? 1).toString())
+            .setAttr('min', (options.min ?? 0).toString())
+            .setAttr('max', (options.max ?? 100).toString())
+            .setAttr('step', (options.step ?? 1).toString())
         )
 }
 
