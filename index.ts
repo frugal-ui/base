@@ -765,6 +765,35 @@ export function RadioButton<T>(selectionCfg: SelectionCfg<T>, value: T) {
         .setAttr('name', selectionCfg.uuid);
 }
 
+/* Select */
+export interface SelectOption {
+    label: string,
+    value: string,
+}
+
+export function Select(value: BindableObject<string>, options: BindableObject<SelectOption[]>) {
+    const optionViews = new ComputedState<Component<any>[]>({
+        statesToBind: [options],
+        initialValue: [],
+        compute: (self) => {
+            self.value = options.value.map(option =>
+                Text(option.label, 'option')
+                    .setValue(option.value)
+            );
+        }
+    })
+
+    return Component('select')
+        .setItems(optionViews)
+        .access(self => self
+            .createTightBinding(new ValueTBCfg({
+                component: self,
+                data: value,
+                fallbackValue: '',
+            }))
+        )
+}
+
 /* Slider */
 export interface SliderCfgExt {
     min?: number;
