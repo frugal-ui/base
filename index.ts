@@ -667,6 +667,12 @@ export function Div(...children: Component<any>[]) {
     return Container('div', ...children);
 }
 
+/* HStack */
+export function HStack(...children: Component<any>[]) {
+    return Div(...children)
+        .addToClass('stacks-horizontal');
+}
+
 /* Icon */
 export function Icon(iconName: string) {
     return Text(iconName)
@@ -899,4 +905,10 @@ export function Textarea(value: BindableObject<string>, placeholder: string) {
 export function Toggle(isChecked: BindableObject<boolean>) {
     return Checkbox(isChecked)
         .addToClass('toggles');
+}
+
+/* VStack */
+export function VStack(...children: Component<any>[]) {
+    return Div(...children)
+        .addToClass('stacks-vertical');
 }
