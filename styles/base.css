@@ -17,6 +17,11 @@ body {
     COMPONENTS
 */
 
+/* ListItem */
+.list-items[aria-selected="true"] {
+    background-color: gray;
+}
+
 /* Popover */
 .popover-containers {
     display: flex;
