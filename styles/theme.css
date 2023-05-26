@@ -28,7 +28,7 @@
 :root {
     --corners: .2rem;
 
-    --padding-md: .2rem .4rem;
+    --padding-md: .4rem .5rem;
     --padding-lg: .5rem;
 }
 
@@ -37,6 +37,10 @@
     color: var(--text);
     font-size: medium;
     font-family: sans-serif, sans;
+}
+
+html {
+    background: var(--background);
 }
 
 /* GROUPS */
@@ -48,7 +52,7 @@
 .textareas,
 .typeable-items {
     background-color: var(--fillable);
-    box-shadow: 0px 0px 4px var(--shadows) inset;
+    box-shadow: 0px 0px 2px var(--shadows) inset;
     padding: var(--padding-md);
 
     border: 1px solid var(--lines);
@@ -166,6 +170,7 @@
     padding: var(--padding-md);
 
     display: flex;
+    flex-shrink: 0;
 
     cursor: pointer;
 }
@@ -233,43 +238,4 @@
 /* Textarea */
 .textareas {
     resize: none;
-}
-
-/* Toggle */
-.toggles input {
-    appearance: none;
-
-    display: inline-block;
-    width: 2.2rem;
-    height: 1.3rem;
-
-    border: 1px solid var(--lines);
-    border-radius: 1rem;
-
-    background-color: var(--fillable);
-
-    padding: .1rem;
-}
-
-.toggles input:checked {
-    background-color: var(--accent);
-    box-shadow: none;
-}
-
-.toggles input::after {
-    content: "";
-
-    display: block;
-    height: 100%;
-    aspect-ratio: 1/1;
-
-    border-radius: 100%;
-    background-color: var(--text);
-
-    transition: margin-left .2s;
-}
-
-.toggles input:checked::after {
-    margin-left: .9rem;
-    background-color: var(--on-accent);
 }

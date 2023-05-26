@@ -40,6 +40,15 @@ body {
     visibility: visible;
 }
 
+/* Sheet */
+.sheet-containers {
+    display: none;
+}
+
+.sheet-containers[open] {
+    display: block;
+}
+
 /* Spacer */
 .spacers {
     display: flex;

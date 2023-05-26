@@ -1,6 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 export function UUID() {
-	return uuidv4();
+	return Math.random().toString(); //TODO
 }
 
 import './styles/base.css';
@@ -421,11 +420,15 @@ export function Component<ValueType>(
 	};
 
 	component.addItems = (...children) => {
-		component.append(...children);
+		children.forEach(child => {
+			component.appendChild(child);
+		})
 		return component;
 	};
 	component.addItemsBefore = (...children) => {
-		component.prepend(...children);
+		children.forEach(child => {
+			component.insertBefore(child, component.firstChild);
+		})
 		return component;
 	};
 	component.clear = () => {
@@ -468,7 +471,10 @@ export function Component<ValueType>(
 
 		component
 			.createBinding(bindable, (newValue) => {
-				component.toggleAttribute(key, newValue);
+				if (newValue == true)
+					component.setAttribute(key, '');
+				else
+					component.removeAttribute(key);
 			})
 			.updateBinding(bindable);
 
@@ -920,6 +926,8 @@ export function Popover(configuration: PopoverCfg) {
 	// Alignment
 	const PADDING = '.5rem';
 
+	resetPosition();
+
 	const rectOfToggle = () => configuration.toggle.getBoundingClientRect();
 	const rectOfContent = () => configuration.content.getBoundingClientRect();
 	const rectOfWindow = document.body.getBoundingClientRect();
@@ -933,6 +941,12 @@ export function Popover(configuration: PopoverCfg) {
 			rect.right > rectOfWindow.right ||
 			rect.bottom > rectOfWindow.bottom
 		);
+	}
+
+	function resetPosition() {
+		configuration.content
+			.setStyle('top', 'unset')
+			.setStyle('left', 'unset');
 	}
 
 	function alignToRightFromLeftEdge() {
@@ -1015,8 +1029,8 @@ export function Popover(configuration: PopoverCfg) {
 
 		const alignmentFunctions = [alignY, alignX, applyFallbackAlignment];
 
-		for (const fn of alignmentFunctions) {
-			fn();
+		for (let i = 0; i < alignmentFunctions.length; i++) {
+			alignmentFunctions[i]();
 			if (checkIsOK() == true) return;
 		}
 	}
@@ -1212,12 +1226,6 @@ export function Textarea(value: BindableObject<string>, placeholder: string) {
 
 				.setAttr('placeholder', placeholder)
 		);
-}
-
-/* Toggle */
-export function Toggle(configuration: CheckboxCfg) {
-	return Checkbox(configuration)
-		.addToClass('toggles');
 }
 
 /* VStack */

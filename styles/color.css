@@ -3,19 +3,32 @@
 	--background: hsl(0, 0%, 96%);
 	--background-alt: hsl(0, 0%, 98%);
 
-	--text: black;
+	--text: rgb(19, 19, 19);
 
 	--clickable: hsl(0, 0%, 96%);
 	--pressed: hsl(0, 0%, 87%);
 	--typeable: hsl(0, 0%, 90%);
-	--checkable: hsl(0, 0%, 94%);
-    
-	--destructive: rgb(220, 0, 0);
-    --on-destructive: white;
-    --accent: hsl(237, 100%, 59%);
-    --on-accent: white;
 
-    --shadows: hsla(0, 0%, 0%, .3);
-    --lines: hsla(0, 0%, 0%, .2);
-    --backdrop: hsla(0, 0%, 0%, .6);
+	--destructive: rgb(220, 0, 0);
+	--on-destructive: white;
+	--accent: hsl(237, 100%, 59%);
+	--on-accent: white;
+
+	--shadows: hsla(0, 0%, 0%, .3);
+	--lines: hsla(0, 0%, 0%, .2);
+	--backdrop: hsla(0, 0%, 0%, .6);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--sub-background: hsl(0, 0%, 14%);
+		--background: hsl(0, 0%, 16%);
+		--background-alt: hsl(0, 0%, 18%);
+
+		--text: rgb(255, 255, 255);
+
+		--clickable: hsl(0, 0%, 24%);
+		--pressed: hsl(0, 0%, 8%);
+		--typeable: hsl(0, 0%, 9%);
+	}
 }
