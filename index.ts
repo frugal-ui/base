@@ -1,19 +1,21 @@
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 export function UUID() {
 	return uuidv4();
 }
 
-import "./styles/base.css";
+import './styles/base.css';
+import './styles/color.css';
+import './styles/theme.css';
 
 /*
-    GENERAL
+	GENERAL
 */
 export class DataModel {
 	readonly uuid = UUID();
 }
 
 /* 
-    REACTIVITY 
+	REACTIVITY 
 */
 // VALUE
 /** Object holding a value. Used by UI components. */
@@ -40,10 +42,10 @@ export class BindableObject<T> {
 	}
 
 	/* reactivity */
-	triggerBinding(binding: Binding<T>) {}
-	triggerAll() {}
-	addBinding(binding: Binding<T>) {}
-	removeBinding(binding: Binding<T>) {}
+	triggerBinding(binding: Binding<T>) { }
+	triggerAll() { }
+	addBinding(binding: Binding<T>) { }
+	removeBinding(binding: Binding<T>) { }
 }
 
 /**  Can be bound, working with one item. Used by unwrapBindable(). */
@@ -64,7 +66,7 @@ export class BindableDummy<T> extends BindableObject<T> {
 
 /** Reactive Variable. Bindings will be triggered on change. */
 export class State<T> extends BindableObject<T> {
-	private bindings = new Map<Binding<T>["uuid"], Binding<T>["action"]>();
+	private bindings = new Map<Binding<T>['uuid'], Binding<T>['action']>();
 
 	/* reactivity */
 	triggerBinding(binding: Binding<T>) {
@@ -196,7 +198,7 @@ export class ValueTBCfg<T> extends TightBindingCfg<T> {
 			data: configuration.data,
 			component: configuration.component,
 			fallbackValue: configuration.fallbackValue,
-			changeEventName: "input",
+			changeEventName: 'input',
 
 			getViewProperty: () => {
 				return this.component.value ?? this.defaultValue;
@@ -216,7 +218,7 @@ export interface CheckTBCfgOpts {
 export class CheckTBCfg extends ValueTBCfg<boolean> {
 	component: CheckableComponent<any>;
 
-	changeEventName: keyof HTMLElementEventMap = "change";
+	changeEventName: keyof HTMLElementEventMap = 'change';
 
 	constructor(configuration: CheckTBCfgOpts) {
 		super({
@@ -310,7 +312,7 @@ export class CheckableSelectionItemCfg<T> extends SelectionItemCfg<T> {
 	constructor(configuration: CheckableSelectionItemCfgOpts<T>) {
 		super({
 			...configuration,
-			changeEventName: "change",
+			changeEventName: 'change',
 
 			getView: () => {
 				return this.component.checked;
@@ -339,7 +341,7 @@ export function unwrapBindable<T>(
 }
 
 /* 
-    COMPONENTS 
+	COMPONENTS 
 */
 // GENERAL
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
@@ -414,7 +416,7 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.setAccessibilityRole = (roleName) => {
-		component.setAttr("role", roleName);
+		component.setAttr('role', roleName);
 		return component;
 	};
 
@@ -427,7 +429,7 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.clear = () => {
-		component.innerHTML = "";
+		component.innerHTML = '';
 		return component;
 	};
 	component.setItems = (children) => {
@@ -446,7 +448,7 @@ export function Component<ValueType>(
 		component.id = id;
 		return component;
 	};
-	component.setAttr = (key, value = "") => {
+	component.setAttr = (key, value = '') => {
 		const bindable = unwrapBindable(value);
 
 		component
@@ -473,7 +475,7 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.resetClasses = () => {
-		component.className = "";
+		component.className = '';
 		return component;
 	};
 	component.removeFromClass = (className) => {
@@ -616,8 +618,8 @@ export function Component<ValueType>(
 /* Accordion */
 export function Accordion(label: string, ...children: Component<any>[]) {
 	return Container(
-		"details",
-		Text(label, "summary"),
+		'details',
+		Text(label, 'summary'),
 
 		...children
 	);
@@ -633,28 +635,30 @@ export function AutoComplete<T>(
 		statesToBind: [optionData],
 		initialValue: [],
 		compute: (self) => {
-			self.value = optionData.value.map((option) => Text(option, "option"));
+			self.value = optionData.value.map((option) => Text(option, 'option'));
 		},
 	});
 
 	return Div(
-		Component("datalist").setID(uuid).setItems(optionViews),
+		Component('datalist').setID(uuid).setItems(optionViews),
 
-		input.setAttr("list", uuid)
+		input.setAttr('list', uuid)
 	);
 }
 
 /* Box */
 export function Box(...children: Component<any>[]) {
-	return Div(...children).addToClass("boxes");
+	return Div(...children)
+		.addToClass('boxes');
 }
 
 /* Button */
 export enum ButtonStyles {
-	Transparent = "buttons-transparent",
-	Normal = "buttons-normal",
-	Primary = "buttons-primary",
-	Destructive = "buttons-destructive",
+	Transparent = 'buttons-transparent',
+	Normal = 'buttons-normal',
+	Primary = 'buttons-primary',
+	Destructive = 'buttons-destructive',
+	Pressed = 'buttons-pressed',
 }
 
 export interface ButtonCfg {
@@ -666,57 +670,67 @@ export interface ButtonCfg {
 }
 
 export function Button(configuration: ButtonCfg) {
-	return Component("button")
+	return Component('button')
 		.addItems(
-			Icon(configuration.iconName ?? ""),
-			Text(configuration.text ?? "")
+			Icon(configuration.iconName ?? ''),
+			Text(configuration.text ?? '')
 		)
 
-		.setAttr("aria-label", configuration.accessibilityLabel)
+		.setAttr('aria-label', configuration.accessibilityLabel)
+		.addToClass('buttons')
 		.addToClass(configuration.style ?? ButtonStyles.Normal)
 
-		.listen("click", configuration.action);
+		.listen('click', configuration.action);
 }
 
 /* ButtonGroup */
 export function ButtonGroup(...buttons: Component<any>[]) {
-	return Div(...buttons).addToClass("buttongroups");
+	return Div(...buttons)
+		.addToClass('button-groups');
 }
 
 /* Checkbox */
-export function Checkbox(
+export interface CheckboxCfg {
 	isChecked: BindableObject<boolean>,
-	isIndeterminate?: BindableObject<boolean>
-) {
-	return (
-		Input({
-			type: "checkbox",
-			fallbackValue: undefined,
-			value: undefined,
-			placeholder: undefined,
-		}) as CheckableComponent<undefined>
-	).access((self) => {
-		self.createTightBinding(
-			new CheckTBCfg({
-				isChecked: isChecked,
-				component: self,
-			})
-		);
+	isIndeterminate?: BindableObject<boolean>,
+	label: string,
+}
 
-		if (isIndeterminate != undefined)
-			self.createTightBinding(
-				new TightBindingCfg<boolean>({
-					component: self,
-					data: isIndeterminate,
-					fallbackValue: false,
-					changeEventName: "change",
+export function Checkbox(configuration: CheckboxCfg) {
+	return Text(configuration.label, 'label')
+		.addItemsBefore(
+			(
+				Input({
+					type: 'checkbox',
+					fallbackValue: undefined,
+					value: undefined,
+					placeholder: undefined,
+				}) as CheckableComponent<undefined>
+			)
+				.addToClass('checkable-items')
+				.access((self) => {
+					self.createTightBinding(
+						new CheckTBCfg({
+							isChecked: configuration.isChecked,
+							component: self,
+						})
+					);
 
-					getViewProperty: () => (self as any).indeterminate,
-					setViewProperty: (newValue) =>
-						((self as any).indeterminate = newValue),
+					if (configuration.isIndeterminate != undefined)
+						self.createTightBinding(
+							new TightBindingCfg<boolean>({
+								component: self,
+								data: configuration.isIndeterminate,
+								fallbackValue: false,
+								changeEventName: 'change',
+
+								getViewProperty: () => (self as any).indeterminate,
+								setViewProperty: (newValue) =>
+									((self as any).indeterminate = newValue),
+							})
+						);
 				})
-			);
-	});
+		);
 }
 
 /* Container */
@@ -728,17 +742,17 @@ export function Container(
 }
 
 export function Div(...children: Component<any>[]) {
-	return Container("div", ...children);
+	return Container('div', ...children);
 }
 
 /* HStack */
 export function HStack(...children: Component<any>[]) {
-	return Div(...children).addToClass("stacks-horizontal");
+	return Div(...children).addToClass('stacks-horizontal');
 }
 
 /* Icon */
 export function Icon(iconName: string) {
-	return Text(iconName).addToClass("icons"); //TODO
+	return Text(iconName).addToClass('icons'); //TODO
 }
 
 /* Input */
@@ -750,12 +764,12 @@ export interface InputCfg<T> {
 }
 
 export class TextInputCfg implements InputCfg<string> {
-	type = "text";
+	type = 'text';
 	value: BindableObject<string>;
 	fallbackValue: string;
 	placeholder: string;
 
-	constructor(value: BindableObject<string>, placeholder = "") {
+	constructor(value: BindableObject<string>, placeholder = '') {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
@@ -763,12 +777,12 @@ export class TextInputCfg implements InputCfg<string> {
 }
 
 export class NumberInputCfg implements InputCfg<number> {
-	type = "number";
+	type = 'number';
 	value: BindableObject<number>;
 	fallbackValue: number;
 	placeholder: string;
 
-	constructor(value: BindableObject<number>, placeholder = "") {
+	constructor(value: BindableObject<number>, placeholder = '') {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
@@ -776,40 +790,44 @@ export class NumberInputCfg implements InputCfg<number> {
 }
 
 export function Input<T>(configuration: InputCfg<T>) {
-	return Component<T>("input").access((self) => {
-		self
-			.setAttr("type", configuration.type)
-			.setAttr("placeholder", configuration.placeholder ?? "");
+	return Component<T>('input')
+		.addToClass('inputs')
+		.access((self) => {
+			self
+				.setAttr('type', configuration.type)
+				.setAttr('placeholder', configuration.placeholder ?? '');
 
-		if (
-			configuration.value != undefined &&
-			configuration.fallbackValue != undefined
-		)
-			self.createTightBinding(
-				new ValueTBCfg({
-					data: configuration.value,
-					component: self,
-					fallbackValue: configuration.fallbackValue,
-				})
-			);
-	});
+			if (
+				configuration.value != undefined &&
+				configuration.fallbackValue != undefined
+			)
+				self.createTightBinding(
+					new ValueTBCfg({
+						data: configuration.value,
+						component: self,
+						fallbackValue: configuration.fallbackValue,
+					})
+				);
+		});
 }
 
 /* Label */
 export function Label(labelText: string, labeledItem: Component<any>) {
-	return Component("label").setText(labelText).addItems(labeledItem);
+	return Component('label')
+		.setText(labelText)
+		.addItems(labeledItem)
+
+		.addToClass('labels');
 }
 
 /* Link */
 export function Link(label: ValueObject<string>, href: string) {
-	return Text(label, "a").setAttr("href", href);
+	return Text(label, 'a')
+		.setAttr('href', href);
 }
 
 /* List */
-export function List<T>(
-	listData: BindableObject<T[]>,
-	compute: (itemData: T) => Component<any>
-) {
+export function List<T>(listData: BindableObject<T[]>, compute: (itemData: T) => Component<any>) {
 	const itemViews = new ComputedState<Component<any>[]>({
 		statesToBind: [listData],
 		initialValue: [],
@@ -818,15 +836,16 @@ export function List<T>(
 		},
 	});
 
-	return VStack().setItems(itemViews);
+	return VStack()
+		.setItems(itemViews);
 }
 
 /* ListBox */
-export function ListBox<T>(
-	listData: BindableObject<T[]>,
-	compute: (itemData: T) => Component<any>
-) {
-	return Box(List(listData, compute).setAccessibilityRole("listbox"));
+export function ListBox<T>(listData: BindableObject<T[]>, compute: (itemData: T) => Component<any>) {
+	return Box(
+		List(listData, compute)
+			.setAccessibilityRole('listbox')
+	);
 }
 
 /* ListItem */
@@ -840,29 +859,30 @@ export function ListItem<T>(
 	...children: Component<any>[]
 ) {
 	return Div(...children)
-		.addToClass("list-items")
+		.addToClass('list-items')
 		.access((self) => {
-            const selectionItemCfg = new SelectionItemCfg<T>({
-                component: self,
-                selectionCfg: configuration.selectionCfg,
+			const selectionItemCfg = new SelectionItemCfg<T>({
+				component: self,
+				selectionCfg: configuration.selectionCfg,
 
-                getView: () => self.getAttribute("aria-selected") == "true",
-                setView: (isSelected) =>
-                    self.setAttr("aria-selected", isSelected.toString()),
+				getView: () => self.getAttribute('aria-selected') == 'true',
+				setView: (isSelected) =>
+					self.setAttr('aria-selected', isSelected.toString()),
 
-                isExclusive: true,
-                ownValue: configuration.ownValue,
+				isExclusive: true,
+				ownValue: configuration.ownValue,
 
-                changeEventName: "click",
-            });
+				changeEventName: 'click',
+			});
 
-			self.addToClass("listitems")
-				.setAccessibilityRole("option")
-                .listen('click', () => {
-                    selectionItemCfg.setModel(true);
-                })
-                .createSelectionBinding(selectionItemCfg);
-        });
+			self
+				.addToClass('listitems')
+				.setAccessibilityRole('option')
+				.listen('click', () => {
+					selectionItemCfg.setModel(true);
+				})
+				.createSelectionBinding(selectionItemCfg);
+		});
 }
 
 /* Meter */
@@ -879,26 +899,26 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 	const low = options.low ?? min;
 	const high = options.high ?? max;
 
-	return Component<number>("meter")
+	return Component<number>('meter')
 		.setValue(value)
 
-		.setAttr("min", min.toString())
-		.setAttr("max", max.toString())
-		.setAttr("low", low.toString())
-		.setAttr("high", high.toString());
+		.setAttr('min', min.toString())
+		.setAttr('max', max.toString())
+		.setAttr('low', low.toString())
+		.setAttr('high', high.toString());
 }
 
 /* Popover */
 export interface PopoverCfg {
 	isOpen: BindableObject<boolean>;
-	width: string;
+	widthStyle: string;
 	toggle: Component<any>;
 	content: Component<any>;
 }
 
 export function Popover(configuration: PopoverCfg) {
 	// Alignment
-	const PADDING = ".5rem";
+	const PADDING = '.5rem';
 
 	const rectOfToggle = () => configuration.toggle.getBoundingClientRect();
 	const rectOfContent = () => configuration.content.getBoundingClientRect();
@@ -916,23 +936,23 @@ export function Popover(configuration: PopoverCfg) {
 	}
 
 	function alignToRightFromLeftEdge() {
-		configuration.content.setStyle("left", `${rectOfToggle().left}px`);
+		configuration.content.setStyle('left', `${rectOfToggle().left}px`);
 	}
 
 	function alignToRightFromRightEdge() {
-		configuration.content.setStyle("left", `${rectOfToggle().right}px`);
+		configuration.content.setStyle('left', `${rectOfToggle().right}px`);
 	}
 
 	function alignToLeftFromLeftEdge() {
 		configuration.content.setStyle(
-			"left",
+			'left',
 			`${rectOfToggle().left - rectOfContent().width}px`
 		);
 	}
 
 	function alignToLeftFromRightEdge() {
 		configuration.content.setStyle(
-			"left",
+			'left',
 			`${rectOfToggle().right - rectOfContent().width}px`
 		);
 	}
@@ -948,8 +968,8 @@ export function Popover(configuration: PopoverCfg) {
 	function alignY() {
 		//down
 		configuration.content
-			.setStyle("left", "unset")
-			.setStyle("top", `${rectOfToggle().bottom}px`);
+			.setStyle('left', 'unset')
+			.setStyle('top', `${rectOfToggle().bottom}px`);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -957,8 +977,8 @@ export function Popover(configuration: PopoverCfg) {
 
 		//up
 		configuration.content
-			.setStyle("left", "unset")
-			.setStyle("top", `${rectOfToggle().top - rectOfContent().height}px`);
+			.setStyle('left', 'unset')
+			.setStyle('top', `${rectOfToggle().top - rectOfContent().height}px`);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -966,28 +986,28 @@ export function Popover(configuration: PopoverCfg) {
 
 	function alignX() {
 		//to left
-		configuration.content.setStyle("top", "unset");
+		configuration.content.setStyle('top', 'unset');
 
 		alignToRightFromRightEdge();
 		if (checkIsOK() == true) return;
 
 		//to right
-		configuration.content.setStyle("top", "unset");
+		configuration.content.setStyle('top', 'unset');
 
 		alignToLeftFromLeftEdge();
 	}
 
 	function applyFallbackAlignment() {
 		configuration.content
-			.setStyle("bottom", PADDING)
-			.setStyle("maxHeight", `calc(100% - 2*${PADDING})`);
+			.setStyle('bottom', PADDING)
+			.setStyle('maxHeight', `calc(100% - 2*${PADDING})`);
 
 		if (rectOfContent().left < rectOfWindow.left)
 			//content overflows left edge
-			configuration.content.setStyle("left", PADDING);
+			configuration.content.setStyle('left', PADDING);
 		if (rectOfContent().left < rectOfWindow.left)
 			//content overflows right edge
-			configuration.content.setStyle("right", PADDING);
+			configuration.content.setStyle('right', PADDING);
 	}
 
 	function updateContentPosition() {
@@ -1010,10 +1030,10 @@ export function Popover(configuration: PopoverCfg) {
 		uuid: UUID(),
 		action: (wasOpened) => {
 			if (wasOpened) {
-				document.body.addEventListener("click", closePopover);
+				document.body.addEventListener('click', closePopover);
 				updateContentPosition();
 			} else {
-				document.body.removeEventListener("click", closePopover);
+				document.body.removeEventListener('click', closePopover);
 			}
 		},
 	});
@@ -1022,12 +1042,12 @@ export function Popover(configuration: PopoverCfg) {
 	return Div(
 		configuration.toggle,
 		configuration.content
-			.addToClass("popover-contents")
-			.setStyle("width", configuration.width)
+			.addToClass('popover-contents')
+			.setStyle('width', configuration.widthStyle)
 	)
-		.addToClass("popover-containers")
-		.toggleAttr("open", configuration.isOpen)
-		.listen("click", (e) => e.stopPropagation());
+		.addToClass('popover-containers')
+		.toggleAttr('open', configuration.isOpen)
+		.listen('click', (e) => e.stopPropagation());
 }
 
 /* ProgressBar */
@@ -1040,13 +1060,13 @@ export function ProgressBar(
 	value: BindableObject<number>,
 	state: BindableObject<ProgressBarStates>
 ) {
-	return Component<number>("progress")
+	return Component<number>('progress')
 		.setValue(value)
 		.access((self) =>
 			self
 				.createBinding(state, (state) => {
 					const isIndeterminate = state == ProgressBarStates.Indeterminate;
-					if (isIndeterminate) self.rmAttr("value");
+					if (isIndeterminate) self.rmAttr('value');
 					else self.value = value.value;
 				})
 				.updateBinding(state)
@@ -1057,12 +1077,12 @@ export function ProgressBar(
 export function RadioButton<T>(
 	selectionCfg: DataSelectionCfg<T>,
 	label: string,
-	value: T
+	value: T,
 ) {
-	return Text(label, "label").addItemsBefore(
+	return Text(label, 'label').addItemsBefore(
 		(
 			Input({
-				type: "radio",
+				type: 'radio',
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
@@ -1078,7 +1098,7 @@ export function RadioButton<T>(
 					})
 				)
 			)
-			.setAttr("name", selectionCfg.uuid)
+			.setAttr('name', selectionCfg.uuid)
 	);
 }
 
@@ -1097,19 +1117,20 @@ export function Select(
 		initialValue: [],
 		compute: (self) => {
 			self.value = options.value.map((option) =>
-				Text(option.label, "option").setValue(option.value)
+				Text(option.label, 'option').setValue(option.value)
 			);
 		},
 	});
 
-	return Component("select")
+	return Component('select')
 		.setItems(optionViews)
+		.addToClass('selects')
 		.access((self) =>
 			self.createTightBinding(
 				new ValueTBCfg({
 					component: self,
 					data: value,
-					fallbackValue: "",
+					fallbackValue: '',
 				})
 			)
 		);
@@ -1117,7 +1138,8 @@ export function Select(
 
 /* Separator */
 export function Separator() {
-	return Component("hr");
+	return Component('hr')
+		.addToClass('separators');
 }
 
 /* Sheet */
@@ -1125,9 +1147,16 @@ export function Sheet(
 	isOpen: BindableObject<boolean>,
 	...children: Component<any>[]
 ) {
-	return Container("dialog", Div(...children).addToClass("sheet-body"))
-		.addToClass("sheet-containers")
-		.toggleAttr("open", isOpen);
+	return Container('dialog',
+		Div(...children)
+			.addToClass('sheet-contents')
+			.listen('click', (e) => e.stopPropagation()),
+	)
+		.addToClass('sheet-containers')
+		.toggleAttr('open', isOpen)
+		.listen('click', () => {
+			isOpen.value = false;
+		});
 }
 
 /* Slider */
@@ -1142,53 +1171,57 @@ export function Slider(
 	options: SliderOpts = {}
 ) {
 	return Input<number>({
-		type: "range",
+		type: 'range',
 		fallbackValue: 0,
 		value,
 		placeholder: undefined,
 	}).access((self) =>
 		self
-			.setAttr("min", (options.min ?? 0).toString())
-			.setAttr("max", (options.max ?? 100).toString())
-			.setAttr("step", (options.step ?? 1).toString())
+			.setAttr('min', (options.min ?? 0).toString())
+			.setAttr('max', (options.max ?? 100).toString())
+			.setAttr('step', (options.step ?? 1).toString())
 	);
 }
 
 /* Spacer */
 export function Spacer() {
-	return Div().addToClass("spacers");
+	return Div().addToClass('spacers');
 }
 
 /* Text */
 export function Text(
 	value: ValueObject<string>,
-	tagName: keyof HTMLElementTagNameMap = "span"
+	tagName: keyof HTMLElementTagNameMap = 'span'
 ) {
 	return Component(tagName).setText(value);
 }
 
 /* Textarea */
 export function Textarea(value: BindableObject<string>, placeholder: string) {
-	return Component<string>("textarea").access((self) =>
-		self
-			.createTightBinding(
-				new ValueTBCfg({
-					component: self,
-					data: value,
-					fallbackValue: "",
-				})
-			)
+	return Component<string>('textarea')
+		.addToClass('textareas')
+		.access((self) =>
+			self
+				.createTightBinding(
+					new ValueTBCfg({
+						component: self,
+						data: value,
+						fallbackValue: '',
+					})
+				)
 
-			.setAttr("placeholder", placeholder)
-	);
+				.setAttr('placeholder', placeholder)
+		);
 }
 
 /* Toggle */
-export function Toggle(isChecked: BindableObject<boolean>) {
-	return Checkbox(isChecked).addToClass("toggles");
+export function Toggle(configuration: CheckboxCfg) {
+	return Checkbox(configuration)
+		.addToClass('toggles');
 }
 
 /* VStack */
 export function VStack(...children: Component<any>[]) {
-	return Div(...children).addToClass("stacks-vertical");
+	return Div(...children)
+		.addToClass('stacks-vertical');
 }

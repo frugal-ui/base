@@ -1,0 +1,21 @@
+:root {
+	--sub-background: hsl(0, 0%, 94%);
+	--background: hsl(0, 0%, 96%);
+	--background-alt: hsl(0, 0%, 98%);
+
+	--text: black;
+
+	--clickable: hsl(0, 0%, 96%);
+	--pressed: hsl(0, 0%, 87%);
+	--typeable: hsl(0, 0%, 90%);
+	--checkable: hsl(0, 0%, 94%);
+    
+	--destructive: rgb(220, 0, 0);
+    --on-destructive: white;
+    --accent: hsl(237, 100%, 59%);
+    --on-accent: white;
+
+    --shadows: hsla(0, 0%, 0%, .3);
+    --lines: hsla(0, 0%, 0%, .2);
+    --backdrop: hsla(0, 0%, 0%, .6);
+}

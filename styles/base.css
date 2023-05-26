@@ -17,9 +17,9 @@ body {
     COMPONENTS
 */
 
-/* ListItem */
-.list-items[aria-selected="true"] {
-    background-color: gray;
+/* Box */
+.boxes {
+    overflow: auto;
 }
 
 /* Popover */
@@ -53,6 +53,11 @@ body {
 .stacks-horizontal {
     display: flex;
     flex: 1;
+
+    align-items: center;
+    justify-content: center;
+
+    overflow: auto;
 }
 
 .stacks-vertical {

@@ -1,0 +1,275 @@
+/* 
+    BASIC 
+*/
+@keyframes appear {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    90% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+}
+
+@keyframes sheet {
+    0% {
+        transform: translateY(2rem);
+    }
+}
+
+:root {
+    --corners: .2rem;
+
+    --padding-md: .2rem .4rem;
+    --padding-lg: .5rem;
+}
+
+* {
+    accent-color: var(--accent);
+    color: var(--text);
+    font-size: medium;
+    font-family: sans-serif, sans;
+}
+
+/* GROUPS */
+.checkable-items {
+    background-color: var(--checkable);
+}
+
+.inputs:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.textareas,
+.typeable-items {
+    background-color: var(--fillable);
+    box-shadow: 0px 0px 4px var(--shadows) inset;
+    padding: var(--padding-md);
+
+    border: 1px solid var(--lines);
+    border-radius: var(--corners);
+
+    font-size: medium;
+    font-family: sans-serif, sans;
+}
+
+/* 
+    COMPONENTS
+*/
+
+/* Box */
+.boxes {
+    box-shadow: 0px 0px 4px var(--shadows) inset;
+    border: 1px solid var(--lines);
+
+    border-radius: var(--corners);
+}
+
+/* Button-like */
+.buttons,
+.selects {
+    font-size: medium;
+}
+
+.buttons {
+    all: unset;
+
+    color: var(--text);
+
+    border-radius: var(--corners);
+    padding: var(--padding-md);
+
+    text-align: center;
+}
+
+.buttons span {
+    color: inherit;
+}
+
+.selects {
+    background-color: var(--clickable);
+    border-radius: var(--corners);
+    border: none;
+    padding: var(--padding-md);
+}
+
+.selects,
+.buttons:not(.buttons-transparent, .buttons-pressed) {
+    box-shadow: 0px 0px 4px var(--shadows);
+}
+
+.buttons-normal {
+    background-color: var(--clickable);
+}
+
+.buttons-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+.buttons:active,
+.buttons-pressed {
+    background: var(--pressed);
+    box-shadow: 0px 0px 5px var(--shadows) inset;
+    color: var(--color);
+}
+
+.buttons-destructive {
+    background: var(--destructive);
+    color: var(--on-destructive);
+}
+
+/* ButtonGroup */
+.button-groups {
+    box-shadow: 0px 0px 5px var(--shadows);
+    border-radius: var(--corners);
+
+    display: flex;
+}
+
+.button-groups .buttons {
+    width: 100%;
+    flex: 1;
+    border-radius: 0rem;
+}
+
+.button-groups .buttons:not(.buttons-pressed) {
+    box-shadow: none;
+}
+
+.button-groups .buttons:first-child {
+    border-top-left-radius: var(--corners);
+    border-bottom-left-radius: var(--corners);
+}
+
+.button-groups .buttons:last-child {
+    border-top-right-radius: var(--corners);
+    border-bottom-right-radius: var(--corners);
+}
+
+/* Label */
+.labels {
+    display: flex;
+    flex-direction: column;
+
+    font-size: small;
+}
+
+/* ListItem */
+.list-items {
+    width: 100%;
+    padding: var(--padding-md);
+
+    display: flex;
+
+    cursor: pointer;
+}
+
+.list-items * {
+    color: inherit;
+}
+
+.list-items[aria-selected="true"] {
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+/* Overlays */
+.popover-contents,
+.sheet-contents {
+    background-color: var(--background-alt);
+    box-shadow: 0px 0px 7px var(--shadows);
+
+    border: 1px solid var(--lines);
+    border-radius: var(--corners);
+}
+
+.popover-containers[open] .popover-contents {
+    animation: appear .2s;
+}
+
+.sheet-contents {
+    width: 100%;
+    height: 100%;
+
+    animation: sheet .2s ease-out;
+}
+
+.sheet-containers {
+    position: fixed;
+    top: 0rem;
+    left: 0rem;
+
+    width: 100%;
+    height: 100%;
+}
+
+.sheet-containers[open] {
+    border: none;
+
+    display: flex;
+    align-items: end;
+
+    padding: 0rem;
+    padding-top: 2rem;
+
+    background-color: var(--backdrop);
+
+    animation: fade-in .1s;
+}
+
+/* Separator */
+.separators {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--lines);
+}
+
+/* Textarea */
+.textareas {
+    resize: none;
+}
+
+/* Toggle */
+.toggles input {
+    appearance: none;
+
+    display: inline-block;
+    width: 2.2rem;
+    height: 1.3rem;
+
+    border: 1px solid var(--lines);
+    border-radius: 1rem;
+
+    background-color: var(--fillable);
+
+    padding: .1rem;
+}
+
+.toggles input:checked {
+    background-color: var(--accent);
+    box-shadow: none;
+}
+
+.toggles input::after {
+    content: "";
+
+    display: block;
+    height: 100%;
+    aspect-ratio: 1/1;
+
+    border-radius: 100%;
+    background-color: var(--text);
+
+    transition: margin-left .2s;
+}
+
+.toggles input:checked::after {
+    margin-left: .9rem;
+    background-color: var(--on-accent);
+}
