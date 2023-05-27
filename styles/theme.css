@@ -25,6 +25,35 @@
     }
 }
 
+@keyframes animate-in {
+    0% {
+        transform: scaleY(0);
+        margin-bottom: calc(-1 * var(--element-height));
+        opacity: 0;
+    }
+
+    50%, 100% {
+        transform: scaleY(1);
+        margin-bottom: 0rem;
+        opacity: 1;
+    }
+}
+
+@keyframes animate-out {
+    0% {
+        transform: scaleY(1);
+        margin-bottom: 0rem;
+        opacity: 1;
+    }
+
+    50%,
+    100% {
+        transform: scaleY(0);
+        margin-bottom: calc(-1 * var(--element-height));
+        opacity: 0;
+    }
+}
+
 :root {
     --corners: .3rem;
 
@@ -57,6 +86,16 @@ input[disabled] {
 }
 
 /* GROUPS */
+.animating-in {
+    transform-origin: top;
+    animation: animate-in .5s;
+}
+
+.animating-out {
+    transform-origin: top;
+    animation: animate-out .5s;
+}
+
 .checkable-items {
     background-color: var(--checkable);
 }
@@ -117,7 +156,7 @@ input[disabled] {
 
 .selects,
 .buttons:not(.buttons-transparent, .buttons-pressed) {
-    box-shadow: 0px 0px 2px var(--shadows);
+    box-shadow: 0px 0px 3px var(--shadows);
 }
 
 .buttons-normal {

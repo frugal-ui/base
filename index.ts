@@ -1,5 +1,28 @@
-export function UUID() {
-	return Math.random().toString(); //TODO
+export class UUID {
+	readonly value: string;
+
+	constructor() {
+		let uuid = '';
+		const chars = '0123456789abcdef';
+
+		for (let i = 0; i < 36; i++) {
+			if (i === 8 || i === 13 || i === 18 || i === 23) {
+				uuid += '-';
+			} else if (i === 14) {
+				uuid += '4';
+			} else if (i === 19) {
+				uuid += chars[(Math.random() * 4) | 8];
+			} else {
+				uuid += chars[(Math.random() * 16) | 0];
+			}
+		}
+
+		this.value = uuid;
+	}
+
+	toString() {
+		return this.value;
+	}
 }
 
 import { AccessibilityRoleMap } from './assets/roles.js';
@@ -8,10 +31,34 @@ import './styles/color.css';
 import './styles/theme.css';
 
 /*
-	GENERAL
+	IDENTIFIABLE
 */
-export class DataModel {
-	readonly uuid = UUID();
+export interface Identifiable {
+	readonly uuid: UUID;
+}
+
+export class IdentifiableObjectMap<T extends Identifiable> {
+	readonly map = new Map<string, T>();
+
+	get(id: string | UUID) {
+		return this.map.get(id.toString());
+	}
+
+	add(value: T) {
+		this.map.set(value.uuid.toString(), value);
+	}
+
+	delete(id: string | UUID) {
+		this.map.delete(id.toString());
+	}
+
+	remove(value: T) {
+		this.map.delete(value.uuid.toString());
+	}
+
+	forEach(callbackFn: (value: T, index: number, array: T[]) => void) {
+		[...this.map.values()].forEach(callbackFn)
+	}
 }
 
 /* 
@@ -21,10 +68,190 @@ export class DataModel {
 /** Object holding a value. Used by UI components. */
 export type ValueObject<T> = T | BindableObject<T>;
 
+// BINDING
+/** Binds a BindableObject. */
+export interface Binding<T> {
+	uuid: UUID;
+	action: BindingAction<T>;
+}
+
+/** Action executed when bound object changes. */
+export type BindingAction<T> = (newValue: T) => void;
+
+export interface TightBindingCfgOpts<T> {
+	readonly data: BindableObject<T>;
+	readonly component: Component<any>;
+	readonly fallbackValue: T;
+	readonly changeEventName: keyof HTMLElementEventMap;
+
+	getViewProperty: () => T;
+	setViewProperty: (newValue: T) => void;
+}
+/** Configure a binding for bi-directional changes. */
+export class TightBindingCfg<T> {
+	readonly data: BindableObject<T>;
+	readonly component: Component<any>;
+	readonly defaultValue: T;
+	readonly changeEventName: keyof HTMLElementEventMap;
+
+	constructor(configuration: TightBindingCfgOpts<T>) {
+		this.data = configuration.data;
+		this.component = configuration.component;
+		this.defaultValue = configuration.fallbackValue;
+		this.changeEventName = configuration.changeEventName;
+
+		this.getViewProperty = configuration.getViewProperty;
+		this.setViewProperty = configuration.setViewProperty;
+	}
+
+	getViewProperty: () => T;
+	setViewProperty: (newValue: T) => void;
+}
+
+export interface ValueTBCfgOpts<T> {
+	data: BindableObject<T>;
+	component: Component<T>;
+	fallbackValue: T;
+}
+/** Tightly binds a component's value. */
+export class ValueTBCfg<T> extends TightBindingCfg<T> {
+	constructor(configuration: ValueTBCfgOpts<T>) {
+		super({
+			data: configuration.data,
+			component: configuration.component,
+			fallbackValue: configuration.fallbackValue,
+			changeEventName: 'input',
+
+			getViewProperty: () => {
+				return this.component.value ?? this.defaultValue;
+			},
+			setViewProperty: (newValue: T) => {
+				this.component.value = newValue;
+			},
+		});
+	}
+}
+
+export interface CheckTBCfgOpts {
+	isChecked: BindableObject<boolean>;
+	component: CheckableComponent<any>;
+}
+/** Tightly bind a component's 'checked' property. */
+export class CheckTBCfg extends ValueTBCfg<boolean> {
+	readonly component: CheckableComponent<any>;
+
+	readonly changeEventName: keyof HTMLElementEventMap = 'change';
+
+	constructor(configuration: CheckTBCfgOpts) {
+		super({
+			data: configuration.isChecked,
+			component: configuration.component,
+			fallbackValue: false,
+		});
+		this.component = configuration.component;
+	}
+
+	getViewProperty = () => {
+		return this.component.checked;
+	};
+	setViewProperty = (newValue: boolean) => {
+		this.component.checked = newValue;
+	};
+}
+
+export interface DataSelectionCfg<T> {
+	uuid: string;
+	selectedItems: BindableObject<T[]>;
+}
+
+export interface ViewItemSelectionCfgOpts<T> {
+	component: Component<any>;
+	ownValue: T;
+	selectionCfg: DataSelectionCfg<T>;
+	changeEventName: keyof HTMLElementEventMap;
+	isExclusive?: boolean;
+
+	getView: () => boolean;
+	setView: (isSelected: boolean) => void;
+}
+
+/** Add or remove ownValue on selectedItems */
+export class SelectionItemCfg<T> {
+	readonly component: Component<any>;
+	readonly selectionCfg: DataSelectionCfg<T>;
+	readonly ownValue: T;
+	readonly changeEventName: keyof HTMLElementEventMap;
+	isExclusive = false;
+
+	constructor(configuration: ViewItemSelectionCfgOpts<T>) {
+		this.component = configuration.component;
+		this.selectionCfg = configuration.selectionCfg;
+		this.ownValue = configuration.ownValue;
+		this.changeEventName = configuration.changeEventName;
+
+		this.getView = configuration.getView;
+		this.setView = configuration.setView;
+
+		if (configuration.isExclusive) this.isExclusive = configuration.isExclusive;
+	}
+
+	getOwnIndex = () => {
+		return this.selectionCfg.selectedItems.value.indexOf(this.ownValue);
+	};
+
+	getView: () => boolean;
+	setView: (isSelected: boolean) => void;
+
+	getModel = () => {
+		return this.getOwnIndex() != -1;
+	};
+	setModel = (isSelected: boolean) => {
+		if (isSelected) {
+			if (this.getOwnIndex() != -1) return; //already selected
+
+			if (this.isExclusive == true)
+				return (this.selectionCfg.selectedItems.value = [this.ownValue]);
+			else this.selectionCfg.selectedItems.value.push(this.ownValue);
+		} else {
+			if (this.getOwnIndex() == -1) return; //already deselected
+			this.selectionCfg.selectedItems.value.splice(this.getOwnIndex(), 1);
+		}
+
+		this.selectionCfg.selectedItems.triggerAll();
+	};
+}
+
+export interface CheckableSelectionItemCfgOpts<T> {
+	component: CheckableComponent<any>;
+	ownValue: T;
+	selectionCfg: DataSelectionCfg<T>;
+	isExclusive?: boolean;
+}
+/** SelectionCfg for checkable components */
+export class CheckableSelectionItemCfg<T> extends SelectionItemCfg<T> {
+	readonly component: CheckableComponent<any>;
+
+	constructor(configuration: CheckableSelectionItemCfgOpts<T>) {
+		super({
+			...configuration,
+			changeEventName: 'change',
+
+			getView: () => {
+				return this.component.checked;
+			},
+			setView: (isSelected: boolean) => {
+				this.component.checked = isSelected;
+			},
+		});
+
+		this.component = configuration.component;
+	}
+}
+
 // BINDABLE
 /** Can be bound, no further functionality. Should be extended by classes. */
 export class BindableObject<T> {
-	uuid = UUID();
+	readonly uuid = new UUID();
 	_value: T;
 
 	constructor(value: T) {
@@ -96,7 +323,7 @@ export class ComputedState<T> extends State<T> {
 		super(configuration.initialValue);
 
 		const binding = {
-			uuid: UUID(),
+			uuid: new UUID(),
 			action: () => configuration.compute(this),
 		};
 
@@ -114,9 +341,9 @@ export interface ProxyStateCfg<T, O> {
 }
 /** State binding and updating another state. Bi-directional. */
 export class ProxyState<T, O> extends State<T> {
-	original: BindableObject<O>;
-	convertFromOriginal: (proxyValue: O) => T;
-	convertToOriginal: (proxyValue: T) => O;
+	readonly original: BindableObject<O>;
+	readonly convertFromOriginal: (proxyValue: O) => T;
+	readonly convertToOriginal: (proxyValue: T) => O;
 
 	constructor(configuration: ProxyStateCfg<T, O>) {
 		super(configuration.convertFromOriginal(configuration.original.value));
@@ -126,7 +353,7 @@ export class ProxyState<T, O> extends State<T> {
 		this.convertToOriginal = configuration.convertToOriginal;
 
 		const binding: Binding<O> = {
-			uuid: UUID(),
+			uuid: new UUID(),
 			action: () => {
 				this._value = configuration.convertFromOriginal(this.original.value);
 				this.triggerAll();
@@ -143,186 +370,6 @@ export class ProxyState<T, O> extends State<T> {
 
 	get value() {
 		return this._value;
-	}
-}
-
-// BINDING
-/** Binds a BindableObject. */
-export interface Binding<T> {
-	uuid: string;
-	action: BindingAction<T>;
-}
-
-/** Action executed when bound object changes. */
-export type BindingAction<T> = (newValue: T) => void;
-
-export interface TightBindingCfgOpts<T> {
-	data: BindableObject<T>;
-	component: Component<any>;
-	fallbackValue: T;
-	changeEventName: keyof HTMLElementEventMap;
-
-	getViewProperty: () => T;
-	setViewProperty: (newValue: T) => void;
-}
-/** Configure a binding for bi-directional changes. */
-export class TightBindingCfg<T> {
-	data: BindableObject<T>;
-	component: Component<any>;
-	defaultValue: T;
-	changeEventName: keyof HTMLElementEventMap;
-
-	constructor(configuration: TightBindingCfgOpts<T>) {
-		this.data = configuration.data;
-		this.component = configuration.component;
-		this.defaultValue = configuration.fallbackValue;
-		this.changeEventName = configuration.changeEventName;
-
-		this.getViewProperty = configuration.getViewProperty;
-		this.setViewProperty = configuration.setViewProperty;
-	}
-
-	getViewProperty: () => T;
-	setViewProperty: (newValue: T) => void;
-}
-
-export interface ValueTBCfgOpts<T> {
-	data: BindableObject<T>;
-	component: Component<T>;
-	fallbackValue: T;
-}
-/** Tightly binds a component's value. */
-export class ValueTBCfg<T> extends TightBindingCfg<T> {
-	constructor(configuration: ValueTBCfgOpts<T>) {
-		super({
-			data: configuration.data,
-			component: configuration.component,
-			fallbackValue: configuration.fallbackValue,
-			changeEventName: 'input',
-
-			getViewProperty: () => {
-				return this.component.value ?? this.defaultValue;
-			},
-			setViewProperty: (newValue: T) => {
-				this.component.value = newValue;
-			},
-		});
-	}
-}
-
-export interface CheckTBCfgOpts {
-	isChecked: BindableObject<boolean>;
-	component: CheckableComponent<any>;
-}
-/** Tightly bind a component's 'checked' property. */
-export class CheckTBCfg extends ValueTBCfg<boolean> {
-	component: CheckableComponent<any>;
-
-	changeEventName: keyof HTMLElementEventMap = 'change';
-
-	constructor(configuration: CheckTBCfgOpts) {
-		super({
-			data: configuration.isChecked,
-			component: configuration.component,
-			fallbackValue: false,
-		});
-		this.component = configuration.component;
-	}
-
-	getViewProperty = () => {
-		return this.component.checked;
-	};
-	setViewProperty = (newValue: boolean) => {
-		this.component.checked = newValue;
-	};
-}
-
-export interface DataSelectionCfg<T> {
-	uuid: string;
-	selectedItems: BindableObject<T[]>;
-}
-
-export interface ViewItemSelectionCfgOpts<T> {
-	component: Component<any>;
-	ownValue: T;
-	selectionCfg: DataSelectionCfg<T>;
-	changeEventName: keyof HTMLElementEventMap;
-	isExclusive?: boolean;
-
-	getView: () => boolean;
-	setView: (isSelected: boolean) => void;
-}
-
-/** Add or remove ownValue on selectedItems */
-export class SelectionItemCfg<T> {
-	component: Component<any>;
-	selectionCfg: DataSelectionCfg<T>;
-	ownValue: T;
-	isExclusive = false;
-	changeEventName: keyof HTMLElementEventMap;
-
-	constructor(configuration: ViewItemSelectionCfgOpts<T>) {
-		this.component = configuration.component;
-		this.selectionCfg = configuration.selectionCfg;
-		this.ownValue = configuration.ownValue;
-		this.changeEventName = configuration.changeEventName;
-
-		this.getView = configuration.getView;
-		this.setView = configuration.setView;
-
-		if (configuration.isExclusive) this.isExclusive = configuration.isExclusive;
-	}
-
-	getOwnIndex = () => {
-		return this.selectionCfg.selectedItems.value.indexOf(this.ownValue);
-	};
-
-	getView: () => boolean;
-	setView: (isSelected: boolean) => void;
-
-	getModel = () => {
-		return this.getOwnIndex() != -1;
-	};
-	setModel = (isSelected: boolean) => {
-		if (isSelected) {
-			if (this.getOwnIndex() != -1) return; //already selected
-
-			if (this.isExclusive == true)
-				return (this.selectionCfg.selectedItems.value = [this.ownValue]);
-			else this.selectionCfg.selectedItems.value.push(this.ownValue);
-		} else {
-			if (this.getOwnIndex() == -1) return; //already deselected
-			this.selectionCfg.selectedItems.value.splice(this.getOwnIndex(), 1);
-		}
-
-		this.selectionCfg.selectedItems.triggerAll();
-	};
-}
-
-export interface CheckableSelectionItemCfgOpts<T> {
-	component: CheckableComponent<any>;
-	ownValue: T;
-	selectionCfg: DataSelectionCfg<T>;
-	isExclusive?: boolean;
-}
-/** SelectionCfg for checkable components */
-export class CheckableSelectionItemCfg<T> extends SelectionItemCfg<T> {
-	component: CheckableComponent<any>;
-
-	constructor(configuration: CheckableSelectionItemCfgOpts<T>) {
-		super({
-			...configuration,
-			changeEventName: 'change',
-
-			getView: () => {
-				return this.component.checked;
-			},
-			setView: (isSelected: boolean) => {
-				this.component.checked = isSelected;
-			},
-		});
-
-		this.component = configuration.component;
 	}
 }
 
@@ -351,6 +398,8 @@ export interface Component<ValueType> extends HTMLElement {
 	value: ValueType | undefined;
 	access: (accessFn: (self: this) => void) => this;
 	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
+	animateIn: () => this;
+	animateOut: () => void;
 
 	//children
 	addItems: (...children: Component<any>[]) => this;
@@ -359,7 +408,7 @@ export interface Component<ValueType> extends HTMLElement {
 	setItems: (children: ValueObject<Component<any>[]>) => this;
 
 	//attributes
-	setID: (id: string) => this;
+	setID: (id: string | UUID) => this;
 	setAttr: (key: string, value?: ValueObject<string>) => this;
 	rmAttr: (key: string) => this;
 	toggleAttr: (key: string, condition: ValueObject<boolean>) => this;
@@ -419,6 +468,25 @@ export function Component<ValueType>(
 		component.setAttr('role', roleName);
 		return component;
 	};
+	component.animateOut = () => {
+		component.style.setProperty('--element-height', `${component.offsetHeight}px`);
+
+		//animate
+		component.addToClass('animating-out');
+
+		//remove after animation
+		setTimeout(() => component.remove(), 400);
+	}
+	component.animateIn = () => {
+		//get rect for animation
+		document.body.append(component);
+		component.style.setProperty('--element-height', `${component.offsetHeight}px`);
+		component.remove();
+
+		component.addToClass('animating-in');
+
+		return component;
+	}
 
 	component.addItems = (...children) => {
 		children.forEach(child => {
@@ -441,7 +509,9 @@ export function Component<ValueType>(
 
 		component
 			.createBinding(bindable, (children) => {
-				component.clear().addItems(...children);
+				component
+					.clear()
+					.addItems(...children);
 			})
 			.updateBinding(bindable);
 
@@ -449,7 +519,7 @@ export function Component<ValueType>(
 	};
 
 	component.setID = (id) => {
-		component.id = id;
+		component.id = id.toString();
 		return component;
 	};
 	component.setAttr = (key, value = '') => {
@@ -555,12 +625,12 @@ export function Component<ValueType>(
 	component.bindings = new Map();
 	component.createBinding = (bindable, action) => {
 		const binding = {
-			uuid: UUID(),
+			uuid: new UUID(),
 			action,
 		};
 
 		bindable.addBinding(binding);
-		component.bindings.set(bindable.uuid, binding);
+		component.bindings.set(bindable.uuid.toString(), binding);
 
 		return component;
 	};
@@ -591,24 +661,24 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.removeBinding = (bindable) => {
-		const binding = component.bindings.get(bindable.uuid);
+		const binding = component.bindings.get(bindable.uuid.toString());
 		if (!binding) {
 			console.error(
-				`Failed to unbind ${bindable.uuid} but bindable is unknown.`
+				`Failed to unbind ${bindable.uuid.toString()} but bindable is unknown.`
 			);
 			return component;
 		}
 
 		bindable.removeBinding(binding);
-		component.bindings.delete(bindable.uuid);
+		component.bindings.delete(bindable.uuid.toString());
 
 		return component;
 	};
 	component.updateBinding = (bindable) => {
-		const binding = component.bindings.get(bindable.uuid);
+		const binding = component.bindings.get(bindable.uuid.toString());
 		if (!binding) {
 			console.error(
-				`Failed to update on bindable ${bindable.uuid} but bindable is unknown.`
+				`Failed to update on bindable ${bindable.uuid.toString()} but bindable is unknown.`
 			);
 			return component;
 		}
@@ -637,7 +707,7 @@ export function AutoComplete<T>(
 	optionData: BindableObject<string[]>,
 	input: Component<T>
 ) {
-	const uuid = UUID();
+	const uuid = new UUID();
 	const optionViews = new ComputedState<Component<any>[]>({
 		statesToBind: [optionData],
 		initialValue: [],
@@ -649,7 +719,7 @@ export function AutoComplete<T>(
 	return Div(
 		Component('datalist').setID(uuid).setItems(optionViews),
 
-		input.setAttr('list', uuid)
+		input.setAttr('list', uuid.toString())
 	);
 }
 
@@ -834,39 +904,60 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* List */
-export function List<T>(listData: BindableObject<T[]>, compute: (itemData: T) => Component<any>) {
-	const itemViews = new ComputedState<Component<any>[]>({
-		statesToBind: [listData],
-		initialValue: [],
-		compute: (self) => {
-			self.value = listData.value.map((item) => compute(item));
-		},
-	});
-
+export function List<T extends Identifiable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
 	return VStack()
-		.setItems(itemViews);
+		.setAccessibilityRole('list')
+		.access(listView => listView
+			.createBinding(listData, listData => {
+				//add new items
+				listData.forEach((itemData, i) => {
+					const oldItemView = document.getElementById(itemData.uuid.toString());
+					if (oldItemView != null) return;
+
+					const newItemView = compute(itemData)
+						.setID(itemData.uuid);
+
+					if (i > listView.children.length) {
+						listView.append(newItemView);
+					} else {
+						const referenceNode = listView.children[i];
+						listView.insertBefore(newItemView, referenceNode);
+					}
+				});
+
+				//remove deleted items
+				[...listView.children].forEach((itemView) => {
+					const matchingDataEntry = listData.get(itemView.id);
+					if (matchingDataEntry != undefined) return; //data entry still exists
+
+					const removeItem = (itemView as Component<any>).animateOut ?? itemView.remove;
+					removeItem();
+				});
+			})
+		)
 }
 
 /* ListBox */
-export function ListBox<T>(listData: BindableObject<T[]>, compute: (itemData: T) => Component<any>) {
+export function ListBox<T extends Identifiable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
 	return Box(
 		List(listData, compute)
 			.setAccessibilityRole('listbox')
 	);
 }
 
-/* ListItem */
-export interface ListItemCfg<T> {
+/* ListBoxItem */
+export interface ListBoxItemCfg<T> {
 	selectionCfg: DataSelectionCfg<T>;
 	ownValue: T;
 }
 
-export function ListItem<T>(
-	configuration: ListItemCfg<T>,
+export function ListBoxItem<T>(
+	configuration: ListBoxItemCfg<T>,
 	...children: Component<any>[]
 ) {
-	return Div(...children)
-		.addToClass('list-items')
+	return ListItem(...children)
+		.setAccessibilityRole('option')
+
 		.access((self) => {
 			const selectionItemCfg = new SelectionItemCfg<T>({
 				component: self,
@@ -883,13 +974,19 @@ export function ListItem<T>(
 			});
 
 			self
-				.addToClass('listitems')
-				.setAccessibilityRole('option')
 				.listen('click', () => {
 					selectionItemCfg.setModel(true);
 				})
 				.createSelectionBinding(selectionItemCfg);
 		});
+}
+
+/* ListItem */
+export function ListItem(...children: Component<any>[]) {
+	return Div(...children)
+		.addToClass('list-items')
+		.setAccessibilityRole('listitem')
+		.animateIn();
 }
 
 /* Meter */
@@ -1042,7 +1139,7 @@ export function Popover(configuration: PopoverCfg) {
 	}
 
 	configuration.isOpen.addBinding({
-		uuid: UUID(),
+		uuid: new UUID(),
 		action: (wasOpened) => {
 			console.log(wasOpened);
 

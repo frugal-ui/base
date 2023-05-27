@@ -25,7 +25,7 @@ test('State & Binding', () => {
 
         const state = new State(valueA);
         const binder: Binding<string> = {
-            uuid: UUID(),
+            uuid: new UUID(),
             action(newValue) {
                 changedValue = newValue;
             }
