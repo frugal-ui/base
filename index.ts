@@ -38,7 +38,7 @@ export interface Identifiable {
 }
 
 export interface Sortable {
-	index: ValueObject<number>;
+	index: BindableObject<number>;
 }
 
 export interface Stringifiable {
@@ -908,27 +908,104 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* List */
-export function List<T extends Identifiable & Sortable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
+export interface ListCfg<T extends Identifiable & Sortable> {
+	listData: BindableObject<IdentifiableObjectMap<T>>;
+	sortable?: boolean;
+}
+
+export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T>, compute: (itemData: T) => Component<any>) {
+	// Sorting
+	let draggedComponent: Component<any> | undefined = undefined;
+	let draggedData: T | undefined = undefined;
+	let dragStartTimeout: NodeJS.Timeout | undefined = undefined;
+	let dragOriginIndex = 0;
+
+	function startDrag(e: Event, data: T, component: Component<any>) {
+		document.body.addEventListener('mouseup', stopDrag);
+		document.body.addEventListener('touchend', stopDrag);
+
+		dragStartTimeout = setTimeout(() => {
+			e.preventDefault();
+
+			draggedData = data;
+			draggedComponent = component
+				.addToClass('dragging');
+
+			dragOriginIndex = data.index.value;
+
+		}, 200);
+	}
+	function handleDragMove(e: TouchEvent | PointerEvent) {
+		if (draggedData == undefined) return;
+
+		function getCoordinate(e: TouchEvent | PointerEvent, axis: 'clientX' | 'clientY') {
+			if (e instanceof TouchEvent) {
+				return e.touches[0][axis];
+			} else {
+				return e[axis]
+			}
+		}
+
+		const elementUnderCursor = document.elementFromPoint(
+			getCoordinate(e, 'clientX'),
+			getCoordinate(e, 'clientY'),
+		);
+
+		if (elementUnderCursor == null) return;
+		const data = configuration.listData.value.get(elementUnderCursor.id);
+		if (data == null) return;
+
+		const ownIndex = data.index.value;
+		const currentDraggedIndex = draggedData.index.value;
+
+		draggedData.index.value = ownIndex;
+		data.index.value = currentDraggedIndex;
+	}
+	function stopDrag() {
+		if (dragStartTimeout) clearTimeout(dragStartTimeout);
+		if (draggedData == undefined) return;
+
+		document.body.removeEventListener('mouseup', stopDrag);
+		document.body.removeEventListener('touchend', stopDrag);
+
+		draggedData = undefined;
+
+		if (draggedComponent == undefined) return;
+		draggedComponent.removeFromClass('dragging');
+		draggedComponent = undefined;
+	}
+
+	// Main
 	return VStack()
 		.setAccessibilityRole('list')
+
+		.listen('touchmove', (e) => handleDragMove(e as TouchEvent))
+		.listen('mousemove', (e) => handleDragMove(e as PointerEvent))
+		
 		.access(listView => listView
-			.createBinding(listData, listData => {
+			.createBinding(configuration.listData, listData => {
 				function removeItemView(itemView: Component<any> | Element) {
 					const removeFn = (itemView as Component<any>).animateOut ?? itemView.remove;
 					removeFn();
 				}
 
 				//add new items
-				listData.forEach((itemData, i) => {
+				configuration.listData.value.forEach((itemData, i) => {
 					const oldItemView = document.getElementById(itemData.uuid.toString())
 
 					const newItemView = compute(itemData)
 						.setID(itemData.uuid)
-						.access(self => self
-							.createBinding(unwrapBindable(itemData.index), (newIndex) => {
+						.access(self => {
+							self.createBinding(unwrapBindable(itemData.index), (newIndex) => {
 								self.setStyle('order', newIndex.toString())
 							})
-						)
+
+							if (configuration.sortable == true) self
+								.addToClass('draggable-items')
+
+								.listen('mousedown', (e) => startDrag(e, itemData, self))
+								.listen('touchstart', (e) => startDrag(e, itemData, self))
+						})
 						.animateIn();
 
 					//already exists
@@ -954,9 +1031,9 @@ export function List<T extends Identifiable & Sortable>(listData: BindableObject
 }
 
 /* ListBox */
-export function ListBox<T extends Identifiable & Sortable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
+export function ListBox<T extends Identifiable & Sortable>(configuration: ListCfg<T>, compute: (itemData: T) => Component<any>) {
 	return Box(
-		List(listData, compute)
+		List(configuration, compute)
 			.setAccessibilityRole('listbox')
 	);
 }

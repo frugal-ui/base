@@ -32,7 +32,8 @@
         opacity: 0;
     }
 
-    50%, 100% {
+    50%,
+    100% {
         transform: scaleY(1);
         margin-bottom: 0rem;
         opacity: 1;
@@ -85,7 +86,11 @@ input[disabled] {
     cursor: not-allowed;
 }
 
-/* GROUPS */
+/* 
+    GROUPS 
+*/
+
+/* Animation */
 .animating-in {
     transform-origin: top;
     animation: animate-in .5s;
@@ -96,10 +101,22 @@ input[disabled] {
     animation: animate-out .5s;
 }
 
+/* Checkable */
 .checkable-items {
     background-color: var(--checkable);
 }
 
+/* Draggable */
+.draggable-items {
+    transition: transform .2s, border-radius .2s;
+}
+
+.draggable-items.dragging {
+    transform: scale(.95);
+    border-radius: var(--corners);
+}
+
+/* Typeable */
 .inputs:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 .textareas,
 .typeable-items {
@@ -296,4 +313,5 @@ input[disabled] {
 .visual-groups {
     background-color: var(--background-alt);
     border-radius: var(--corners);
+    overflow: hidden;
 }
