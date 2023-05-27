@@ -2,6 +2,7 @@ export function UUID() {
 	return Math.random().toString(); //TODO
 }
 
+import { AccessibilityRoleMap } from './assets/roles.js';
 import './styles/base.css';
 import './styles/color.css';
 import './styles/theme.css';
@@ -349,7 +350,7 @@ export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 export interface Component<ValueType> extends HTMLElement {
 	value: ValueType | undefined;
 	access: (accessFn: (self: this) => void) => this;
-	setAccessibilityRole: (roleName: string) => this;
+	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
 
 	//children
 	addItems: (...children: Component<any>[]) => this;
@@ -1231,7 +1232,8 @@ export function Textarea(value: BindableObject<string>, placeholder: string) {
 /* VisualGroup */
 export function VisualGroup(...children: Component<any>[]) {
 	return VStack(...children)
-		.addToClass('visual-groups');
+		.addToClass('visual-groups')
+		.setAccessibilityRole('listbox');
 }
 
 /* VStack */
