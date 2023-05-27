@@ -26,10 +26,17 @@
 }
 
 :root {
-    --corners: .2rem;
+    --corners: .3rem;
 
-    --padding-md: .4rem .5rem;
-    --padding-lg: .5rem;
+    --padding-md: .6rem .9rem;
+    --padding-lg: .9rem .9rem;
+}
+
+@media (pointer: fine) {
+    :root {
+        --padding-md: .4rem .6rem;
+        --padding-lg: .6rem .9rem;
+    }   
 }
 
 * {
@@ -238,4 +245,10 @@ html {
 /* Textarea */
 .textareas {
     resize: none;
+}
+
+/* VisualGroup */
+.visual-groups {
+    background-color: var(--background-alt);
+    border-radius: var(--corners);
 }

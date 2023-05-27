@@ -1058,10 +1058,10 @@ export function Popover(configuration: PopoverCfg) {
 		configuration.content
 			.addToClass('popover-contents')
 			.setStyle('width', configuration.widthStyle)
+			.listen('click', (e) => e.stopPropagation())
 	)
 		.addToClass('popover-containers')
-		.toggleAttr('open', configuration.isOpen)
-		.listen('click', (e) => e.stopPropagation());
+		.toggleAttr('open', configuration.isOpen);
 }
 
 /* ProgressBar */
@@ -1226,6 +1226,12 @@ export function Textarea(value: BindableObject<string>, placeholder: string) {
 
 				.setAttr('placeholder', placeholder)
 		);
+}
+
+/* VisualGroup */
+export function VisualGroup(...children: Component<any>[]) {
+	return VStack(...children)
+		.addToClass('visual-groups');
 }
 
 /* VStack */
