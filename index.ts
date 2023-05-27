@@ -1199,6 +1199,12 @@ export function RadioButton<T>(
 	);
 }
 
+/* ScrollArea */
+export function ScrollArea(...children: Component<any>[]) {
+	return Div(...children)
+		.addToClass('scroll-areas');
+}
+
 /* Select */
 export interface SelectOption {
 	label: string;
