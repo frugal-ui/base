@@ -116,7 +116,7 @@ input[disabled] {
     transition: transform .2s, border-radius .2s;
 }
 
-.rearranged-items:not(.dragging) {
+:not(:has(.dragging)) .rearranged-items {
     animation: rearrange .5s;
 }
 
