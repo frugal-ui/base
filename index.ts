@@ -1044,6 +1044,8 @@ export function Popover(configuration: PopoverCfg) {
 	configuration.isOpen.addBinding({
 		uuid: UUID(),
 		action: (wasOpened) => {
+			console.log(wasOpened);
+
 			if (wasOpened) {
 				document.body.addEventListener('click', closePopover);
 				updateContentPosition();
@@ -1059,8 +1061,11 @@ export function Popover(configuration: PopoverCfg) {
 		configuration.content
 			.addToClass('popover-contents')
 			.setStyle('width', configuration.widthStyle)
-			.listen('click', (e) => e.stopPropagation())
 	)
+		.listen('click', (e) => {
+			e.preventDefault()
+			e.stopPropagation()
+		})
 		.addToClass('popover-containers')
 		.toggleAttr('open', configuration.isOpen);
 }
@@ -1232,8 +1237,7 @@ export function Textarea(value: BindableObject<string>, placeholder: string) {
 /* VisualGroup */
 export function VisualGroup(...children: Component<any>[]) {
 	return VStack(...children)
-		.addToClass('visual-groups')
-		.setAccessibilityRole('listbox');
+		.addToClass('visual-groups');
 }
 
 /* VStack */
