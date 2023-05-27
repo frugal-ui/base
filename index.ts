@@ -31,10 +31,18 @@ import './styles/color.css';
 import './styles/theme.css';
 
 /*
-	IDENTIFIABLE
+	BASIC
 */
 export interface Identifiable {
 	readonly uuid: UUID;
+}
+
+export interface Sortable {
+	index: ValueObject<number>;
+}
+
+export interface Stringifiable {
+	toString: () => string;
 }
 
 export class IdentifiableObjectMap<T extends Identifiable> {
@@ -44,12 +52,8 @@ export class IdentifiableObjectMap<T extends Identifiable> {
 		return this.map.get(id.toString());
 	}
 
-	add(value: T) {
+	set(value: T) {
 		this.map.set(value.uuid.toString(), value);
-	}
-
-	delete(id: string | UUID) {
-		this.map.delete(id.toString());
 	}
 
 	remove(value: T) {
@@ -160,7 +164,7 @@ export class CheckTBCfg extends ValueTBCfg<boolean> {
 }
 
 export interface DataSelectionCfg<T> {
-	uuid: string;
+	uuid: UUID;
 	selectedItems: BindableObject<T[]>;
 }
 
@@ -409,7 +413,7 @@ export interface Component<ValueType> extends HTMLElement {
 
 	//attributes
 	setID: (id: string | UUID) => this;
-	setAttr: (key: string, value?: ValueObject<string>) => this;
+	setAttr: (key: string, value?: ValueObject<Stringifiable>) => this;
 	rmAttr: (key: string) => this;
 	toggleAttr: (key: string, condition: ValueObject<boolean>) => this;
 	resetClasses: (value: string) => this;
@@ -527,7 +531,7 @@ export function Component<ValueType>(
 
 		component
 			.createBinding(bindable, (newValue) => {
-				component.setAttribute(key, newValue);
+				component.setAttribute(key, newValue.toString());
 			})
 			.updateBinding(bindable);
 
@@ -719,7 +723,7 @@ export function AutoComplete<T>(
 	return Div(
 		Component('datalist').setID(uuid).setItems(optionViews),
 
-		input.setAttr('list', uuid.toString())
+		input.setAttr('list', uuid)
 	);
 }
 
@@ -904,18 +908,31 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* List */
-export function List<T extends Identifiable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
+export function List<T extends Identifiable & Sortable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
 	return VStack()
 		.setAccessibilityRole('list')
 		.access(listView => listView
 			.createBinding(listData, listData => {
+				function removeItemView(itemView: Component<any> | Element) {
+					const removeFn = (itemView as Component<any>).animateOut ?? itemView.remove;
+					removeFn();
+				}
+
 				//add new items
 				listData.forEach((itemData, i) => {
-					const oldItemView = document.getElementById(itemData.uuid.toString());
-					if (oldItemView != null) return;
+					const oldItemView = document.getElementById(itemData.uuid.toString())
 
 					const newItemView = compute(itemData)
-						.setID(itemData.uuid);
+						.setID(itemData.uuid)
+						.access(self => self
+							.createBinding(unwrapBindable(itemData.index), (newIndex) => {
+								self.setStyle('order', newIndex.toString())
+							})
+						)
+						.animateIn();
+
+					//already exists
+					if (oldItemView != null) return;
 
 					if (i > listView.children.length) {
 						listView.append(newItemView);
@@ -930,55 +947,18 @@ export function List<T extends Identifiable>(listData: BindableObject<Identifiab
 					const matchingDataEntry = listData.get(itemView.id);
 					if (matchingDataEntry != undefined) return; //data entry still exists
 
-					const removeItem = (itemView as Component<any>).animateOut ?? itemView.remove;
-					removeItem();
+					removeItemView(itemView);
 				});
 			})
 		)
 }
 
 /* ListBox */
-export function ListBox<T extends Identifiable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
+export function ListBox<T extends Identifiable & Sortable>(listData: BindableObject<IdentifiableObjectMap<T>>, compute: (itemData: T) => Component<any>) {
 	return Box(
 		List(listData, compute)
 			.setAccessibilityRole('listbox')
 	);
-}
-
-/* ListBoxItem */
-export interface ListBoxItemCfg<T> {
-	selectionCfg: DataSelectionCfg<T>;
-	ownValue: T;
-}
-
-export function ListBoxItem<T>(
-	configuration: ListBoxItemCfg<T>,
-	...children: Component<any>[]
-) {
-	return ListItem(...children)
-		.setAccessibilityRole('option')
-
-		.access((self) => {
-			const selectionItemCfg = new SelectionItemCfg<T>({
-				component: self,
-				selectionCfg: configuration.selectionCfg,
-
-				getView: () => self.getAttribute('aria-selected') == 'true',
-				setView: (isSelected) =>
-					self.setAttr('aria-selected', isSelected.toString()),
-
-				isExclusive: true,
-				ownValue: configuration.ownValue,
-
-				changeEventName: 'click',
-			});
-
-			self
-				.listen('click', () => {
-					selectionItemCfg.setModel(true);
-				})
-				.createSelectionBinding(selectionItemCfg);
-		});
 }
 
 /* ListItem */
@@ -1006,10 +986,10 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 	return Component<number>('meter')
 		.setValue(value)
 
-		.setAttr('min', min.toString())
-		.setAttr('max', max.toString())
-		.setAttr('low', low.toString())
-		.setAttr('high', high.toString());
+		.setAttr('min', min)
+		.setAttr('max', max)
+		.setAttr('low', low)
+		.setAttr('high', high);
 }
 
 /* Popover */
@@ -1253,6 +1233,42 @@ export function Select(
 		);
 }
 
+/* SelectingListItem */
+export interface SelectingListItemCfg<T> {
+	selectionCfg: DataSelectionCfg<T>;
+	ownValue: T;
+}
+
+export function SelectingListItem<T>(
+	configuration: SelectingListItemCfg<T>,
+	...children: Component<any>[]
+) {
+	return ListItem(...children)
+		.setAccessibilityRole('option')
+
+		.access((self) => {
+			const selectionItemCfg = new SelectionItemCfg<T>({
+				component: self,
+				selectionCfg: configuration.selectionCfg,
+
+				getView: () => self.getAttribute('aria-selected') == 'true',
+				setView: (isSelected) =>
+					self.setAttr('aria-selected', isSelected),
+
+				isExclusive: true,
+				ownValue: configuration.ownValue,
+
+				changeEventName: 'click',
+			});
+
+			self
+				.listen('click', () => {
+					selectionItemCfg.setModel(true);
+				})
+				.createSelectionBinding(selectionItemCfg);
+		});
+}
+
 /* Separator */
 export function Separator() {
 	return Component('hr')
@@ -1278,9 +1294,9 @@ export function Sheet(
 
 /* Slider */
 export interface SliderOpts {
-	min?: number;
-	max?: number;
-	step?: number;
+	min?: ValueObject<number>;
+	max?: ValueObject<number>;
+	step?: ValueObject<number>;
 }
 
 export function Slider(
@@ -1294,9 +1310,9 @@ export function Slider(
 		placeholder: undefined,
 	}).access((self) =>
 		self
-			.setAttr('min', (options.min ?? 0).toString())
-			.setAttr('max', (options.max ?? 100).toString())
-			.setAttr('step', (options.step ?? 1).toString())
+			.setAttr('min', options.min ?? 0)
+			.setAttr('max', options.max ?? 100)
+			.setAttr('step', options.step ?? 1)
 	);
 }
 
