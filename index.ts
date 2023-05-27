@@ -48,19 +48,19 @@ export interface Stringifiable {
 export class IdentifiableObjectMap<T extends Identifiable> {
 	readonly map = new Map<string, T>();
 
-	get(id: string | UUID) {
+	get = (id: string | UUID) => {
 		return this.map.get(id.toString());
 	}
 
-	set(value: T) {
+	set = (value: T) => {
 		this.map.set(value.uuid.toString(), value);
 	}
 
-	remove(value: T) {
+	remove = (value: T) => {
 		this.map.delete(value.uuid.toString());
 	}
 
-	forEach(callbackFn: (value: T, index: number, array: T[]) => void) {
+	forEach = (callbackFn: (value: T, index: number, array: T[]) => void) => {
 		[...this.map.values()].forEach(callbackFn)
 	}
 }
@@ -273,10 +273,10 @@ export class BindableObject<T> {
 	}
 
 	/* reactivity */
-	triggerBinding(binding: Binding<T>) { }
-	triggerAll() { }
-	addBinding(binding: Binding<T>) { }
-	removeBinding(binding: Binding<T>) { }
+	triggerBinding = (binding: Binding<T>) => { };
+	triggerAll = () => { };
+	addBinding = (binding: Binding<T>) => { };
+	removeBinding = (binding: Binding<T>) => { };
 }
 
 /**  Can be bound, working with one item. Used by unwrapBindable(). */
@@ -284,13 +284,13 @@ export class BindableDummy<T> extends BindableObject<T> {
 	action: BindingAction<T> | undefined;
 
 	/* reactivity */
-	triggerBinding() {
+	triggerBinding = () => {
 		if (this.action) this.action(this._value);
 	}
-	triggerAll() {
+	triggerAll = () => {
 		if (this.action) this.action(this._value);
 	}
-	addBinding(binding: Binding<T>) {
+	addBinding = (binding: Binding<T>) => {
 		this.action = binding.action;
 	}
 }
@@ -300,18 +300,18 @@ export class State<T> extends BindableObject<T> {
 	private bindings = new Map<Binding<T>['uuid'], Binding<T>['action']>();
 
 	/* reactivity */
-	triggerBinding(binding: Binding<T>) {
+	triggerBinding = (binding: Binding<T>) => {
 		binding.action(this.value);
 	}
-	triggerAll() {
+	triggerAll = () => {
 		this.bindings.forEach((action) => {
 			action(this.value);
 		});
 	}
-	addBinding(binding: Binding<T>) {
+	addBinding = (binding: Binding<T>) => {
 		this.bindings.set(binding.uuid, binding.action);
 	}
-	removeBinding(binding: Binding<T>) {
+	removeBinding = (binding: Binding<T>) => {
 		this.bindings.delete(binding.uuid);
 	}
 }
@@ -472,15 +472,6 @@ export function Component<ValueType>(
 		component.setAttr('role', roleName);
 		return component;
 	};
-	component.animateOut = () => {
-		component.style.setProperty('--element-height', `${component.offsetHeight}px`);
-
-		//animate
-		component.addToClass('animating-out');
-
-		//remove after animation
-		setTimeout(() => component.remove(), 400);
-	}
 	component.animateIn = () => {
 		//get rect for animation
 		document.body.append(component);
@@ -489,7 +480,18 @@ export function Component<ValueType>(
 
 		component.addToClass('animating-in');
 
+		setTimeout(() => component.removeFromClass('animating-in'), 400)
+
 		return component;
+	}
+	component.animateOut = () => {
+		component.style.setProperty('--element-height', `${component.offsetHeight}px`);
+
+		//animate
+		component.addToClass('animating-out');
+
+		//remove after animation
+		setTimeout(() => component.remove(), 400);
 	}
 
 	component.addItems = (...children) => {
@@ -754,14 +756,17 @@ export function Button(configuration: ButtonCfg) {
 	return Component('button')
 		.addItems(
 			Icon(configuration.iconName ?? ''),
-			Text(configuration.text ?? '')
+			Text(configuration.text ?? ''),
 		)
 
 		.setAttr('aria-label', configuration.accessibilityLabel)
 		.addToClass('buttons')
 		.addToClass(configuration.style ?? ButtonStyles.Normal)
 
-		.listen('click', configuration.action);
+		.listen('click', (e) => {
+			e.stopPropagation()
+			configuration.action(e);
+		});
 }
 
 /* ButtonGroup */
@@ -918,21 +923,15 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 	let draggedComponent: Component<any> | undefined = undefined;
 	let draggedData: T | undefined = undefined;
 	let dragStartTimeout: NodeJS.Timeout | undefined = undefined;
-	let dragOriginIndex = 0;
 
 	function startDrag(e: Event, data: T, component: Component<any>) {
 		document.body.addEventListener('mouseup', stopDrag);
 		document.body.addEventListener('touchend', stopDrag);
 
 		dragStartTimeout = setTimeout(() => {
-			e.preventDefault();
-
 			draggedData = data;
 			draggedComponent = component
 				.addToClass('dragging');
-
-			dragOriginIndex = data.index.value;
-
 		}, 200);
 	}
 	function handleDragMove(e: TouchEvent | PointerEvent) {
@@ -981,7 +980,7 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 
 		.listen('touchmove', (e) => handleDragMove(e as TouchEvent))
 		.listen('mousemove', (e) => handleDragMove(e as PointerEvent))
-		
+
 		.access(listView => listView
 			.createBinding(configuration.listData, listData => {
 				function removeItemView(itemView: Component<any> | Element) {
@@ -996,12 +995,24 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 					const newItemView = compute(itemData)
 						.setID(itemData.uuid)
 						.access(self => {
+							let lastIndex = itemData.index.value;
+
 							self.createBinding(unwrapBindable(itemData.index), (newIndex) => {
-								self.setStyle('order', newIndex.toString())
+								const indexDifference = lastIndex - newIndex;
+								let height = self.getBoundingClientRect().height;
+								let distanceDifference = indexDifference * height;
+
+								self.style.setProperty('--order-offset', `${distanceDifference}px`)
+								self.setStyle('order', newIndex.toString());
+								self.addToClass('rearranged-items');
+								lastIndex = newIndex;
+
+								setTimeout(() => self.removeFromClass('rearranged-items'), 400);
 							})
 
 							if (configuration.sortable == true) self
 								.addToClass('draggable-items')
+								.addToClass('rearrangable-items')
 
 								.listen('mousedown', (e) => startDrag(e, itemData, self))
 								.listen('touchstart', (e) => startDrag(e, itemData, self))

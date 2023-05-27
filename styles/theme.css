@@ -55,6 +55,17 @@
     }
 }
 
+@keyframes rearrange {
+    0% {
+        transform: translateY(var(--order-offset))
+    }
+
+    50%,
+    100% {
+        transform: translateY(0px)
+    }
+}
+
 :root {
     --corners: .3rem;
 
@@ -101,6 +112,14 @@ input[disabled] {
     animation: animate-out .5s;
 }
 
+.draggable-items {
+    transition: transform .2s, border-radius .2s;
+}
+
+.rearranged-items:not(.dragging) {
+    animation: rearrange .5s;
+}
+
 /* Checkable */
 .checkable-items {
     background-color: var(--checkable);
@@ -108,7 +127,10 @@ input[disabled] {
 
 /* Draggable */
 .draggable-items {
-    transition: transform .2s, border-radius .2s;
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .draggable-items.dragging {
