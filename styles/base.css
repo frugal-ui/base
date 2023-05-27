@@ -30,7 +30,7 @@ body {
 }
 
 .popover-contents {
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: 0px;
     visibility: hidden;
