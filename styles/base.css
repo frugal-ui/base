@@ -75,7 +75,7 @@ body {
     display: flex;
     flex: 1;
 
-    width: auto;
+    width: 100%;
     height: auto;
 
     align-items: center;
@@ -94,6 +94,6 @@ body {
 
 /* VisualGroup */
 .visual-groups {
-    width: auto;
+    width: 100%;
     height: auto;
 }
