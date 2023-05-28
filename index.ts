@@ -63,7 +63,7 @@ export class IdentifiableObjectMap<T extends Identifiable> {
 	}
 
 	forEach = (callbackFn: (value: T, index: number, array: T[]) => void) => {
-		[...this.map.values()].forEach(callbackFn)
+		Array.from(this.map.values()).forEach(callbackFn)
 	}
 }
 
@@ -476,7 +476,7 @@ export function Component<ValueType>(
 	};
 	component.animateIn = () => {
 		//get rect for animation
-		document.body.append(component);
+		document.body.appendChild(component);
 		component.style.setProperty('--element-height', `${component.offsetHeight}px`);
 		component.remove();
 
@@ -944,11 +944,13 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 		if (draggedData == undefined) return;
 
 		function getCoordinate(e: TouchEvent | PointerEvent, axis: 'clientX' | 'clientY') {
-			if (e instanceof TouchEvent) {
+			if ('touches' in e) {
 				return e.touches[0][axis];
-			} else {
+			} else if (axis in e) {
 				return e[axis]
 			}
+			//fallback
+			return 0;
 		}
 
 		const elementUnderCursor = document.elementFromPoint(
@@ -1037,7 +1039,7 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 				});
 
 				//remove deleted items
-				[...listView.children].forEach((itemView) => {
+				Array.from(listView.children).forEach((itemView) => {
 					const matchingDataEntry = listData.get(itemView.id);
 					if (matchingDataEntry != undefined) return; //data entry still exists
 
