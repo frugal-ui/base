@@ -179,11 +179,18 @@ input[disabled] {
     border-radius: var(--corners);
     padding: var(--padding-md);
 
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
 }
 
 .buttons span {
     color: inherit;
+}
+
+.buttons span:empty {
+    display: none;
 }
 
 .selects {
@@ -245,6 +252,11 @@ input[disabled] {
 .button-groups .buttons:last-child {
     border-top-right-radius: var(--corners);
     border-bottom-right-radius: var(--corners);
+}
+
+/* Icon */
+.icons {
+    font-size: 1.2rem;
 }
 
 /* Label */

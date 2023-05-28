@@ -28,6 +28,7 @@
   "dependencies": {
     "@types/node": "^20.2.3",
     "@types/uuid": "^9.0.1",
+    "material-icons": "^1.13.7",
     "uuid": "^9.0.0"
   }
 }

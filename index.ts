@@ -1,3 +1,13 @@
+import 'material-icons/iconfont/round.css';
+
+import AccessibilityRoleMap from './assets/roles.js';
+import './styles/base.css';
+import './styles/color.css';
+import './styles/theme.css';
+
+/*
+	BASIC
+*/
 export class UUID {
 	readonly value: string;
 
@@ -25,14 +35,6 @@ export class UUID {
 	}
 }
 
-import { AccessibilityRoleMap } from './assets/roles.js';
-import './styles/base.css';
-import './styles/color.css';
-import './styles/theme.css';
-
-/*
-	BASIC
-*/
 export interface Identifiable {
 	readonly uuid: UUID;
 }
@@ -824,7 +826,8 @@ export function Container(
 	tagName: keyof HTMLElementTagNameMap,
 	...children: Component<any>[]
 ) {
-	return Component(tagName).addItems(...children);
+	return Component(tagName)
+		.addItems(...children);
 }
 
 export function Div(...children: Component<any>[]) {
@@ -833,12 +836,15 @@ export function Div(...children: Component<any>[]) {
 
 /* HStack */
 export function HStack(...children: Component<any>[]) {
-	return Div(...children).addToClass('stacks-horizontal');
+	return Div(...children)
+		.addToClass('stacks-horizontal');
 }
 
 /* Icon */
 export function Icon(iconName: string) {
-	return Text(iconName).addToClass('icons'); //TODO
+	return Text(iconName)
+		.addToClass('icons')
+		.addToClass('material-icons-round');
 }
 
 /* Input */
@@ -1452,3 +1458,7 @@ export function VStack(...children: Component<any>[]) {
 	return Div(...children)
 		.addToClass('stacks-vertical');
 }
+
+/*
+	NAVIGATION
+*/

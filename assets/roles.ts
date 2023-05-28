@@ -1,4 +1,4 @@
-export interface AccessibilityRoleMap {
+export default interface AccessibilityRoleMap {
     alert: 'alert'
     alertdialog: 'alertdialog'
     application: 'application'
