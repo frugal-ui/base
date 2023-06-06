@@ -5,9 +5,17 @@ import './styles/base.css';
 import './styles/color.css';
 import './styles/theme.css';
 
+/* 
+ * MAIN
+ */
+
+export function initialize(component: Component<any>) {
+	document.body.appendChild(component);
+}
+
 /*
-	BASIC
-*/
+ * BASIC
+ */
 export class UUID {
 	readonly value: string;
 
@@ -68,8 +76,8 @@ export class IdentifiableObjectMap<T extends Identifiable> {
 }
 
 /* 
-	REACTIVITY 
-*/
+ *  REACTIVITY 
+ */
 // VALUE
 /** Object holding a value. Used by UI components. */
 export type ValueObject<T> = T | BindableObject<T>;
@@ -333,10 +341,10 @@ export class ComputedState<T> extends State<T> {
 			action: () => configuration.compute(this),
 		};
 
-		configuration.statesToBind.forEach((bindable) => {
-			bindable.addBinding(binding);
-			bindable.triggerBinding(binding);
-		});
+			configuration.statesToBind.forEach((bindable) => {
+				bindable.addBinding(binding);
+				bindable.triggerBinding(binding);
+			});
 	}
 }
 
@@ -394,8 +402,8 @@ export function unwrapBindable<T>(
 }
 
 /* 
-	COMPONENTS 
-*/
+   COMPONENTS 
+   */
 // GENERAL
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 
@@ -516,12 +524,12 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(children);
 
 		component
-			.createBinding(bindable, (children) => {
-				component
-					.clear()
-					.addItems(...children);
-			})
-			.updateBinding(bindable);
+		.createBinding(bindable, (children) => {
+			component
+			.clear()
+			.addItems(...children);
+		})
+		.updateBinding(bindable);
 
 		return component;
 	};
@@ -534,10 +542,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(value);
 
 		component
-			.createBinding(bindable, (newValue) => {
-				component.setAttribute(key, newValue.toString());
-			})
-			.updateBinding(bindable);
+		.createBinding(bindable, (newValue) => {
+			component.setAttribute(key, newValue.toString());
+		})
+		.updateBinding(bindable);
 
 		return component;
 	};
@@ -549,13 +557,13 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(condition);
 
 		component
-			.createBinding(bindable, (newValue) => {
-				if (newValue == true)
-					component.setAttribute(key, '');
-				else
-					component.removeAttribute(key);
-			})
-			.updateBinding(bindable);
+		.createBinding(bindable, (newValue) => {
+			if (newValue == true)
+				component.setAttribute(key, '');
+			else
+				component.removeAttribute(key);
+		})
+		.updateBinding(bindable);
 
 		return component;
 	};
@@ -575,10 +583,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(condition);
 
 		component
-			.createBinding(bindable, (newValue) => {
-				component.classList.toggle(className, newValue);
-			})
-			.updateBinding(bindable);
+		.createBinding(bindable, (newValue) => {
+			component.classList.toggle(className, newValue);
+		})
+		.updateBinding(bindable);
 
 		return component;
 	};
@@ -591,10 +599,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(text);
 
 		component
-			.createBinding(bindable, (newValue) => {
-				component.innerText = newValue;
-			})
-			.updateBinding(bindable);
+		.createBinding(bindable, (newValue) => {
+			component.innerText = newValue;
+		})
+		.updateBinding(bindable);
 
 		return component;
 	};
@@ -602,10 +610,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(value);
 
 		component
-			.createBinding(bindable, (newValue) => {
-				component.value = newValue;
-			})
-			.updateBinding(bindable);
+		.createBinding(bindable, (newValue) => {
+			component.value = newValue;
+		})
+		.updateBinding(bindable);
 
 		return component;
 	};
@@ -613,10 +621,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(text);
 
 		component
-			.createBinding(bindable, (newValue) => {
-				component.innerHTML = newValue;
-			})
-			.updateBinding(bindable);
+		.createBinding(bindable, (newValue) => {
+			component.innerHTML = newValue;
+		})
+		.updateBinding(bindable);
 
 		return component;
 	};
@@ -644,27 +652,27 @@ export function Component<ValueType>(
 	};
 	component.createTightBinding = (configuration) => {
 		component
-			.createBinding(configuration.data, (newValue) => {
-				configuration.setViewProperty(newValue);
-			})
-			.updateBinding(configuration.data)
-			.listen(configuration.changeEventName, () => {
-				configuration.data.value = configuration.getViewProperty();
-			});
+		.createBinding(configuration.data, (newValue) => {
+			configuration.setViewProperty(newValue);
+		})
+		.updateBinding(configuration.data)
+		.listen(configuration.changeEventName, () => {
+			configuration.data.value = configuration.getViewProperty();
+		});
 
 		return component;
 	};
 	component.createSelectionBinding = (configuration) => {
 		component
-			.createBinding(configuration.selectionCfg.selectedItems, () => {
-				const isSelected = configuration.getOwnIndex() != -1;
-				configuration.setView(isSelected);
-			})
-			.updateBinding(configuration.selectionCfg.selectedItems)
-			.listen(configuration.changeEventName, () => {
-				const isSelectedInView = configuration.getView();
-				configuration.setModel(isSelectedInView);
-			});
+		.createBinding(configuration.selectionCfg.selectedItems, () => {
+			const isSelected = configuration.getOwnIndex() != -1;
+			configuration.setView(isSelected);
+		})
+		.updateBinding(configuration.selectionCfg.selectedItems)
+		.listen(configuration.changeEventName, () => {
+			const isSelectedInView = configuration.getView();
+			configuration.setModel(isSelectedInView);
+		});
 
 		return component;
 	};
@@ -734,28 +742,28 @@ export function AutoComplete<T>(
 /* Box */
 export function Box(...children: Component<any>[]) {
 	return Div(...children)
-		.addToClass('boxes');
+	.addToClass('boxes');
 }
 
 /* Button */
 export enum ButtonStyles {
 	Transparent = 'buttons-transparent',
-	Normal = 'buttons-normal',
-	Primary = 'buttons-primary',
-	Destructive = 'buttons-destructive',
-	Pressed = 'buttons-pressed',
+		Normal = 'buttons-normal',
+		Primary = 'buttons-primary',
+		Destructive = 'buttons-destructive',
+		Pressed = 'buttons-pressed',
 }
 
-export interface ButtonCfg {
-	style?: ButtonStyles;
-	text?: ValueObject<string>;
-	iconName?: string;
-	accessibilityLabel: ValueObject<string>;
-	action: (e: Event) => void;
-}
+	export interface ButtonCfg {
+		style?: ButtonStyles;
+		text?: ValueObject<string>;
+		iconName?: string;
+		accessibilityLabel: ValueObject<string>;
+		action: (e: Event) => void;
+	}
 
-export function Button(configuration: ButtonCfg) {
-	return Component('button')
+	export function Button(configuration: ButtonCfg) {
+		return Component('button')
 		.addItems(
 			Icon(configuration.iconName ?? ''),
 			Text(configuration.text ?? ''),
@@ -769,12 +777,12 @@ export function Button(configuration: ButtonCfg) {
 			e.stopPropagation()
 			configuration.action(e);
 		});
-}
+	}
 
 /* ButtonGroup */
 export function ButtonGroup(...buttons: Component<any>[]) {
 	return Div(...buttons)
-		.addToClass('button-groups');
+	.addToClass('button-groups');
 }
 
 /* Checkbox */
@@ -786,39 +794,39 @@ export interface CheckboxCfg {
 
 export function Checkbox(configuration: CheckboxCfg) {
 	return Text(configuration.label, 'label')
-		.addItemsBefore(
-			(
-				Input({
-					type: 'checkbox',
-					fallbackValue: undefined,
-					value: undefined,
-					placeholder: undefined,
-				}) as CheckableComponent<undefined>
-			)
-				.addToClass('checkable-items')
-				.access((self) => {
-					self.createTightBinding(
-						new CheckTBCfg({
-							isChecked: configuration.isChecked,
-							component: self,
-						})
-					);
-
-					if (configuration.isIndeterminate != undefined)
-						self.createTightBinding(
-							new TightBindingCfg<boolean>({
-								component: self,
-								data: configuration.isIndeterminate,
-								fallbackValue: false,
-								changeEventName: 'change',
-
-								getViewProperty: () => (self as any).indeterminate,
-								setViewProperty: (newValue) =>
-									((self as any).indeterminate = newValue),
-							})
-						);
+	.addItemsBefore(
+		(
+			Input({
+				type: 'checkbox',
+				fallbackValue: undefined,
+				value: undefined,
+				placeholder: undefined,
+			}) as CheckableComponent<undefined>
+		)
+		.addToClass('checkable-items')
+		.access((self) => {
+			self.createTightBinding(
+				new CheckTBCfg({
+					isChecked: configuration.isChecked,
+					component: self,
 				})
-		);
+			);
+
+			if (configuration.isIndeterminate != undefined)
+				self.createTightBinding(
+					new TightBindingCfg<boolean>({
+						component: self,
+						data: configuration.isIndeterminate,
+						fallbackValue: false,
+						changeEventName: 'change',
+
+						getViewProperty: () => (self as any).indeterminate,
+							setViewProperty: (newValue) =>
+						((self as any).indeterminate = newValue),
+					})
+				);
+		})
+	);
 }
 
 /* Container */
@@ -827,7 +835,7 @@ export function Container(
 	...children: Component<any>[]
 ) {
 	return Component(tagName)
-		.addItems(...children);
+	.addItems(...children);
 }
 
 export function Div(...children: Component<any>[]) {
@@ -837,14 +845,14 @@ export function Div(...children: Component<any>[]) {
 /* HStack */
 export function HStack(...children: Component<any>[]) {
 	return Div(...children)
-		.addToClass('stacks-horizontal');
+	.addToClass('stacks-horizontal');
 }
 
 /* Icon */
 export function Icon(iconName: string) {
 	return Text(iconName)
-		.addToClass('icons')
-		.addToClass('material-icons-round');
+	.addToClass('icons')
+	.addToClass('material-icons-round');
 }
 
 /* Input */
@@ -883,39 +891,39 @@ export class NumberInputCfg implements InputCfg<number> {
 
 export function Input<T>(configuration: InputCfg<T>) {
 	return Component<T>('input')
-		.addToClass('inputs')
-		.access((self) => {
-			self
-				.setAttr('type', configuration.type)
-				.setAttr('placeholder', configuration.placeholder ?? '');
+	.addToClass('inputs')
+	.access((self) => {
+		self
+		.setAttr('type', configuration.type)
+		.setAttr('placeholder', configuration.placeholder ?? '');
 
-			if (
-				configuration.value != undefined &&
-				configuration.fallbackValue != undefined
-			)
-				self.createTightBinding(
-					new ValueTBCfg({
-						data: configuration.value,
-						component: self,
-						fallbackValue: configuration.fallbackValue,
-					})
-				);
-		});
+		if (
+			configuration.value != undefined &&
+			configuration.fallbackValue != undefined
+		)
+		self.createTightBinding(
+			new ValueTBCfg({
+				data: configuration.value,
+				component: self,
+				fallbackValue: configuration.fallbackValue,
+			})
+		);
+	});
 }
 
 /* Label */
 export function Label(labelText: string, labeledItem: Component<any>) {
 	return Component('label')
-		.setText(labelText)
-		.addItems(labeledItem)
+	.setText(labelText)
+	.addItems(labeledItem)
 
-		.addToClass('labels');
+	.addToClass('labels');
 }
 
 /* Link */
 export function Link(label: ValueObject<string>, href: string) {
 	return Text(label, 'a')
-		.setAttr('href', href);
+	.setAttr('href', href);
 }
 
 /* List */
@@ -937,7 +945,7 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 		dragStartTimeout = setTimeout(() => {
 			draggedData = data;
 			draggedComponent = component
-				.addToClass('dragging');
+			.addToClass('dragging');
 		}, 200);
 	}
 	function handleDragMove(e: TouchEvent | PointerEvent) {
@@ -984,12 +992,12 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 
 	// Main
 	return VStack()
-		.setAccessibilityRole('list')
+	.setAccessibilityRole('list')
 
-		.listen('touchmove', (e) => handleDragMove(e as TouchEvent))
-		.listen('mousemove', (e) => handleDragMove(e as PointerEvent))
+	.listen('touchmove', (e) => handleDragMove(e as TouchEvent))
+	.listen('mousemove', (e) => handleDragMove(e as PointerEvent))
 
-		.access(listView => listView
+	.access(listView => listView
 			.createBinding(configuration.listData, listData => {
 				function removeItemView(itemView: Component<any> | Element) {
 					const removeFn = (itemView as Component<any>).animateOut ?? itemView.remove;
@@ -1001,31 +1009,31 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 					const oldItemView = document.getElementById(itemData.uuid.toString())
 
 					const newItemView = compute(itemData)
-						.setID(itemData.uuid)
-						.access(self => {
-							let lastIndex = itemData.index.value;
+					.setID(itemData.uuid)
+					.access(self => {
+						let lastIndex = itemData.index.value;
 
-							self.createBinding(unwrapBindable(itemData.index), (newIndex) => {
-								const indexDifference = lastIndex - newIndex;
-								let height = self.getBoundingClientRect().height;
-								let distanceDifference = indexDifference * height;
+						self.createBinding(unwrapBindable(itemData.index), (newIndex) => {
+							const indexDifference = lastIndex - newIndex;
+							let height = self.getBoundingClientRect().height;
+							let distanceDifference = indexDifference * height;
 
-								self.style.setProperty('--order-offset', `${distanceDifference}px`)
-								self.setStyle('order', newIndex.toString());
-								self.addToClass('rearranged-items');
-								lastIndex = newIndex;
+							self.style.setProperty('--order-offset', `${distanceDifference}px`)
+							self.setStyle('order', newIndex.toString());
+							self.addToClass('rearranged-items');
+							lastIndex = newIndex;
 
-								setTimeout(() => self.removeFromClass('rearranged-items'), 400);
-							})
-
-							if (configuration.sortable == true) self
-								.addToClass('draggable-items')
-								.addToClass('rearrangable-items')
-
-								.listen('mousedown', (e) => startDrag(e, itemData, self))
-								.listen('touchstart', (e) => startDrag(e, itemData, self))
+							setTimeout(() => self.removeFromClass('rearranged-items'), 400);
 						})
-						.animateIn();
+
+						if (configuration.sortable == true) self
+							.addToClass('draggable-items')
+						.addToClass('rearrangable-items')
+
+						.listen('mousedown', (e) => startDrag(e, itemData, self))
+						.listen('touchstart', (e) => startDrag(e, itemData, self))
+					})
+					.animateIn();
 
 					//already exists
 					if (oldItemView != null) return;
@@ -1046,23 +1054,23 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 					removeItemView(itemView);
 				});
 			})
-		)
+		   )
 }
 
 /* ListBox */
 export function ListBox<T extends Identifiable & Sortable>(configuration: ListCfg<T>, compute: (itemData: T) => Component<any>) {
 	return Box(
 		List(configuration, compute)
-			.setAccessibilityRole('listbox')
+		.setAccessibilityRole('listbox')
 	);
 }
 
 /* ListItem */
 export function ListItem(...children: Component<any>[]) {
 	return Div(...children)
-		.addToClass('list-items')
-		.setAccessibilityRole('listitem')
-		.animateIn();
+	.addToClass('list-items')
+	.setAccessibilityRole('listitem')
+	.animateIn();
 }
 
 /* Meter */
@@ -1080,12 +1088,12 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 	const high = options.high ?? max;
 
 	return Component<number>('meter')
-		.setValue(value)
+	.setValue(value)
 
-		.setAttr('min', min)
-		.setAttr('max', max)
-		.setAttr('low', low)
-		.setAttr('high', high);
+	.setAttr('min', min)
+	.setAttr('max', max)
+	.setAttr('low', low)
+	.setAttr('high', high);
 }
 
 /* Popover */
@@ -1111,16 +1119,16 @@ export function Popover(configuration: PopoverCfg) {
 
 		return !(
 			rect.top < rectOfWindow.top ||
-			rect.left < rectOfWindow.left ||
-			rect.right > rectOfWindow.right ||
-			rect.bottom > rectOfWindow.bottom
+				rect.left < rectOfWindow.left ||
+				rect.right > rectOfWindow.right ||
+				rect.bottom > rectOfWindow.bottom
 		);
 	}
 
 	function resetPosition() {
 		configuration.content
-			.setStyle('top', 'unset')
-			.setStyle('left', 'unset');
+		.setStyle('top', 'unset')
+		.setStyle('left', 'unset');
 	}
 
 	function alignToRightFromLeftEdge() {
@@ -1156,8 +1164,8 @@ export function Popover(configuration: PopoverCfg) {
 	function alignY() {
 		//down
 		configuration.content
-			.setStyle('left', 'unset')
-			.setStyle('top', `${rectOfToggle().bottom}px`);
+		.setStyle('left', 'unset')
+		.setStyle('top', `${rectOfToggle().bottom}px`);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1165,8 +1173,8 @@ export function Popover(configuration: PopoverCfg) {
 
 		//up
 		configuration.content
-			.setStyle('left', 'unset')
-			.setStyle('top', `${rectOfToggle().top - rectOfContent().height}px`);
+		.setStyle('left', 'unset')
+		.setStyle('top', `${rectOfToggle().top - rectOfContent().height}px`);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1187,15 +1195,15 @@ export function Popover(configuration: PopoverCfg) {
 
 	function applyFallbackAlignment() {
 		configuration.content
-			.setStyle('bottom', PADDING)
-			.setStyle('maxHeight', `calc(100% - 2*${PADDING})`);
+		.setStyle('bottom', PADDING)
+		.setStyle('maxHeight', `calc(100% - 2*${PADDING})`);
 
 		if (rectOfContent().left < rectOfWindow.left)
 			//content overflows left edge
 			configuration.content.setStyle('left', PADDING);
-		if (rectOfContent().left < rectOfWindow.left)
-			//content overflows right edge
-			configuration.content.setStyle('right', PADDING);
+			if (rectOfContent().left < rectOfWindow.left)
+				//content overflows right edge
+				configuration.content.setStyle('right', PADDING);
 	}
 
 	function updateContentPosition() {
@@ -1232,15 +1240,15 @@ export function Popover(configuration: PopoverCfg) {
 	return Div(
 		configuration.toggle,
 		configuration.content
-			.addToClass('popover-contents')
-			.setStyle('width', configuration.widthStyle)
+		.addToClass('popover-contents')
+		.setStyle('width', configuration.widthStyle)
 	)
-		.listen('click', (e) => {
-			e.preventDefault()
-			e.stopPropagation()
-		})
-		.addToClass('popover-containers')
-		.toggleAttr('open', configuration.isOpen);
+	.listen('click', (e) => {
+		e.preventDefault()
+		e.stopPropagation()
+	})
+	.addToClass('popover-containers')
+	.toggleAttr('open', configuration.isOpen);
 }
 
 /* ProgressBar */
@@ -1254,16 +1262,16 @@ export function ProgressBar(
 	state: BindableObject<ProgressBarStates>
 ) {
 	return Component<number>('progress')
-		.setValue(value)
-		.access((self) =>
+	.setValue(value)
+	.access((self) =>
 			self
-				.createBinding(state, (state) => {
-					const isIndeterminate = state == ProgressBarStates.Indeterminate;
-					if (isIndeterminate) self.rmAttr('value');
-					else self.value = value.value;
-				})
-				.updateBinding(state)
-		);
+			.createBinding(state, (state) => {
+				const isIndeterminate = state == ProgressBarStates.Indeterminate;
+				if (isIndeterminate) self.rmAttr('value');
+				else self.value = value.value;
+			})
+			.updateBinding(state)
+		   );
 }
 
 /* RadioButton */
@@ -1281,7 +1289,7 @@ export function RadioButton<T>(
 				placeholder: undefined,
 			}) as CheckableComponent<undefined>
 		)
-			.access((self) =>
+		.access((self) =>
 				self.createSelectionBinding(
 					new CheckableSelectionItemCfg({
 						selectionCfg,
@@ -1290,15 +1298,15 @@ export function RadioButton<T>(
 						isExclusive: true,
 					})
 				)
-			)
-			.setAttr('name', selectionCfg.uuid)
+			   )
+			   .setAttr('name', selectionCfg.uuid)
 	);
 }
 
 /* ScrollArea */
 export function ScrollArea(...children: Component<any>[]) {
 	return Div(...children)
-		.addToClass('scroll-areas');
+	.addToClass('scroll-areas');
 }
 
 /* Select */
@@ -1316,15 +1324,15 @@ export function Select(
 		initialValue: [],
 		compute: (self) => {
 			self.value = options.value.map((option) =>
-				Text(option.label, 'option').setValue(option.value)
-			);
+										   Text(option.label, 'option').setValue(option.value)
+										  );
 		},
 	});
 
 	return Component('select')
-		.setItems(optionViews)
-		.addToClass('selects')
-		.access((self) =>
+	.setItems(optionViews)
+	.addToClass('selects')
+	.access((self) =>
 			self.createTightBinding(
 				new ValueTBCfg({
 					component: self,
@@ -1332,7 +1340,7 @@ export function Select(
 					fallbackValue: '',
 				})
 			)
-		);
+		   );
 }
 
 /* SelectingListItem */
@@ -1346,35 +1354,35 @@ export function SelectingListItem<T>(
 	...children: Component<any>[]
 ) {
 	return ListItem(...children)
-		.setAccessibilityRole('option')
+	.setAccessibilityRole('option')
 
-		.access((self) => {
-			const selectionItemCfg = new SelectionItemCfg<T>({
-				component: self,
-				selectionCfg: configuration.selectionCfg,
+	.access((self) => {
+		const selectionItemCfg = new SelectionItemCfg<T>({
+			component: self,
+			selectionCfg: configuration.selectionCfg,
 
-				getView: () => self.getAttribute('aria-selected') == 'true',
+			getView: () => self.getAttribute('aria-selected') == 'true',
 				setView: (isSelected) =>
-					self.setAttr('aria-selected', isSelected),
+			self.setAttr('aria-selected', isSelected),
 
-				isExclusive: true,
-				ownValue: configuration.ownValue,
+			isExclusive: true,
+			ownValue: configuration.ownValue,
 
-				changeEventName: 'click',
-			});
-
-			self
-				.listen('click', () => {
-					selectionItemCfg.setModel(true);
-				})
-				.createSelectionBinding(selectionItemCfg);
+			changeEventName: 'click',
 		});
+
+		self
+		.listen('click', () => {
+			selectionItemCfg.setModel(true);
+		})
+		.createSelectionBinding(selectionItemCfg);
+	});
 }
 
 /* Separator */
 export function Separator() {
 	return Component('hr')
-		.addToClass('separators');
+	.addToClass('separators');
 }
 
 /* Sheet */
@@ -1383,15 +1391,15 @@ export function Sheet(
 	...children: Component<any>[]
 ) {
 	return Container('dialog',
-		Div(...children)
-			.addToClass('sheet-contents')
-			.listen('click', (e) => e.stopPropagation()),
-	)
-		.addToClass('sheet-containers')
-		.toggleAttr('open', isOpen)
-		.listen('click', () => {
-			isOpen.value = false;
-		});
+					 Div(...children)
+					 .addToClass('sheet-contents')
+					 .listen('click', (e) => e.stopPropagation()),
+					)
+					 .addToClass('sheet-containers')
+					 .toggleAttr('open', isOpen)
+					 .listen('click', () => {
+						 isOpen.value = false;
+					 });
 }
 
 /* Slider */
@@ -1411,11 +1419,11 @@ export function Slider(
 		value,
 		placeholder: undefined,
 	}).access((self) =>
-		self
-			.setAttr('min', options.min ?? 0)
-			.setAttr('max', options.max ?? 100)
-			.setAttr('step', options.step ?? 1)
-	);
+	self
+	.setAttr('min', options.min ?? 0)
+	.setAttr('max', options.max ?? 100)
+	.setAttr('step', options.step ?? 1)
+			 );
 }
 
 /* Spacer */
@@ -1424,43 +1432,125 @@ export function Spacer() {
 }
 
 /* Text */
-export function Text(
-	value: ValueObject<string>,
-	tagName: keyof HTMLElementTagNameMap = 'span'
-) {
+export function Text(value: ValueObject<string>, tagName: keyof HTMLElementTagNameMap = 'span') {
 	return Component(tagName).setText(value);
 }
 
 /* Textarea */
 export function Textarea(value: BindableObject<string>, placeholder: string) {
 	return Component<string>('textarea')
-		.addToClass('textareas')
-		.access((self) =>
+	.addToClass('textareas')
+	.access((self) =>
 			self
-				.createTightBinding(
-					new ValueTBCfg({
-						component: self,
-						data: value,
-						fallbackValue: '',
-					})
-				)
+			.createTightBinding(
+				new ValueTBCfg({
+					component: self,
+					data: value,
+					fallbackValue: '',
+				})
+			)
 
-				.setAttr('placeholder', placeholder)
-		);
+			.setAttr('placeholder', placeholder)
+		   );
 }
 
 /* VisualGroup */
 export function VisualGroup(...children: Component<any>[]) {
 	return VStack(...children)
-		.addToClass('visual-groups');
+	.addToClass('visual-groups');
 }
 
 /* VStack */
 export function VStack(...children: Component<any>[]) {
 	return Div(...children)
-		.addToClass('stacks-vertical');
+	.addToClass('stacks-vertical');
 }
 
 /*
-	NAVIGATION
-*/
+   NAVIGATION
+   */
+
+export class Scene {
+	uuid = new UUID();
+	view: Component<any>
+
+	constructor(view: Scene['view']) {
+		this.view = view;
+	}
+}
+
+/* Stack */
+export enum StackedSceneTypes {
+	Master,
+	Navigation,
+	Content,
+}
+
+export class StackedScene extends Scene {
+	type: StackedSceneTypes;
+
+	constructor(type: StackedSceneTypes, view: Scene['view']) {
+		super(view);
+		this.type = type;
+	}
+}
+
+export class NavigationStackVM {
+	uuid = new UUID();
+
+	scenes = new State<StackedScene[]>([]);
+
+	get depth() {
+		return this.scenes.value.length;
+	}
+
+	addScene = (scene: StackedScene, depth: number) => {
+		this.navigateBackTo(depth);
+		this.scenes.value[depth] = scene;
+		this.scenes.triggerAll();
+	}
+
+	navigateBackTo = (depth: number) => {
+		length = this.scenes.value.length;
+
+		if (depth < 0 || depth > length)
+			return console.error(`Cannot go back to level ${depth}: only ${length} levels. NavigationStack ${this.uuid.toString()}`);
+
+		this.scenes.value.splice(depth, length);
+		this.scenes.triggerAll();
+	}
+}
+
+export function NavigationStack(model: NavigationStackVM, initialScene: StackedScene) {
+	return Div(
+		initialScene.view,
+	);
+}
+
+export interface NavigationLinkCfg {
+	model: NavigationStackVM;
+	destination: () => StackedScene;
+}
+
+export function NavigationLink(configuration: NavigationLinkCfg, view: Component<any>) {
+	const depth = configuration.model.depth;
+	let currentScene: StackedScene|undefined = undefined;
+
+	function openLink() {
+		currentScene = configuration.destination();
+		configuration.model.addScene(currentScene, depth);
+	}
+
+	return HStack(
+		view,
+		Spacer(),
+		Icon(''),//todo
+	)
+	.listen('click', openLink)
+	.access(self => self
+			.createBinding(configuration.model.scenes, () => {
+				const isOpen = configuration.model.scenes.value[depth] != currentScene;
+				self.addToClassConditionally('is-open', isOpen);
+			})
+		   );
+}
