@@ -466,6 +466,7 @@ export interface Component<ValueType> extends HTMLElement {
 	) => this;
 
 	//navigation
+	setVisibleIf: (shouldBeVisible: BindableObject<boolean>) => this;
 	setVisibleIfSelected: (
 		ownIndex: number,	
 		currentIndex: BindableObject<number>
@@ -666,14 +667,23 @@ export function Component<ValueType>(
 	};
 
 	//navigation
+	component.setVisibleIf = (shouldBeVisible) => {
+		component
+		.createBinding(shouldBeVisible, () => {
+			component.toggleAttribute("hidden", shouldBeVisible.value == false);
+		})
+		.updateBinding(shouldBeVisible);
+
+		return component;
+	};
+
 	component.setVisibleIfSelected = (ownIndex, currentIndex) => {
 		component
 		.createBinding(currentIndex, () => {
 			const isOpen = currentIndex.value == ownIndex;
-			component.toggleAttribute("open", isOpen);
+			component.toggleAttribute("hidden", !isOpen);
 		})
-		.updateBinding(currentIndex)
-		.addToClass("scenes");
+		.updateBinding(currentIndex);
 
 		return component;
 	};

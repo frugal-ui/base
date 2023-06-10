@@ -172,6 +172,7 @@ input[disabled] {
 
 .buttons span {
     color: inherit;
+	cursor: default;
 }
 
 .buttons span:empty {
@@ -207,7 +208,7 @@ input[disabled] {
 .buttons:not([disabled]):active,
 .buttons-pressed {
     background: var(--pressed);
-    box-shadow: 0px 0px 5px var(--shadows) inset;
+    box-shadow: 0px 0px 4px var(--shadows) inset;
     color: var(--color);
 }
 
