@@ -1,9 +1,9 @@
-import "material-icons/iconfont/round.css";
+import 'material-icons/iconfont/round.css';
 
-import AccessibilityRoleMap from "./assets/roles.js";
-import "./styles/base.css";
-import "./styles/color.css";
-import "./styles/theme.css";
+import AccessibilityRoleMap from './assets/roles.js';
+import './styles/base.css';
+import './styles/color.css';
+import './styles/theme.css';
 
 /*
  * MAIN
@@ -20,14 +20,14 @@ export class UUID {
 	readonly value: string;
 
 	constructor() {
-		let uuid = "";
-		const chars = "0123456789abcdef";
+		let uuid = '';
+		const chars = '0123456789abcdef';
 
 		for (let i = 0; i < 36; i++) {
 			if (i === 8 || i === 13 || i === 18 || i === 23) {
-				uuid += "-";
+				uuid += '-';
 			} else if (i === 14) {
-				uuid += "4";
+				uuid += '4';
 			} else if (i === 19) {
 				uuid += chars[(Math.random() * 4) | 8];
 			} else {
@@ -143,7 +143,7 @@ export class ValueTBCfg<T> extends TightBindingCfg<T> {
 			data: configuration.data,
 			component: configuration.component,
 			fallbackValue: configuration.fallbackValue,
-			changeEventName: "input",
+			changeEventName: 'input',
 
 			getViewProperty: () => {
 				return this.component.value ?? this.defaultValue;
@@ -163,7 +163,7 @@ export interface CheckTBCfgOpts {
 export class CheckTBCfg extends ValueTBCfg<boolean> {
 	readonly component: CheckableComponent<any>;
 
-	readonly changeEventName: keyof HTMLElementEventMap = "change";
+	readonly changeEventName: keyof HTMLElementEventMap = 'change';
 
 	constructor(configuration: CheckTBCfgOpts) {
 		super({
@@ -261,7 +261,7 @@ export class CheckSelectionCfg<T> extends ValueSelectionCfg<T> {
 	constructor(configuration: CheckSelectionCfgOpts<T>) {
 		super({
 			...configuration,
-			changeEventName: "change",
+			changeEventName: 'change',
 
 			getView: () => {
 				return this.component.checked;
@@ -320,7 +320,7 @@ export class BindableDummy<T> extends BindableObject<T> {
 
 /** Reactive Variable. Bindings will be triggered on change. */
 export class State<T> extends BindableObject<T> {
-	private bindings = new Map<Binding<T>["uuid"], Binding<T>["action"]>();
+	private bindings = new Map<Binding<T>['uuid'], Binding<T>['action']>();
 
 	/* reactivity */
 	triggerBinding = (binding: Binding<T>) => {
@@ -383,7 +383,7 @@ export class ProxyState<T, O> extends State<T> {
 			uuid: new UUID(),
 			action: () => {
 				this._value = configuration.convertFromOriginal(
-					this.original.value
+					this.original.value,
 				);
 				this.triggerAll();
 			},
@@ -410,14 +410,14 @@ export function unwrapValue<T>(valueObject: ValueObject<T>): T {
 }
 /** Converts ValueObject to BindableObject. */
 export function unwrapBindable<T>(
-	valueObject: ValueObject<T>
+	valueObject: ValueObject<T>,
 ): BindableObject<T> {
 	if (valueObject instanceof BindableObject) return valueObject;
 	else return new BindableDummy(unwrapValue(valueObject));
 }
 
-/* 
- *COMPONENTS 
+/*
+ *COMPONENTS
  */
 // GENERAL
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
@@ -440,7 +440,7 @@ export interface Component<ValueType> extends HTMLElement {
 	addToClass: (value: string) => this;
 	addToClassConditionally: (
 		value: string,
-		condition: ValueObject<boolean>
+		condition: ValueObject<boolean>,
 	) => this;
 	setStyle: (property: keyof CSSStyleDeclaration, value: string) => this;
 
@@ -458,18 +458,18 @@ export interface Component<ValueType> extends HTMLElement {
 	//events
 	listen: (
 		eventName: keyof HTMLElementEventMap,
-		handler: ComponentEventHandler
+		handler: ComponentEventHandler,
 	) => this;
 	ignore: (
 		eventName: keyof HTMLElementEventMap,
-		handler: ComponentEventHandler
+		handler: ComponentEventHandler,
 	) => this;
 
 	//navigation
 	setVisibleIf: (shouldBeVisible: BindableObject<boolean>) => this;
 	setVisibleIfSelected: (
-		ownIndex: number,	
-		currentIndex: BindableObject<number>
+		ownIndex: number,
+		currentIndex: BindableObject<number>,
 	) => this;
 
 	//state
@@ -477,7 +477,7 @@ export interface Component<ValueType> extends HTMLElement {
 	bindings: Map<string, Binding<any>>;
 	createBinding: <T>(
 		bindable: BindableObject<T>,
-		action: BindingAction<T>
+		action: BindingAction<T>,
 	) => this;
 	createSelectionBinding: <T>(configuration: ValueSelectionCfg<T>) => this;
 	createTightBinding: <T>(configuration: TightBindingCfg<T>) => this;
@@ -490,7 +490,7 @@ export interface CheckableComponent<T> extends Component<T> {
 }
 
 export function Component<ValueType>(
-	tagName: keyof HTMLElementTagNameMap
+	tagName: keyof HTMLElementTagNameMap,
 ): Component<ValueType> {
 	//create
 	const component = document.createElement(tagName) as Component<ValueType>;
@@ -501,32 +501,32 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.setAccessibilityRole = (roleName) => {
-		component.setAttr("role", roleName);
+		component.setAttr('role', roleName);
 		return component;
 	};
 	component.animateIn = () => {
 		//get rect for animation
 		document.body.appendChild(component);
 		component.style.setProperty(
-			"--element-height",
-			`${component.offsetHeight}px`
+			'--element-height',
+			`${component.offsetHeight}px`,
 		);
 		component.remove();
 
-		component.addToClass("animating-in");
+		component.addToClass('animating-in');
 
-		setTimeout(() => component.removeFromClass("animating-in"), 400);
+		setTimeout(() => component.removeFromClass('animating-in'), 400);
 
 		return component;
 	};
 	component.animateOut = () => {
 		component.style.setProperty(
-			"--element-height",
-			`${component.offsetHeight}px`
+			'--element-height',
+			`${component.offsetHeight}px`,
 		);
 
 		//animate
-		component.addToClass("animating-out");
+		component.addToClass('animating-out');
 
 		//remove after animation
 		setTimeout(() => component.remove(), 400);
@@ -537,14 +537,14 @@ export function Component<ValueType>(
 		component.id = id.toString();
 		return component;
 	};
-	component.setAttr = (key, value = "") => {
+	component.setAttr = (key, value = '') => {
 		const bindable = unwrapBindable(value);
 
 		component
-		.createBinding(bindable, (newValue) => {
-			component.setAttribute(key, newValue.toString());
-		})
-		.updateBinding(bindable);
+			.createBinding(bindable, (newValue) => {
+				component.setAttribute(key, newValue.toString());
+			})
+			.updateBinding(bindable);
 
 		return component;
 	};
@@ -556,16 +556,16 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(condition);
 
 		component
-		.createBinding(bindable, (newValue) => {
-			if (newValue == true) component.setAttribute(key, "");
-			else component.removeAttribute(key);
-		})
-		.updateBinding(bindable);
+			.createBinding(bindable, (newValue) => {
+				if (newValue == true) component.setAttribute(key, '');
+				else component.removeAttribute(key);
+			})
+			.updateBinding(bindable);
 
 		return component;
 	};
 	component.resetClasses = () => {
-		component.className = "";
+		component.className = '';
 		return component;
 	};
 	component.removeFromClass = (className) => {
@@ -580,10 +580,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(condition);
 
 		component
-		.createBinding(bindable, (newValue) => {
-			component.classList.toggle(className, newValue);
-		})
-		.updateBinding(bindable);
+			.createBinding(bindable, (newValue) => {
+				component.classList.toggle(className, newValue);
+			})
+			.updateBinding(bindable);
 
 		return component;
 	};
@@ -606,17 +606,17 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.clear = () => {
-		component.innerHTML = "";
+		component.innerHTML = '';
 		return component;
 	};
 	component.setItems = (children) => {
 		const bindable = unwrapBindable(children);
 
 		component
-		.createBinding(bindable, (children) => {
-			component.clear().addItems(...children);
-		})
-		.updateBinding(bindable);
+			.createBinding(bindable, (children) => {
+				component.clear().addItems(...children);
+			})
+			.updateBinding(bindable);
 
 		return component;
 	};
@@ -626,10 +626,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(text);
 
 		component
-		.createBinding(bindable, (newValue) => {
-			component.innerText = newValue;
-		})
-		.updateBinding(bindable);
+			.createBinding(bindable, (newValue) => {
+				component.innerText = newValue;
+			})
+			.updateBinding(bindable);
 
 		return component;
 	};
@@ -637,10 +637,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(value);
 
 		component
-		.createBinding(bindable, (newValue) => {
-			component.value = newValue;
-		})
-		.updateBinding(bindable);
+			.createBinding(bindable, (newValue) => {
+				component.value = newValue;
+			})
+			.updateBinding(bindable);
 
 		return component;
 	};
@@ -648,10 +648,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(text);
 
 		component
-		.createBinding(bindable, (newValue) => {
-			component.innerHTML = newValue;
-		})
-		.updateBinding(bindable);
+			.createBinding(bindable, (newValue) => {
+				component.innerHTML = newValue;
+			})
+			.updateBinding(bindable);
 
 		return component;
 	};
@@ -669,21 +669,24 @@ export function Component<ValueType>(
 	//navigation
 	component.setVisibleIf = (shouldBeVisible) => {
 		component
-		.createBinding(shouldBeVisible, () => {
-			component.toggleAttribute("hidden", shouldBeVisible.value == false);
-		})
-		.updateBinding(shouldBeVisible);
+			.createBinding(shouldBeVisible, () => {
+				component.toggleAttribute(
+					'hidden',
+					shouldBeVisible.value == false,
+				);
+			})
+			.updateBinding(shouldBeVisible);
 
 		return component;
 	};
 
 	component.setVisibleIfSelected = (ownIndex, currentIndex) => {
 		component
-		.createBinding(currentIndex, () => {
-			const isOpen = currentIndex.value == ownIndex;
-			component.toggleAttribute("hidden", !isOpen);
-		})
-		.updateBinding(currentIndex);
+			.createBinding(currentIndex, () => {
+				const isOpen = currentIndex.value == ownIndex;
+				component.toggleAttribute('hidden', !isOpen);
+			})
+			.updateBinding(currentIndex);
 
 		return component;
 	};
@@ -703,27 +706,27 @@ export function Component<ValueType>(
 	};
 	component.createTightBinding = (configuration) => {
 		component
-		.createBinding(configuration.data, (newValue) => {
-			configuration.setViewProperty(newValue);
-		})
-		.updateBinding(configuration.data)
-		.listen(configuration.changeEventName, () => {
-			configuration.data.value = configuration.getViewProperty();
-		});
+			.createBinding(configuration.data, (newValue) => {
+				configuration.setViewProperty(newValue);
+			})
+			.updateBinding(configuration.data)
+			.listen(configuration.changeEventName, () => {
+				configuration.data.value = configuration.getViewProperty();
+			});
 
 		return component;
 	};
 	component.createSelectionBinding = (configuration) => {
 		component
-		.createBinding(configuration.selectionCfg.selectedItems, () => {
-			const isSelected = configuration.getOwnIndex() != -1;
-			configuration.setView(isSelected);
-		})
-		.updateBinding(configuration.selectionCfg.selectedItems)
-		.listen(configuration.changeEventName, () => {
-			const isSelectedInView = configuration.getView();
-			configuration.setModel(isSelectedInView);
-		});
+			.createBinding(configuration.selectionCfg.selectedItems, () => {
+				const isSelected = configuration.getOwnIndex() != -1;
+				configuration.setView(isSelected);
+			})
+			.updateBinding(configuration.selectionCfg.selectedItems)
+			.listen(configuration.changeEventName, () => {
+				const isSelectedInView = configuration.getView();
+				configuration.setModel(isSelectedInView);
+			});
 
 		return component;
 	};
@@ -731,7 +734,7 @@ export function Component<ValueType>(
 		const binding = component.bindings.get(bindable.uuid.toString());
 		if (!binding) {
 			console.error(
-				`Failed to unbind ${bindable.uuid.toString()} but bindable is unknown.`
+				`Failed to unbind ${bindable.uuid.toString()} but bindable is unknown.`,
 			);
 			return component;
 		}
@@ -745,7 +748,7 @@ export function Component<ValueType>(
 		const binding = component.bindings.get(bindable.uuid.toString());
 		if (!binding) {
 			console.error(
-				`Failed to update on bindable ${bindable.uuid.toString()} but bindable is unknown.`
+				`Failed to update on bindable ${bindable.uuid.toString()} but bindable is unknown.`,
 			);
 			return component;
 		}
@@ -762,17 +765,17 @@ export function Component<ValueType>(
 /* Accordion */
 export function Accordion(label: string, ...children: Component<any>[]) {
 	return Container(
-		"details",
-		Text(label, "summary"),
+		'details',
+		Text(label, 'summary'),
 
-		...children
+		...children,
 	);
 }
 
 /* AutoComplete */
 export function AutoComplete<T>(
 	optionData: BindableObject<string[]>,
-	input: Component<T>
+	input: Component<T>,
 ) {
 	const uuid = new UUID();
 	const optionViews = new ComputedState<Component<any>[]>({
@@ -780,60 +783,60 @@ export function AutoComplete<T>(
 		initialValue: [],
 		compute: (self) => {
 			self.value = optionData.value.map((option) =>
-											  Text(option, "option")
-											 );
+				Text(option, 'option'),
+			);
 		},
 	});
 
 	return Div(
-		Component("datalist").setID(uuid).setItems(optionViews),
+		Component('datalist').setID(uuid).setItems(optionViews),
 
-		input.setAttr("list", uuid)
+		input.setAttr('list', uuid),
 	);
 }
 
 /* Box */
 export function Box(...children: Component<any>[]) {
-	return Div(...children).addToClass("boxes");
+	return Div(...children).addToClass('boxes');
 }
 
 /* Button */
 export enum ButtonStyles {
-	Transparent = "buttons-transparent",
-		Normal = "buttons-normal",
-		Primary = "buttons-primary",
-		Destructive = "buttons-destructive",
-		Pressed = "buttons-pressed",
+	Transparent = 'buttons-transparent',
+	Normal = 'buttons-normal',
+	Primary = 'buttons-primary',
+	Destructive = 'buttons-destructive',
+	Pressed = 'buttons-pressed',
 }
 
-	export interface ButtonCfg {
-		style?: ButtonStyles;
-		text?: ValueObject<string>;
-		iconName?: string;
-		accessibilityLabel: ValueObject<string>;
-		action: (e: Event) => void;
-	}
+export interface ButtonCfg {
+	style?: ButtonStyles;
+	text?: ValueObject<string>;
+	iconName?: string;
+	accessibilityLabel: ValueObject<string>;
+	action: (e: Event) => void;
+}
 
-	export function Button(configuration: ButtonCfg) {
-		return Component("button")
+export function Button(configuration: ButtonCfg) {
+	return Component('button')
 		.addItems(
-			Icon(configuration.iconName ?? ""),
-			Text(configuration.text ?? "")
+			Icon(configuration.iconName ?? ''),
+			Text(configuration.text ?? ''),
 		)
 
-		.setAttr("aria-label", configuration.accessibilityLabel)
-		.addToClass("buttons")
+		.setAttr('aria-label', configuration.accessibilityLabel)
+		.addToClass('buttons')
 		.addToClass(configuration.style ?? ButtonStyles.Normal)
 
-		.listen("click", (e) => {
+		.listen('click', (e) => {
 			e.stopPropagation();
 			configuration.action(e);
 		});
-	}
+}
 
 /* ButtonGroup */
 export function ButtonGroup(...buttons: Component<any>[]) {
-	return Div(...buttons).addToClass("button-groups");
+	return Div(...buttons).addToClass('button-groups');
 }
 
 /* Checkbox */
@@ -844,38 +847,38 @@ export interface CheckboxCfg {
 }
 
 export function Checkbox(configuration: CheckboxCfg) {
-	return Text(configuration.label, "label").addItemsBefore(
+	return Text(configuration.label, 'label').addItemsBefore(
 		(
 			Input({
-				type: "checkbox",
+				type: 'checkbox',
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
 			}) as CheckableComponent<undefined>
 		)
-		.addToClass("checkable-items")
-		.access((self) => {
-			self.createTightBinding(
-				new CheckTBCfg({
-					isChecked: configuration.isChecked,
-					component: self,
-				})
-			);
-
-			if (configuration.isIndeterminate != undefined)
+			.addToClass('checkable-items')
+			.access((self) => {
 				self.createTightBinding(
-					new TightBindingCfg<boolean>({
+					new CheckTBCfg({
+						isChecked: configuration.isChecked,
 						component: self,
-						data: configuration.isIndeterminate,
-						fallbackValue: false,
-						changeEventName: "change",
-
-						getViewProperty: () => (self as any).indeterminate,
-							setViewProperty: (newValue) =>
-						((self as any).indeterminate = newValue),
-					})
+					}),
 				);
-		})
+
+				if (configuration.isIndeterminate != undefined)
+					self.createTightBinding(
+						new TightBindingCfg<boolean>({
+							component: self,
+							data: configuration.isIndeterminate,
+							fallbackValue: false,
+							changeEventName: 'change',
+
+							getViewProperty: () => (self as any).indeterminate,
+							setViewProperty: (newValue) =>
+								((self as any).indeterminate = newValue),
+						}),
+					);
+			}),
 	);
 }
 
@@ -888,19 +891,19 @@ export function Container(
 }
 
 export function Div(...children: Component<any>[]) {
-	return Container("div", ...children);
+	return Container('div', ...children);
 }
 
 /* HStack */
 export function HStack(...children: Component<any>[]) {
-	return Div(...children).addToClass("stacks-horizontal");
+	return Div(...children).addToClass('stacks-horizontal');
 }
 
 /* Icon */
 export function Icon(iconName: string) {
 	return Text(iconName)
-	.addToClass("icons")
-	.addToClass("material-icons-round");
+		.addToClass('icons')
+		.addToClass('material-icons-round');
 }
 
 /* Input */
@@ -912,12 +915,12 @@ export interface InputCfg<T> {
 }
 
 export class TextInputCfg implements InputCfg<string> {
-	type = "text";
+	type = 'text';
 	value: BindableObject<string>;
 	fallbackValue: string;
 	placeholder: string;
 
-	constructor(value: BindableObject<string>, placeholder = "") {
+	constructor(value: BindableObject<string>, placeholder = '') {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
@@ -925,12 +928,12 @@ export class TextInputCfg implements InputCfg<string> {
 }
 
 export class NumberInputCfg implements InputCfg<number> {
-	type = "number";
+	type = 'number';
 	value: BindableObject<number>;
 	fallbackValue: number;
 	placeholder: string;
 
-	constructor(value: BindableObject<number>, placeholder = "") {
+	constructor(value: BindableObject<number>, placeholder = '') {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
@@ -938,40 +941,40 @@ export class NumberInputCfg implements InputCfg<number> {
 }
 
 export function Input<T>(configuration: InputCfg<T>) {
-	return Component<T>("input")
-	.addToClass("inputs")
-	.access((self) => {
-		self.setAttr("type", configuration.type).setAttr(
-			"placeholder",
-			configuration.placeholder ?? ""
-		);
+	return Component<T>('input')
+		.addToClass('inputs')
+		.access((self) => {
+			self.setAttr('type', configuration.type).setAttr(
+				'placeholder',
+				configuration.placeholder ?? '',
+			);
 
-		if (
-			configuration.value != undefined &&
-			configuration.fallbackValue != undefined
-		)
-		self.createTightBinding(
-			new ValueTBCfg({
-				data: configuration.value,
-				component: self,
-				fallbackValue: configuration.fallbackValue,
-			})
-		);
-	});
+			if (
+				configuration.value != undefined &&
+				configuration.fallbackValue != undefined
+			)
+				self.createTightBinding(
+					new ValueTBCfg({
+						data: configuration.value,
+						component: self,
+						fallbackValue: configuration.fallbackValue,
+					}),
+				);
+		});
 }
 
 /* Label */
 export function Label(labelText: string, labeledItem: Component<any>) {
-	return Component("label")
-	.setText(labelText)
-	.addItems(labeledItem)
+	return Component('label')
+		.setText(labelText)
+		.addItems(labeledItem)
 
-	.addToClass("labels");
+		.addToClass('labels');
 }
 
 /* Link */
 export function Link(label: ValueObject<string>, href: string) {
-	return Text(label, "a").setAttr("href", href);
+	return Text(label, 'a').setAttr('href', href);
 }
 
 /* List */
@@ -982,7 +985,7 @@ export interface ListCfg<T extends Identifiable & Sortable> {
 
 export function List<T extends Identifiable & Sortable>(
 	configuration: ListCfg<T>,
-	compute: (itemData: T) => Component<any>
+	compute: (itemData: T) => Component<any>,
 ) {
 	// Sorting
 	let draggedComponent: Component<any> | undefined = undefined;
@@ -991,18 +994,18 @@ export function List<T extends Identifiable & Sortable>(
 
 	function cleanIndices() {
 		configuration.listData.value
-		.values()
-		.sort((a, b) => a.index.value - b.index.value)
-		.forEach((item, i) => (item.index.value = i));
+			.values()
+			.sort((a, b) => a.index.value - b.index.value)
+			.forEach((item, i) => (item.index.value = i));
 	}
 
 	function startDrag(e: Event, data: T, component: Component<any>) {
-		document.body.addEventListener("mouseup", stopDrag);
-		document.body.addEventListener("touchend", stopDrag);
+		document.body.addEventListener('mouseup', stopDrag);
+		document.body.addEventListener('touchend', stopDrag);
 
 		dragStartTimeout = setTimeout(() => {
 			draggedData = data;
-			draggedComponent = component.addToClass("dragging");
+			draggedComponent = component.addToClass('dragging');
 		}, 200);
 	}
 	function handleDragMove(e: TouchEvent | PointerEvent) {
@@ -1010,9 +1013,9 @@ export function List<T extends Identifiable & Sortable>(
 
 		function getCoordinate(
 			e: TouchEvent | PointerEvent,
-			axis: "clientX" | "clientY"
+			axis: 'clientX' | 'clientY',
 		) {
-			if ("touches" in e) {
+			if ('touches' in e) {
 				return e.touches[0][axis];
 			} else if (axis in e) {
 				return e[axis];
@@ -1022,8 +1025,8 @@ export function List<T extends Identifiable & Sortable>(
 		}
 
 		const elementUnderCursor = document.elementFromPoint(
-			getCoordinate(e, "clientX"),
-			getCoordinate(e, "clientY")
+			getCoordinate(e, 'clientX'),
+			getCoordinate(e, 'clientY'),
 		);
 
 		if (elementUnderCursor == null) return;
@@ -1040,26 +1043,26 @@ export function List<T extends Identifiable & Sortable>(
 		if (dragStartTimeout) clearTimeout(dragStartTimeout);
 		if (draggedData == undefined) return;
 
-		document.body.removeEventListener("mouseup", stopDrag);
-		document.body.removeEventListener("touchend", stopDrag);
+		document.body.removeEventListener('mouseup', stopDrag);
+		document.body.removeEventListener('touchend', stopDrag);
 
 		draggedData = undefined;
 
 		cleanIndices();
 
 		if (draggedComponent == undefined) return;
-		draggedComponent.removeFromClass("dragging");
+		draggedComponent.removeFromClass('dragging');
 		draggedComponent = undefined;
 	}
 
 	// Main
 	return VStack()
-	.setAccessibilityRole("list")
+		.setAccessibilityRole('list')
 
-	.listen("touchmove", (e) => handleDragMove(e as TouchEvent))
-	.listen("mousemove", (e) => handleDragMove(e as PointerEvent))
+		.listen('touchmove', (e) => handleDragMove(e as TouchEvent))
+		.listen('mousemove', (e) => handleDragMove(e as PointerEvent))
 
-	.access((listView) =>
+		.access((listView) =>
 			listView.createBinding(configuration.listData, (listData) => {
 				function removeItemView(itemView: Component<any> | Element) {
 					const removeFn =
@@ -1071,31 +1074,31 @@ export function List<T extends Identifiable & Sortable>(
 				//add new items
 				configuration.listData.value.forEach((itemData, i) => {
 					const oldItemView = document.getElementById(
-						itemData.uuid.toString()
+						itemData.uuid.toString(),
 					);
 
 					const newItemView = compute(itemData)
-					.setID(itemData.uuid)
-					.access((self) => {
-						self.createBinding(
-							unwrapBindable(itemData.index),
-							(newIndex) => {
-								self.setStyle("order", newIndex.toString());
-							}
-						);
+						.setID(itemData.uuid)
+						.access((self) => {
+							self.createBinding(
+								unwrapBindable(itemData.index),
+								(newIndex) => {
+									self.setStyle('order', newIndex.toString());
+								},
+							);
 
-						if (configuration.sortable == true)
-							self.addToClass("draggable-items")
-						.addToClass("rearrangable-items")
+							if (configuration.sortable == true)
+								self.addToClass('draggable-items')
+									.addToClass('rearrangable-items')
 
-						.listen("mousedown", (e) =>
-								startDrag(e, itemData, self)
-							   )
-							   .listen("touchstart", (e) =>
-									   startDrag(e, itemData, self)
-									  );
-					})
-					.animateIn();
+									.listen('mousedown', (e) =>
+										startDrag(e, itemData, self),
+									)
+									.listen('touchstart', (e) =>
+										startDrag(e, itemData, self),
+									);
+						})
+						.animateIn();
 
 					//already exists
 					if (oldItemView != null) return;
@@ -1115,24 +1118,24 @@ export function List<T extends Identifiable & Sortable>(
 
 					removeItemView(itemView);
 				});
-			})
-		   );
+			}),
+		);
 }
 
 /* ListBox */
 export function ListBox<T extends Identifiable & Sortable>(
 	configuration: ListCfg<T>,
-	compute: (itemData: T) => Component<any>
+	compute: (itemData: T) => Component<any>,
 ) {
-	return Box(List(configuration, compute).setAccessibilityRole("listbox"));
+	return Box(List(configuration, compute).setAccessibilityRole('listbox'));
 }
 
 /* ListItem */
 export function ListItem(...children: Component<any>[]) {
 	return Div(...children)
-	.addToClass("list-items")
-	.setAccessibilityRole("listitem")
-	.animateIn();
+		.addToClass('list-items')
+		.setAccessibilityRole('listitem')
+		.animateIn();
 }
 
 /* Meter */
@@ -1149,13 +1152,13 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 	const low = options.low ?? min;
 	const high = options.high ?? max;
 
-	return Component<number>("meter")
-	.setValue(value)
+	return Component<number>('meter')
+		.setValue(value)
 
-	.setAttr("min", min)
-	.setAttr("max", max)
-	.setAttr("low", low)
-	.setAttr("high", high);
+		.setAttr('min', min)
+		.setAttr('max', max)
+		.setAttr('low', low)
+		.setAttr('high', high);
 }
 
 /* Popover */
@@ -1168,7 +1171,7 @@ export interface PopoverCfg {
 
 export function Popover(configuration: PopoverCfg) {
 	// Alignment
-	const PADDING = ".5rem";
+	const PADDING = '.5rem';
 
 	resetPosition();
 
@@ -1181,37 +1184,37 @@ export function Popover(configuration: PopoverCfg) {
 
 		return !(
 			rect.top < rectOfWindow.top ||
-				rect.left < rectOfWindow.left ||
-				rect.right > rectOfWindow.right ||
-				rect.bottom > rectOfWindow.bottom
+			rect.left < rectOfWindow.left ||
+			rect.right > rectOfWindow.right ||
+			rect.bottom > rectOfWindow.bottom
 		);
 	}
 
 	function resetPosition() {
 		configuration.content
-		.setStyle("top", "unset")
-		.setStyle("left", "unset");
+			.setStyle('top', 'unset')
+			.setStyle('left', 'unset');
 	}
 
 	function alignToRightFromLeftEdge() {
-		configuration.content.setStyle("left", `${rectOfToggle().left}px`);
+		configuration.content.setStyle('left', `${rectOfToggle().left}px`);
 	}
 
 	function alignToRightFromRightEdge() {
-		configuration.content.setStyle("left", `${rectOfToggle().right}px`);
+		configuration.content.setStyle('left', `${rectOfToggle().right}px`);
 	}
 
 	function alignToLeftFromLeftEdge() {
 		configuration.content.setStyle(
-			"left",
-			`${rectOfToggle().left - rectOfContent().width}px`
+			'left',
+			`${rectOfToggle().left - rectOfContent().width}px`,
 		);
 	}
 
 	function alignToLeftFromRightEdge() {
 		configuration.content.setStyle(
-			"left",
-			`${rectOfToggle().right - rectOfContent().width}px`
+			'left',
+			`${rectOfToggle().right - rectOfContent().width}px`,
 		);
 	}
 
@@ -1226,8 +1229,8 @@ export function Popover(configuration: PopoverCfg) {
 	function alignY() {
 		//down
 		configuration.content
-		.setStyle("left", "unset")
-		.setStyle("top", `${rectOfToggle().bottom}px`);
+			.setStyle('left', 'unset')
+			.setStyle('top', `${rectOfToggle().bottom}px`);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1235,11 +1238,11 @@ export function Popover(configuration: PopoverCfg) {
 
 		//up
 		configuration.content
-		.setStyle("left", "unset")
-		.setStyle(
-			"top",
-			`${rectOfToggle().top - rectOfContent().height}px`
-		);
+			.setStyle('left', 'unset')
+			.setStyle(
+				'top',
+				`${rectOfToggle().top - rectOfContent().height}px`,
+			);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1247,28 +1250,28 @@ export function Popover(configuration: PopoverCfg) {
 
 	function alignX() {
 		//to left
-		configuration.content.setStyle("top", "unset");
+		configuration.content.setStyle('top', 'unset');
 
 		alignToRightFromRightEdge();
 		if (checkIsOK() == true) return;
 
 		//to right
-		configuration.content.setStyle("top", "unset");
+		configuration.content.setStyle('top', 'unset');
 
 		alignToLeftFromLeftEdge();
 	}
 
 	function applyFallbackAlignment() {
 		configuration.content
-		.setStyle("bottom", PADDING)
-		.setStyle("maxHeight", `calc(100% - 2*${PADDING})`);
+			.setStyle('bottom', PADDING)
+			.setStyle('maxHeight', `calc(100% - 2*${PADDING})`);
 
 		if (rectOfContent().left < rectOfWindow.left)
 			//content overflows left edge
-			configuration.content.setStyle("left", PADDING);
-			if (rectOfContent().left < rectOfWindow.left)
-				//content overflows right edge
-				configuration.content.setStyle("right", PADDING);
+			configuration.content.setStyle('left', PADDING);
+		if (rectOfContent().left < rectOfWindow.left)
+			//content overflows right edge
+			configuration.content.setStyle('right', PADDING);
 	}
 
 	function updateContentPosition() {
@@ -1293,10 +1296,10 @@ export function Popover(configuration: PopoverCfg) {
 			console.log(wasOpened);
 
 			if (wasOpened) {
-				document.body.addEventListener("click", closePopover);
+				document.body.addEventListener('click', closePopover);
 				updateContentPosition();
 			} else {
-				document.body.removeEventListener("click", closePopover);
+				document.body.removeEventListener('click', closePopover);
 			}
 		},
 	});
@@ -1305,15 +1308,15 @@ export function Popover(configuration: PopoverCfg) {
 	return Div(
 		configuration.toggle,
 		configuration.content
-		.addToClass("popover-contents")
-		.setStyle("width", configuration.widthStyle)
+			.addToClass('popover-contents')
+			.setStyle('width', configuration.widthStyle),
 	)
-	.listen("click", (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-	})
-	.addToClass("popover-containers")
-	.toggleAttr("open", configuration.isOpen);
+		.listen('click', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+		})
+		.addToClass('popover-containers')
+		.toggleAttr('open', configuration.isOpen);
 }
 
 /* ProgressBar */
@@ -1324,54 +1327,54 @@ export enum ProgressBarStates {
 
 export function ProgressBar(
 	value: BindableObject<number>,
-	state: BindableObject<ProgressBarStates>
+	state: BindableObject<ProgressBarStates>,
 ) {
-	return Component<number>("progress")
-	.setValue(value)
-	.access((self) =>
+	return Component<number>('progress')
+		.setValue(value)
+		.access((self) =>
 			self
-			.createBinding(state, (state) => {
-				const isIndeterminate =
-					state == ProgressBarStates.Indeterminate;
-				if (isIndeterminate) self.rmAttr("value");
-				else self.value = value.value;
-			})
-			.updateBinding(state)
-		   );
+				.createBinding(state, (state) => {
+					const isIndeterminate =
+						state == ProgressBarStates.Indeterminate;
+					if (isIndeterminate) self.rmAttr('value');
+					else self.value = value.value;
+				})
+				.updateBinding(state),
+		);
 }
 
 /* RadioButton */
 export function RadioButton<T>(
 	selectionCfg: DataSelection<T>,
 	label: string,
-	value: T
+	value: T,
 ) {
-	return Text(label, "label").addItemsBefore(
+	return Text(label, 'label').addItemsBefore(
 		(
 			Input({
-				type: "radio",
+				type: 'radio',
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
 			}) as CheckableComponent<undefined>
 		)
-		.access((self) =>
+			.access((self) =>
 				self.createSelectionBinding(
 					new CheckSelectionCfg({
 						selection: selectionCfg,
 						component: self,
 						ownValue: value,
 						isExclusive: true,
-					})
-				)
-			   )
-			   .setAttr("name", selectionCfg.uuid)
+					}),
+				),
+			)
+			.setAttr('name', selectionCfg.uuid),
 	);
 }
 
 /* ScrollArea */
 export function ScrollArea(...children: Component<any>[]) {
-	return Div(...children).addToClass("scroll-areas");
+	return Div(...children).addToClass('scroll-areas');
 }
 
 /* Select */
@@ -1382,30 +1385,30 @@ export interface SelectOption {
 
 export function Select(
 	value: BindableObject<string>,
-	options: BindableObject<SelectOption[]>
+	options: BindableObject<SelectOption[]>,
 ) {
 	const optionViews = new ComputedState<Component<any>[]>({
 		statesToBind: [options],
 		initialValue: [],
 		compute: (self) => {
 			self.value = options.value.map((option) =>
-										   Text(option.label, "option").setValue(option.value)
-										  );
+				Text(option.label, 'option').setValue(option.value),
+			);
 		},
 	});
 
-	return Component("select")
-	.setItems(optionViews)
-	.addToClass("selects")
-	.access((self) =>
+	return Component('select')
+		.setItems(optionViews)
+		.addToClass('selects')
+		.access((self) =>
 			self.createTightBinding(
 				new ValueTBCfg({
 					component: self,
 					data: value,
-					fallbackValue: "",
-				})
-			)
-		   );
+					fallbackValue: '',
+				}),
+			),
+		);
 }
 
 /* SelectingListItem */
@@ -1419,35 +1422,35 @@ export function SelectingListItem<T>(
 	...children: Component<any>[]
 ) {
 	return ListItem(...children)
-	.setAccessibilityRole("option")
+		.setAccessibilityRole('option')
 
-	.access((self) => {
-		const selectionItemCfg = new ValueSelectionCfg<T>({
-			component: self,
-			selection: configuration.selection,
+		.access((self) => {
+			const selectionItemCfg = new ValueSelectionCfg<T>({
+				component: self,
+				selection: configuration.selection,
 
-			getView: () => {
-				return self.getAttribute("aria-selected") == "true";
-			},
-			setView: (isSelected) => {
-				self.setAttr("aria-selected", isSelected);
-			},
+				getView: () => {
+					return self.getAttribute('aria-selected') == 'true';
+				},
+				setView: (isSelected) => {
+					self.setAttr('aria-selected', isSelected);
+				},
 
-			isExclusive: true,
-			ownValue: configuration.ownValue,
+				isExclusive: true,
+				ownValue: configuration.ownValue,
 
-			changeEventName: "click",
+				changeEventName: 'click',
+			});
+
+			self.listen('click', () => {
+				selectionItemCfg.setModel(true);
+			}).createSelectionBinding(selectionItemCfg);
 		});
-
-		self.listen("click", () => {
-			selectionItemCfg.setModel(true);
-		}).createSelectionBinding(selectionItemCfg);
-	});
 }
 
 /* Separator */
 export function Separator() {
-	return Component("hr").addToClass("separators");
+	return Component('hr').addToClass('separators');
 }
 
 /* Sheet */
@@ -1456,16 +1459,16 @@ export function Sheet(
 	...children: Component<any>[]
 ) {
 	return Container(
-		"dialog",
+		'dialog',
 		Div(...children)
-		.addToClass("sheet-contents")
-		.listen("click", (e) => e.stopPropagation())
+			.addToClass('sheet-contents')
+			.listen('click', (e) => e.stopPropagation()),
 	)
-	.addToClass("sheet-containers")
-	.toggleAttr("open", isOpen)
-	.listen("click", () => {
-		isOpen.value = false;
-	});
+		.addToClass('sheet-containers')
+		.toggleAttr('open', isOpen)
+		.listen('click', () => {
+			isOpen.value = false;
+		});
 }
 
 /* Slider */
@@ -1477,58 +1480,58 @@ export interface SliderOpts {
 
 export function Slider(
 	value: BindableObject<number>,
-	options: SliderOpts = {}
+	options: SliderOpts = {},
 ) {
 	return Input<number>({
-		type: "range",
+		type: 'range',
 		fallbackValue: 0,
 		value,
 		placeholder: undefined,
 	}).access((self) =>
-	self
-	.setAttr("min", options.min ?? 0)
-	.setAttr("max", options.max ?? 100)
-	.setAttr("step", options.step ?? 1)
-			 );
+		self
+			.setAttr('min', options.min ?? 0)
+			.setAttr('max', options.max ?? 100)
+			.setAttr('step', options.step ?? 1),
+	);
 }
 
 /* Spacer */
 export function Spacer() {
-	return Div().addToClass("spacers");
+	return Div().addToClass('spacers');
 }
 
 /* Text */
 export function Text(
 	value: ValueObject<string>,
-	tagName: keyof HTMLElementTagNameMap = "span"
+	tagName: keyof HTMLElementTagNameMap = 'span',
 ) {
 	return Component(tagName).setText(value);
 }
 
 /* Textarea */
 export function Textarea(value: BindableObject<string>, placeholder: string) {
-	return Component<string>("textarea")
-	.addToClass("textareas")
-	.access((self) =>
+	return Component<string>('textarea')
+		.addToClass('textareas')
+		.access((self) =>
 			self
-			.createTightBinding(
-				new ValueTBCfg({
-					component: self,
-					data: value,
-					fallbackValue: "",
-				})
-			)
+				.createTightBinding(
+					new ValueTBCfg({
+						component: self,
+						data: value,
+						fallbackValue: '',
+					}),
+				)
 
-			.setAttr("placeholder", placeholder)
-		   );
+				.setAttr('placeholder', placeholder),
+		);
 }
 
 /* VisualGroup */
 export function VisualGroup(...children: Component<any>[]) {
-	return VStack(...children).addToClass("visual-groups");
+	return VStack(...children).addToClass('visual-groups');
 }
 
 /* VStack */
 export function VStack(...children: Component<any>[]) {
-	return Div(...children).addToClass("stacks-vertical");
+	return Div(...children).addToClass('stacks-vertical');
 }

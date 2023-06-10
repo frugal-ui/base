@@ -7,14 +7,14 @@
 
 	--clickable: hsl(0, 0%, 96%);
 	--pressed: hsl(0, 0%, 87%);
-	--typeable: hsl(0, 0%, 90%);
+	--typeable: hsl(0, 0%, 95%);
 
 	--destructive: rgb(220, 0, 0);
 	--on-destructive: white;
 	--accent: hsl(237, 100%, 59%);
 	--on-accent: white;
 
-	--shadows: hsla(0, 0%, 0%, .3);
+	--shadows: hsla(0, 0%, 0%, .15);
 	--lines: hsla(0, 0%, 0%, .2);
 	--backdrop: hsla(0, 0%, 0%, .6);
 }
