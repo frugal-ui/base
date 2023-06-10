@@ -2,88 +2,81 @@
     BASIC 
 */
 @keyframes appear {
-	0% {
-		transform: scale(0);
-		opacity: 0;
-	}
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
 
-	90% {
-		transform: scale(1.05);
-		opacity: 1;
-	}
+    90% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
 }
 
 @keyframes fade-in {
-	0% {
-		opacity: 0;
-	}
+    0% {
+        opacity: 0;
+    }
 }
 
 @keyframes sheet {
-	0% {
-		transform: translateY(2rem);
-	}
+    0% {
+        transform: translateY(2rem);
+    }
 }
 
 @keyframes animate-in {
-	0% {
-		transform: scaleY(0);
-		margin-bottom: calc(-1 * var(--element-height));
-		opacity: 0;
-	}
+    0% {
+        transform: scaleY(0);
+        margin-bottom: calc(-1 * var(--element-height));
+        opacity: 0;
+    }
 
-	50%,
-	100% {
-		transform: scaleY(1);
-		margin-bottom: 0rem;
-		opacity: 1;
-	}
+    50%,
+    100% {
+        transform: scaleY(1);
+        margin-bottom: 0rem;
+        opacity: 1;
+    }
 }
 
 @keyframes animate-out {
-	0% {
-		transform: scaleY(1);
-		margin-bottom: 0rem;
-		opacity: 1;
-	}
+    0% {
+        transform: scaleY(1);
+        margin-bottom: 0rem;
+        opacity: 1;
+    }
 
-	50%,
-	100% {
-		transform: scaleY(0);
-		margin-bottom: calc(-1 * var(--element-height));
-		opacity: 0;
-	}
+    50%,
+    100% {
+        transform: scaleY(0);
+        margin-bottom: calc(-1 * var(--element-height));
+        opacity: 0;
+    }
 }
 
 :root {
-	--corners: 0.3rem;
+    --corners: 0.2rem;
 
-	--padding-md: 0.6rem 0.9rem;
-	--padding-lg: 0.9rem 0.9rem;
-}
-
-@media (pointer: fine) {
-	:root {
-		--padding-md: 0.4rem 0.6rem;
-		--padding-lg: 0.6rem 0.9rem;
-	}
+    --padding-md: 0.6rem 0.9rem;
+    --padding-lg: 0.9rem 0.9rem;
 }
 
 * {
-	accent-color: var(--accent);
-	color: var(--text);
-	font-size: medium;
-	font-family: sans-serif, sans;
+    accent-color: var(--accent);
+    color: var(--text);
+    font-size: medium;
+    font-family: sans-rg, sans-serif;
 }
 
 html {
-	background: var(--background);
+    background: var(--background);
 }
 
 button[disabled],
 input[disabled] {
-	opacity: 0.6;
-	cursor: not-allowed;
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* 
@@ -92,50 +85,50 @@ input[disabled] {
 
 /* Animation */
 .animating-in {
-	transform-origin: top;
-	animation: animate-in 0.5s;
+    transform-origin: top;
+    animation: animate-in 0.5s;
 }
 
 .animating-out {
-	transform-origin: top;
-	animation: animate-out 0.5s;
+    transform-origin: top;
+    animation: animate-out 0.5s;
 }
 
 .draggable-items {
-	transition: transform 0.2s, border-radius 0.2s;
+    transition: transform 0.2s, border-radius 0.2s;
 }
 
 /* Checkable */
 .checkable-items {
-	background-color: var(--checkable);
+    background-color: var(--checkable);
 }
 
 /* Draggable */
 .draggable-items {
-	-webkit-user-drag: none;
-	user-drag: none;
-	-webkit-user-select: none;
-	user-select: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .draggable-items.dragging {
-	transform: scale(0.95);
-	border-radius: var(--corners);
+    transform: scale(0.95);
+    border-radius: var(--corners);
 }
 
 /* Typeable */
 .inputs:not([type='checkbox']):not([type='radio']):not([type='range']),
 .textareas,
 .typeable-items {
-	background-color: var(--typeable);
-	box-shadow: 0px 0px 2px var(--shadows) inset;
-	padding: var(--padding-md);
+    background-color: var(--inset);
+    box-shadow: 0px 0px 2px var(--shadows) inset;
+    padding: var(--padding-md);
 
-	border: 1px solid var(--lines);
-	border-radius: var(--corners);
+    border: 1px solid var(--lines);
+    border-radius: var(--corners);
 
-	font-size: medium;
-	font-family: sans-serif, sans;
+    font-size: medium;
+    font-family: sans-md, sans;
 }
 
 /* 
@@ -144,194 +137,217 @@ input[disabled] {
 
 /* Box */
 .boxes {
-	box-shadow: 0px 0px 3px var(--shadows) inset;
-	border: 1px solid var(--lines);
+    box-shadow: 0px 0px 3px var(--shadows) inset;
+    border: 1px solid var(--lines);
 
-	border-radius: var(--corners);
+    border-radius: var(--corners);
+    background-color: var(--inset);
 }
 
 /* Button-like */
 .buttons,
 .selects {
-	font-size: medium;
+    font-size: medium;
+	font-family: mono-md;
+    color: var(--on-clickable);
+
+    border: 1px solid var(--lines);
+    border-radius: var(--corners);
+    padding: var(--padding-md);
 }
 
 .buttons {
-	all: unset;
-
-	color: var(--text);
-
-	border-radius: var(--corners);
-	padding: var(--padding-md);
-
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    background-color: transparent;
 }
 
 .buttons span {
-	color: inherit;
-	cursor: default;
+    color: inherit;
+    font-family: inherit;
+	cursor: inherit;
 }
 
 .buttons span:empty {
-	display: none;
+    display: none;
 }
 
 .selects {
-	background-color: var(--clickable);
-	border-radius: var(--corners);
-	border: none;
-	padding: var(--padding-md);
-}
-
-.selects,
-.buttons:not(.buttons-transparent, .buttons-pressed) {
-	box-shadow: 0px 0px 3px var(--shadows);
+    background-color: var(--clickable);
 }
 
 .buttons-normal {
-	background-color: var(--clickable);
+    background-color: var(--clickable);
+}
+
+.buttons-transparent {
+    border-color: transparent;
 }
 
 .buttons.buttons-primary {
-	background: var(--accent);
-	color: var(--on-accent);
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--on-accent);
 }
 
 .buttons.buttons-destructive {
-	background: var(--destructive);
-	color: var(--on-destructive);
+    background: var(--destructive);
+    color: var(--on-destructive);
+    border-color: var(--on-destructive);
 }
 
 .buttons:not([disabled]):active,
 .buttons-pressed {
-	background: var(--pressed);
-	box-shadow: 0px 0px 4px var(--shadows) inset;
-	color: var(--color);
+    background: var(--pressed);
+	color: var(--on-clickable);
+	border-color: var(--on-clickable);
 }
 
 /* ButtonGroup */
 .button-groups {
-	box-shadow: 0px 0px 5px var(--shadows);
-	border-radius: var(--corners);
-
-	display: flex;
+    border-radius: var(--corners);
+    display: flex;
 }
 
 .button-groups .buttons {
-	width: 100%;
-	flex: 1;
-	border-radius: 0rem;
+    width: 100%;
+    flex: 1;
+    border-radius: 0rem;
+
+    border-left-width: 0px;
+    border-right-width: 0px;
 }
 
 .button-groups .buttons:not(.buttons-pressed) {
-	box-shadow: none;
+    box-shadow: none;
 }
 
 .button-groups .buttons:first-child {
-	border-top-left-radius: var(--corners);
-	border-bottom-left-radius: var(--corners);
+    border-top-left-radius: var(--corners);
+    border-bottom-left-radius: var(--corners);
+
+	border-left-width: 1px;
 }
 
 .button-groups .buttons:last-child {
-	border-top-right-radius: var(--corners);
-	border-bottom-right-radius: var(--corners);
+    border-top-right-radius: var(--corners);
+    border-bottom-right-radius: var(--corners);
+
+	border-right-width: 1px;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5 {
+	font-family: headings, mono-md;
+	text-transform: uppercase;
+}
+
+h1 {
+	font-size: x-large;
+}
+
+h2 {
+	font-size: larger;
+}
+
+h3 {
+	font-size: large;
 }
 
 /* Icon */
 .icons {
-	font-size: 1.2rem;
+    font-size: 1.2rem;
 }
 
 /* Label */
 .labels {
-	display: flex;
-	flex-direction: column;
+    display: flex;
+    flex-direction: column;
 
-	font-size: small;
+    font-size: small;
 }
 
 /* ListItem */
 .list-items {
-	width: 100%;
-	padding: var(--padding-md);
+    width: 100%;
+    padding: var(--padding-md);
 
-	display: flex;
-	flex-shrink: 0;
+    display: flex;
+    flex-shrink: 0;
 
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .list-items * {
-	color: inherit;
+    color: inherit;
 }
 
 .list-items[aria-selected='true'] {
-	background: var(--accent);
-	color: var(--on-accent);
+    background: var(--accent);
+    color: var(--on-accent);
 }
 
 /* Overlays */
 .popover-contents,
 .sheet-contents {
-	background-color: var(--background-alt);
-	box-shadow: 0px 0px 7px var(--shadows);
+    background-color: var(--background-alt);
+    box-shadow: 0px 0px 7px var(--shadows);
 
-	border: 1px solid var(--lines);
-	border-radius: var(--corners);
+    border: 1px solid var(--lines);
+    border-radius: var(--corners);
 }
 
 .popover-containers[open] .popover-contents {
-	animation: appear 0.2s;
+    animation: appear 0.2s;
 }
 
 .sheet-contents {
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 
-	animation: sheet 0.2s ease-out;
+    animation: sheet 0.2s ease-out;
 }
 
 .sheet-containers {
-	position: fixed;
-	top: 0rem;
-	left: 0rem;
+    position: fixed;
+    top: 0rem;
+    left: 0rem;
 
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 .sheet-containers[open] {
-	border: none;
+    border: none;
 
-	display: flex;
-	align-items: end;
+    display: flex;
+    align-items: end;
 
-	padding: 0rem;
-	padding-top: 2rem;
+    padding: 0rem;
+    padding-top: 2rem;
 
-	background-color: var(--backdrop);
+    background-color: var(--backdrop);
 
-	animation: fade-in 0.1s;
+    animation: fade-in 0.1s;
 }
 
 /* Separator */
 .separators {
-	width: 100%;
-	border: none;
-	border-bottom: 1px solid var(--lines);
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--lines);
 }
 
 /* Textarea */
 .textareas {
-	resize: none;
+    resize: none;
 }
 
 /* VisualGroup */
 .visual-groups {
-	background-color: var(--background-alt);
-	border-radius: var(--corners);
-	overflow: hidden;
+    background-color: var(--background-alt);
+    border-radius: var(--corners);
+    overflow: hidden;
 }

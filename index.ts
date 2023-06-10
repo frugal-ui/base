@@ -1,8 +1,11 @@
 import 'material-icons/iconfont/round.css';
 
+import { PrefixedCSSPropertyNames } from 'css-property-names';
+
 import AccessibilityRoleMap from './assets/roles.js';
 import './styles/base.css';
 import './styles/color.css';
+import './styles/fonts.css';
 import './styles/theme.css';
 
 /*
@@ -421,9 +424,14 @@ export function unwrapBindable<T>(
  */
 // GENERAL
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
+export type Styleable = {
+	[property in keyof typeof PrefixedCSSPropertyNames]: (
+		value: string,
+	) => Component<any>;
+};
 
 /** UI Component. */
-export interface Component<ValueType> extends HTMLElement {
+export interface Component<ValueType> extends HTMLElement, Styleable {
 	value: ValueType | undefined;
 	access: (accessFn: (self: this) => void) => this;
 	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
@@ -494,6 +502,17 @@ export function Component<ValueType>(
 ): Component<ValueType> {
 	//create
 	const component = document.createElement(tagName) as Component<ValueType>;
+
+	//styles
+	Object.entries(PrefixedCSSPropertyNames).forEach((entry) => {
+		const componentProperty = entry[0];
+		const cssProperty = entry[1];
+
+		component[componentProperty as keyof Styleable] = (value: string) => {
+			component.setStyle(cssProperty as keyof CSSStyleDeclaration, value);
+			return component;
+		};
+	});
 
 	//methods
 	component.access = (fn) => {
@@ -1344,12 +1363,14 @@ export function ProgressBar(
 }
 
 /* RadioButton */
-export function RadioButton<T>(
-	selectionCfg: DataSelection<T>,
-	label: string,
-	value: T,
-) {
-	return Text(label, 'label').addItemsBefore(
+export interface RadioButtonCfg<T> {
+	selectionCfg: DataSelection<T>;
+	label: string;
+	value: T;
+}
+
+export function RadioButton<T>(configuration: RadioButtonCfg<T>) {
+	return Text(configuration.label, 'label').addItemsBefore(
 		(
 			Input({
 				type: 'radio',
@@ -1361,14 +1382,14 @@ export function RadioButton<T>(
 			.access((self) =>
 				self.createSelectionBinding(
 					new CheckSelectionCfg({
-						selection: selectionCfg,
+						selection: configuration.selectionCfg,
 						component: self,
-						ownValue: value,
+						ownValue: configuration.value,
 						isExclusive: true,
 					}),
 				),
 			)
-			.setAttr('name', selectionCfg.uuid),
+			.setAttr('name', configuration.selectionCfg.uuid),
 	);
 }
 
