@@ -1,11 +1,11 @@
-import 'material-icons/iconfont/round.css';
+import "material-icons/iconfont/round.css";
 
-import AccessibilityRoleMap from './assets/roles.js';
-import './styles/base.css';
-import './styles/color.css';
-import './styles/theme.css';
+import AccessibilityRoleMap from "./assets/roles.js";
+import "./styles/base.css";
+import "./styles/color.css";
+import "./styles/theme.css";
 
-/* 
+/*
  * MAIN
  */
 
@@ -20,14 +20,14 @@ export class UUID {
 	readonly value: string;
 
 	constructor() {
-		let uuid = '';
-		const chars = '0123456789abcdef';
+		let uuid = "";
+		const chars = "0123456789abcdef";
 
 		for (let i = 0; i < 36; i++) {
 			if (i === 8 || i === 13 || i === 18 || i === 23) {
-				uuid += '-';
+				uuid += "-";
 			} else if (i === 14) {
-				uuid += '4';
+				uuid += "4";
 			} else if (i === 19) {
 				uuid += chars[(Math.random() * 4) | 8];
 			} else {
@@ -60,23 +60,31 @@ export class IdentifiableObjectMap<T extends Identifiable> {
 
 	get = (id: string | UUID) => {
 		return this.map.get(id.toString());
-	}
+	};
 
 	set = (value: T) => {
 		this.map.set(value.uuid.toString(), value);
-	}
+	};
 
 	remove = (value: T) => {
 		this.map.delete(value.uuid.toString());
-	}
+	};
+
+	values = () => {
+		return Array.from(this.map.values());
+	};
+
+	getSorted = (compareFn: (a: T, b: T) => number) => {
+		return this.values().sort(compareFn);
+	};
 
 	forEach = (callbackFn: (value: T, index: number, array: T[]) => void) => {
-		Array.from(this.map.values()).forEach(callbackFn)
-	}
+		this.values().forEach(callbackFn);
+	};
 }
 
-/* 
- *  REACTIVITY 
+/*
+ *  REACTIVITY
  */
 // VALUE
 /** Object holding a value. Used by UI components. */
@@ -92,6 +100,7 @@ export interface Binding<T> {
 /** Action executed when bound object changes. */
 export type BindingAction<T> = (newValue: T) => void;
 
+//tight binding
 export interface TightBindingCfgOpts<T> {
 	readonly data: BindableObject<T>;
 	readonly component: Component<any>;
@@ -134,7 +143,7 @@ export class ValueTBCfg<T> extends TightBindingCfg<T> {
 			data: configuration.data,
 			component: configuration.component,
 			fallbackValue: configuration.fallbackValue,
-			changeEventName: 'input',
+			changeEventName: "input",
 
 			getViewProperty: () => {
 				return this.component.value ?? this.defaultValue;
@@ -154,7 +163,7 @@ export interface CheckTBCfgOpts {
 export class CheckTBCfg extends ValueTBCfg<boolean> {
 	readonly component: CheckableComponent<any>;
 
-	readonly changeEventName: keyof HTMLElementEventMap = 'change';
+	readonly changeEventName: keyof HTMLElementEventMap = "change";
 
 	constructor(configuration: CheckTBCfgOpts) {
 		super({
@@ -173,15 +182,16 @@ export class CheckTBCfg extends ValueTBCfg<boolean> {
 	};
 }
 
-export interface DataSelectionCfg<T> {
-	uuid: UUID;
-	selectedItems: BindableObject<T[]>;
+//selection
+export class DataSelection<T> {
+	readonly uuid = new UUID();
+	selectedItems = new State<T[]>([]);
 }
 
-export interface ViewItemSelectionCfgOpts<T> {
+export interface ValueSelectionCfgOpts<T> {
 	component: Component<any>;
 	ownValue: T;
-	selectionCfg: DataSelectionCfg<T>;
+	selection: DataSelection<T>;
 	changeEventName: keyof HTMLElementEventMap;
 	isExclusive?: boolean;
 
@@ -190,23 +200,24 @@ export interface ViewItemSelectionCfgOpts<T> {
 }
 
 /** Add or remove ownValue on selectedItems */
-export class SelectionItemCfg<T> {
+export class ValueSelectionCfg<T> {
 	readonly component: Component<any>;
-	readonly selectionCfg: DataSelectionCfg<T>;
+	readonly selectionCfg: DataSelection<T>;
 	readonly ownValue: T;
 	readonly changeEventName: keyof HTMLElementEventMap;
 	isExclusive = false;
 
-	constructor(configuration: ViewItemSelectionCfgOpts<T>) {
+	constructor(configuration: ValueSelectionCfgOpts<T>) {
 		this.component = configuration.component;
-		this.selectionCfg = configuration.selectionCfg;
+		this.selectionCfg = configuration.selection;
 		this.ownValue = configuration.ownValue;
 		this.changeEventName = configuration.changeEventName;
 
 		this.getView = configuration.getView;
 		this.setView = configuration.setView;
 
-		if (configuration.isExclusive) this.isExclusive = configuration.isExclusive;
+		if (configuration.isExclusive)
+			this.isExclusive = configuration.isExclusive;
 	}
 
 	getOwnIndex = () => {
@@ -224,7 +235,9 @@ export class SelectionItemCfg<T> {
 			if (this.getOwnIndex() != -1) return; //already selected
 
 			if (this.isExclusive == true)
-				return (this.selectionCfg.selectedItems.value = [this.ownValue]);
+				return (this.selectionCfg.selectedItems.value = [
+					this.ownValue,
+				]);
 			else this.selectionCfg.selectedItems.value.push(this.ownValue);
 		} else {
 			if (this.getOwnIndex() == -1) return; //already deselected
@@ -235,20 +248,20 @@ export class SelectionItemCfg<T> {
 	};
 }
 
-export interface CheckableSelectionItemCfgOpts<T> {
+export interface CheckSelectionCfgOpts<T> {
 	component: CheckableComponent<any>;
 	ownValue: T;
-	selectionCfg: DataSelectionCfg<T>;
+	selection: DataSelection<T>;
 	isExclusive?: boolean;
 }
 /** SelectionCfg for checkable components */
-export class CheckableSelectionItemCfg<T> extends SelectionItemCfg<T> {
+export class CheckSelectionCfg<T> extends ValueSelectionCfg<T> {
 	readonly component: CheckableComponent<any>;
 
-	constructor(configuration: CheckableSelectionItemCfgOpts<T>) {
+	constructor(configuration: CheckSelectionCfgOpts<T>) {
 		super({
 			...configuration,
-			changeEventName: 'change',
+			changeEventName: "change",
 
 			getView: () => {
 				return this.component.checked;
@@ -283,10 +296,10 @@ export class BindableObject<T> {
 	}
 
 	/* reactivity */
-	triggerBinding = (binding: Binding<T>) => { };
-	triggerAll = () => { };
-	addBinding = (binding: Binding<T>) => { };
-	removeBinding = (binding: Binding<T>) => { };
+	triggerBinding = (binding: Binding<T>) => {};
+	triggerAll = () => {};
+	addBinding = (binding: Binding<T>) => {};
+	removeBinding = (binding: Binding<T>) => {};
 }
 
 /**  Can be bound, working with one item. Used by unwrapBindable(). */
@@ -296,34 +309,34 @@ export class BindableDummy<T> extends BindableObject<T> {
 	/* reactivity */
 	triggerBinding = () => {
 		if (this.action) this.action(this._value);
-	}
+	};
 	triggerAll = () => {
 		if (this.action) this.action(this._value);
-	}
+	};
 	addBinding = (binding: Binding<T>) => {
 		this.action = binding.action;
-	}
+	};
 }
 
 /** Reactive Variable. Bindings will be triggered on change. */
 export class State<T> extends BindableObject<T> {
-	private bindings = new Map<Binding<T>['uuid'], Binding<T>['action']>();
+	private bindings = new Map<Binding<T>["uuid"], Binding<T>["action"]>();
 
 	/* reactivity */
 	triggerBinding = (binding: Binding<T>) => {
 		binding.action(this.value);
-	}
+	};
 	triggerAll = () => {
 		this.bindings.forEach((action) => {
 			action(this.value);
 		});
-	}
+	};
 	addBinding = (binding: Binding<T>) => {
 		this.bindings.set(binding.uuid, binding.action);
-	}
+	};
 	removeBinding = (binding: Binding<T>) => {
 		this.bindings.delete(binding.uuid);
-	}
+	};
 }
 
 export interface ComputedStateCfg<T> {
@@ -341,10 +354,10 @@ export class ComputedState<T> extends State<T> {
 			action: () => configuration.compute(this),
 		};
 
-			configuration.statesToBind.forEach((bindable) => {
-				bindable.addBinding(binding);
-				bindable.triggerBinding(binding);
-			});
+		configuration.statesToBind.forEach((bindable) => {
+			bindable.addBinding(binding);
+			bindable.triggerBinding(binding);
+		});
 	}
 }
 
@@ -369,7 +382,9 @@ export class ProxyState<T, O> extends State<T> {
 		const binding: Binding<O> = {
 			uuid: new UUID(),
 			action: () => {
-				this._value = configuration.convertFromOriginal(this.original.value);
+				this._value = configuration.convertFromOriginal(
+					this.original.value
+				);
 				this.triggerAll();
 			},
 		};
@@ -402,8 +417,8 @@ export function unwrapBindable<T>(
 }
 
 /* 
-   COMPONENTS 
-   */
+ *COMPONENTS 
+ */
 // GENERAL
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 
@@ -414,12 +429,6 @@ export interface Component<ValueType> extends HTMLElement {
 	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
 	animateIn: () => this;
 	animateOut: () => void;
-
-	//children
-	addItems: (...children: Component<any>[]) => this;
-	addItemsBefore: (...children: Component<any>[]) => this;
-	clear: () => this;
-	setItems: (children: ValueObject<Component<any>[]>) => this;
 
 	//attributes
 	setID: (id: string | UUID) => this;
@@ -434,6 +443,12 @@ export interface Component<ValueType> extends HTMLElement {
 		condition: ValueObject<boolean>
 	) => this;
 	setStyle: (property: keyof CSSStyleDeclaration, value: string) => this;
+
+	//children
+	addItems: (...children: Component<any>[]) => this;
+	addItemsBefore: (...children: Component<any>[]) => this;
+	clear: () => this;
+	setItems: (children: ValueObject<Component<any>[]>) => this;
 
 	//content
 	setText: (text: ValueObject<string>) => this;
@@ -450,6 +465,12 @@ export interface Component<ValueType> extends HTMLElement {
 		handler: ComponentEventHandler
 	) => this;
 
+	//navigation
+	setVisibleIfSelected: (
+		ownIndex: number,	
+		currentIndex: BindableObject<number>
+	) => this;
+
 	//state
 	/** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
 	bindings: Map<string, Binding<any>>;
@@ -457,7 +478,7 @@ export interface Component<ValueType> extends HTMLElement {
 		bindable: BindableObject<T>,
 		action: BindingAction<T>
 	) => this;
-	createSelectionBinding: <T>(configuration: SelectionItemCfg<T>) => this;
+	createSelectionBinding: <T>(configuration: ValueSelectionCfg<T>) => this;
 	createTightBinding: <T>(configuration: TightBindingCfg<T>) => this;
 	removeBinding: <T>(bindable: BindableObject<T>) => this;
 	updateBinding: <T>(bindable: BindableObject<T>) => this;
@@ -479,66 +500,43 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.setAccessibilityRole = (roleName) => {
-		component.setAttr('role', roleName);
+		component.setAttr("role", roleName);
 		return component;
 	};
 	component.animateIn = () => {
 		//get rect for animation
 		document.body.appendChild(component);
-		component.style.setProperty('--element-height', `${component.offsetHeight}px`);
+		component.style.setProperty(
+			"--element-height",
+			`${component.offsetHeight}px`
+		);
 		component.remove();
 
-		component.addToClass('animating-in');
+		component.addToClass("animating-in");
 
-		setTimeout(() => component.removeFromClass('animating-in'), 400)
+		setTimeout(() => component.removeFromClass("animating-in"), 400);
 
 		return component;
-	}
+	};
 	component.animateOut = () => {
-		component.style.setProperty('--element-height', `${component.offsetHeight}px`);
+		component.style.setProperty(
+			"--element-height",
+			`${component.offsetHeight}px`
+		);
 
 		//animate
-		component.addToClass('animating-out');
+		component.addToClass("animating-out");
 
 		//remove after animation
 		setTimeout(() => component.remove(), 400);
-	}
-
-	component.addItems = (...children) => {
-		children.forEach(child => {
-			component.appendChild(child);
-		})
-		return component;
-	};
-	component.addItemsBefore = (...children) => {
-		children.forEach(child => {
-			component.insertBefore(child, component.firstChild);
-		})
-		return component;
-	};
-	component.clear = () => {
-		component.innerHTML = '';
-		return component;
-	};
-	component.setItems = (children) => {
-		const bindable = unwrapBindable(children);
-
-		component
-		.createBinding(bindable, (children) => {
-			component
-			.clear()
-			.addItems(...children);
-		})
-		.updateBinding(bindable);
-
-		return component;
 	};
 
+	//attributes
 	component.setID = (id) => {
 		component.id = id.toString();
 		return component;
 	};
-	component.setAttr = (key, value = '') => {
+	component.setAttr = (key, value = "") => {
 		const bindable = unwrapBindable(value);
 
 		component
@@ -558,17 +556,15 @@ export function Component<ValueType>(
 
 		component
 		.createBinding(bindable, (newValue) => {
-			if (newValue == true)
-				component.setAttribute(key, '');
-			else
-				component.removeAttribute(key);
+			if (newValue == true) component.setAttribute(key, "");
+			else component.removeAttribute(key);
 		})
 		.updateBinding(bindable);
 
 		return component;
 	};
 	component.resetClasses = () => {
-		component.className = '';
+		component.className = "";
 		return component;
 	};
 	component.removeFromClass = (className) => {
@@ -595,6 +591,36 @@ export function Component<ValueType>(
 		return component;
 	};
 
+	//children
+	component.addItems = (...children) => {
+		children.forEach((child) => {
+			component.appendChild(child);
+		});
+		return component;
+	};
+	component.addItemsBefore = (...children) => {
+		children.forEach((child) => {
+			component.insertBefore(child, component.firstChild);
+		});
+		return component;
+	};
+	component.clear = () => {
+		component.innerHTML = "";
+		return component;
+	};
+	component.setItems = (children) => {
+		const bindable = unwrapBindable(children);
+
+		component
+		.createBinding(bindable, (children) => {
+			component.clear().addItems(...children);
+		})
+		.updateBinding(bindable);
+
+		return component;
+	};
+
+	//content
 	component.setText = (text) => {
 		const bindable = unwrapBindable(text);
 
@@ -629,6 +655,7 @@ export function Component<ValueType>(
 		return component;
 	};
 
+	//events
 	component.listen = (eventName, handler) => {
 		component.addEventListener(eventName, handler);
 		return component;
@@ -638,6 +665,20 @@ export function Component<ValueType>(
 		return component;
 	};
 
+	//navigation
+	component.setVisibleIfSelected = (ownIndex, currentIndex) => {
+		component
+		.createBinding(currentIndex, () => {
+			const isOpen = currentIndex.value == ownIndex;
+			component.toggleAttribute("open", isOpen);
+		})
+		.updateBinding(currentIndex)
+		.addToClass("scenes");
+
+		return component;
+	};
+
+	//state
 	component.bindings = new Map();
 	component.createBinding = (bindable, action) => {
 		const binding = {
@@ -711,8 +752,8 @@ export function Component<ValueType>(
 /* Accordion */
 export function Accordion(label: string, ...children: Component<any>[]) {
 	return Container(
-		'details',
-		Text(label, 'summary'),
+		"details",
+		Text(label, "summary"),
 
 		...children
 	);
@@ -728,30 +769,31 @@ export function AutoComplete<T>(
 		statesToBind: [optionData],
 		initialValue: [],
 		compute: (self) => {
-			self.value = optionData.value.map((option) => Text(option, 'option'));
+			self.value = optionData.value.map((option) =>
+											  Text(option, "option")
+											 );
 		},
 	});
 
 	return Div(
-		Component('datalist').setID(uuid).setItems(optionViews),
+		Component("datalist").setID(uuid).setItems(optionViews),
 
-		input.setAttr('list', uuid)
+		input.setAttr("list", uuid)
 	);
 }
 
 /* Box */
 export function Box(...children: Component<any>[]) {
-	return Div(...children)
-	.addToClass('boxes');
+	return Div(...children).addToClass("boxes");
 }
 
 /* Button */
 export enum ButtonStyles {
-	Transparent = 'buttons-transparent',
-		Normal = 'buttons-normal',
-		Primary = 'buttons-primary',
-		Destructive = 'buttons-destructive',
-		Pressed = 'buttons-pressed',
+	Transparent = "buttons-transparent",
+		Normal = "buttons-normal",
+		Primary = "buttons-primary",
+		Destructive = "buttons-destructive",
+		Pressed = "buttons-pressed",
 }
 
 	export interface ButtonCfg {
@@ -763,47 +805,45 @@ export enum ButtonStyles {
 	}
 
 	export function Button(configuration: ButtonCfg) {
-		return Component('button')
+		return Component("button")
 		.addItems(
-			Icon(configuration.iconName ?? ''),
-			Text(configuration.text ?? ''),
+			Icon(configuration.iconName ?? ""),
+			Text(configuration.text ?? "")
 		)
 
-		.setAttr('aria-label', configuration.accessibilityLabel)
-		.addToClass('buttons')
+		.setAttr("aria-label", configuration.accessibilityLabel)
+		.addToClass("buttons")
 		.addToClass(configuration.style ?? ButtonStyles.Normal)
 
-		.listen('click', (e) => {
-			e.stopPropagation()
+		.listen("click", (e) => {
+			e.stopPropagation();
 			configuration.action(e);
 		});
 	}
 
 /* ButtonGroup */
 export function ButtonGroup(...buttons: Component<any>[]) {
-	return Div(...buttons)
-	.addToClass('button-groups');
+	return Div(...buttons).addToClass("button-groups");
 }
 
 /* Checkbox */
 export interface CheckboxCfg {
-	isChecked: BindableObject<boolean>,
-	isIndeterminate?: BindableObject<boolean>,
-	label: string,
+	isChecked: BindableObject<boolean>;
+	isIndeterminate?: BindableObject<boolean>;
+	label: string;
 }
 
 export function Checkbox(configuration: CheckboxCfg) {
-	return Text(configuration.label, 'label')
-	.addItemsBefore(
+	return Text(configuration.label, "label").addItemsBefore(
 		(
 			Input({
-				type: 'checkbox',
+				type: "checkbox",
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
 			}) as CheckableComponent<undefined>
 		)
-		.addToClass('checkable-items')
+		.addToClass("checkable-items")
 		.access((self) => {
 			self.createTightBinding(
 				new CheckTBCfg({
@@ -818,7 +858,7 @@ export function Checkbox(configuration: CheckboxCfg) {
 						component: self,
 						data: configuration.isIndeterminate,
 						fallbackValue: false,
-						changeEventName: 'change',
+						changeEventName: "change",
 
 						getViewProperty: () => (self as any).indeterminate,
 							setViewProperty: (newValue) =>
@@ -834,25 +874,23 @@ export function Container(
 	tagName: keyof HTMLElementTagNameMap,
 	...children: Component<any>[]
 ) {
-	return Component(tagName)
-	.addItems(...children);
+	return Component(tagName).addItems(...children);
 }
 
 export function Div(...children: Component<any>[]) {
-	return Container('div', ...children);
+	return Container("div", ...children);
 }
 
 /* HStack */
 export function HStack(...children: Component<any>[]) {
-	return Div(...children)
-	.addToClass('stacks-horizontal');
+	return Div(...children).addToClass("stacks-horizontal");
 }
 
 /* Icon */
 export function Icon(iconName: string) {
 	return Text(iconName)
-	.addToClass('icons')
-	.addToClass('material-icons-round');
+	.addToClass("icons")
+	.addToClass("material-icons-round");
 }
 
 /* Input */
@@ -864,12 +902,12 @@ export interface InputCfg<T> {
 }
 
 export class TextInputCfg implements InputCfg<string> {
-	type = 'text';
+	type = "text";
 	value: BindableObject<string>;
 	fallbackValue: string;
 	placeholder: string;
 
-	constructor(value: BindableObject<string>, placeholder = '') {
+	constructor(value: BindableObject<string>, placeholder = "") {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
@@ -877,12 +915,12 @@ export class TextInputCfg implements InputCfg<string> {
 }
 
 export class NumberInputCfg implements InputCfg<number> {
-	type = 'number';
+	type = "number";
 	value: BindableObject<number>;
 	fallbackValue: number;
 	placeholder: string;
 
-	constructor(value: BindableObject<number>, placeholder = '') {
+	constructor(value: BindableObject<number>, placeholder = "") {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
@@ -890,12 +928,13 @@ export class NumberInputCfg implements InputCfg<number> {
 }
 
 export function Input<T>(configuration: InputCfg<T>) {
-	return Component<T>('input')
-	.addToClass('inputs')
+	return Component<T>("input")
+	.addToClass("inputs")
 	.access((self) => {
-		self
-		.setAttr('type', configuration.type)
-		.setAttr('placeholder', configuration.placeholder ?? '');
+		self.setAttr("type", configuration.type).setAttr(
+			"placeholder",
+			configuration.placeholder ?? ""
+		);
 
 		if (
 			configuration.value != undefined &&
@@ -913,17 +952,16 @@ export function Input<T>(configuration: InputCfg<T>) {
 
 /* Label */
 export function Label(labelText: string, labeledItem: Component<any>) {
-	return Component('label')
+	return Component("label")
 	.setText(labelText)
 	.addItems(labeledItem)
 
-	.addToClass('labels');
+	.addToClass("labels");
 }
 
 /* Link */
 export function Link(label: ValueObject<string>, href: string) {
-	return Text(label, 'a')
-	.setAttr('href', href);
+	return Text(label, "a").setAttr("href", href);
 }
 
 /* List */
@@ -932,38 +970,50 @@ export interface ListCfg<T extends Identifiable & Sortable> {
 	sortable?: boolean;
 }
 
-export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T>, compute: (itemData: T) => Component<any>) {
+export function List<T extends Identifiable & Sortable>(
+	configuration: ListCfg<T>,
+	compute: (itemData: T) => Component<any>
+) {
 	// Sorting
 	let draggedComponent: Component<any> | undefined = undefined;
 	let draggedData: T | undefined = undefined;
-	let dragStartTimeout: NodeJS.Timeout | undefined = undefined;
+	let dragStartTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+
+	function cleanIndices() {
+		configuration.listData.value
+		.values()
+		.sort((a, b) => a.index.value - b.index.value)
+		.forEach((item, i) => (item.index.value = i));
+	}
 
 	function startDrag(e: Event, data: T, component: Component<any>) {
-		document.body.addEventListener('mouseup', stopDrag);
-		document.body.addEventListener('touchend', stopDrag);
+		document.body.addEventListener("mouseup", stopDrag);
+		document.body.addEventListener("touchend", stopDrag);
 
 		dragStartTimeout = setTimeout(() => {
 			draggedData = data;
-			draggedComponent = component
-			.addToClass('dragging');
+			draggedComponent = component.addToClass("dragging");
 		}, 200);
 	}
 	function handleDragMove(e: TouchEvent | PointerEvent) {
 		if (draggedData == undefined) return;
 
-		function getCoordinate(e: TouchEvent | PointerEvent, axis: 'clientX' | 'clientY') {
-			if ('touches' in e) {
+		function getCoordinate(
+			e: TouchEvent | PointerEvent,
+			axis: "clientX" | "clientY"
+		) {
+			if ("touches" in e) {
 				return e.touches[0][axis];
 			} else if (axis in e) {
-				return e[axis]
+				return e[axis];
 			}
 			//fallback
 			return 0;
 		}
 
 		const elementUnderCursor = document.elementFromPoint(
-			getCoordinate(e, 'clientX'),
-			getCoordinate(e, 'clientY'),
+			getCoordinate(e, "clientX"),
+			getCoordinate(e, "clientY")
 		);
 
 		if (elementUnderCursor == null) return;
@@ -980,58 +1030,60 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 		if (dragStartTimeout) clearTimeout(dragStartTimeout);
 		if (draggedData == undefined) return;
 
-		document.body.removeEventListener('mouseup', stopDrag);
-		document.body.removeEventListener('touchend', stopDrag);
+		document.body.removeEventListener("mouseup", stopDrag);
+		document.body.removeEventListener("touchend", stopDrag);
 
 		draggedData = undefined;
 
+		cleanIndices();
+
 		if (draggedComponent == undefined) return;
-		draggedComponent.removeFromClass('dragging');
+		draggedComponent.removeFromClass("dragging");
 		draggedComponent = undefined;
 	}
 
 	// Main
 	return VStack()
-	.setAccessibilityRole('list')
+	.setAccessibilityRole("list")
 
-	.listen('touchmove', (e) => handleDragMove(e as TouchEvent))
-	.listen('mousemove', (e) => handleDragMove(e as PointerEvent))
+	.listen("touchmove", (e) => handleDragMove(e as TouchEvent))
+	.listen("mousemove", (e) => handleDragMove(e as PointerEvent))
 
-	.access(listView => listView
-			.createBinding(configuration.listData, listData => {
+	.access((listView) =>
+			listView.createBinding(configuration.listData, (listData) => {
 				function removeItemView(itemView: Component<any> | Element) {
-					const removeFn = (itemView as Component<any>).animateOut ?? itemView.remove;
+					const removeFn =
+						(itemView as Component<any>).animateOut ??
+						itemView.remove;
 					removeFn();
 				}
 
 				//add new items
 				configuration.listData.value.forEach((itemData, i) => {
-					const oldItemView = document.getElementById(itemData.uuid.toString())
+					const oldItemView = document.getElementById(
+						itemData.uuid.toString()
+					);
 
 					const newItemView = compute(itemData)
 					.setID(itemData.uuid)
-					.access(self => {
-						let lastIndex = itemData.index.value;
+					.access((self) => {
+						self.createBinding(
+							unwrapBindable(itemData.index),
+							(newIndex) => {
+								self.setStyle("order", newIndex.toString());
+							}
+						);
 
-						self.createBinding(unwrapBindable(itemData.index), (newIndex) => {
-							const indexDifference = lastIndex - newIndex;
-							let height = self.getBoundingClientRect().height;
-							let distanceDifference = indexDifference * height;
+						if (configuration.sortable == true)
+							self.addToClass("draggable-items")
+						.addToClass("rearrangable-items")
 
-							self.style.setProperty('--order-offset', `${distanceDifference}px`)
-							self.setStyle('order', newIndex.toString());
-							self.addToClass('rearranged-items');
-							lastIndex = newIndex;
-
-							setTimeout(() => self.removeFromClass('rearranged-items'), 400);
-						})
-
-						if (configuration.sortable == true) self
-							.addToClass('draggable-items')
-						.addToClass('rearrangable-items')
-
-						.listen('mousedown', (e) => startDrag(e, itemData, self))
-						.listen('touchstart', (e) => startDrag(e, itemData, self))
+						.listen("mousedown", (e) =>
+								startDrag(e, itemData, self)
+							   )
+							   .listen("touchstart", (e) =>
+									   startDrag(e, itemData, self)
+									  );
 					})
 					.animateIn();
 
@@ -1047,29 +1099,29 @@ export function List<T extends Identifiable & Sortable>(configuration: ListCfg<T
 				});
 
 				//remove deleted items
-				Array.from(listView.children).forEach((itemView) => {
+				Array.from(listView.children).forEach((itemView: Element) => {
 					const matchingDataEntry = listData.get(itemView.id);
 					if (matchingDataEntry != undefined) return; //data entry still exists
 
 					removeItemView(itemView);
 				});
 			})
-		   )
+		   );
 }
 
 /* ListBox */
-export function ListBox<T extends Identifiable & Sortable>(configuration: ListCfg<T>, compute: (itemData: T) => Component<any>) {
-	return Box(
-		List(configuration, compute)
-		.setAccessibilityRole('listbox')
-	);
+export function ListBox<T extends Identifiable & Sortable>(
+	configuration: ListCfg<T>,
+	compute: (itemData: T) => Component<any>
+) {
+	return Box(List(configuration, compute).setAccessibilityRole("listbox"));
 }
 
 /* ListItem */
 export function ListItem(...children: Component<any>[]) {
 	return Div(...children)
-	.addToClass('list-items')
-	.setAccessibilityRole('listitem')
+	.addToClass("list-items")
+	.setAccessibilityRole("listitem")
 	.animateIn();
 }
 
@@ -1087,13 +1139,13 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 	const low = options.low ?? min;
 	const high = options.high ?? max;
 
-	return Component<number>('meter')
+	return Component<number>("meter")
 	.setValue(value)
 
-	.setAttr('min', min)
-	.setAttr('max', max)
-	.setAttr('low', low)
-	.setAttr('high', high);
+	.setAttr("min", min)
+	.setAttr("max", max)
+	.setAttr("low", low)
+	.setAttr("high", high);
 }
 
 /* Popover */
@@ -1106,7 +1158,7 @@ export interface PopoverCfg {
 
 export function Popover(configuration: PopoverCfg) {
 	// Alignment
-	const PADDING = '.5rem';
+	const PADDING = ".5rem";
 
 	resetPosition();
 
@@ -1127,28 +1179,28 @@ export function Popover(configuration: PopoverCfg) {
 
 	function resetPosition() {
 		configuration.content
-		.setStyle('top', 'unset')
-		.setStyle('left', 'unset');
+		.setStyle("top", "unset")
+		.setStyle("left", "unset");
 	}
 
 	function alignToRightFromLeftEdge() {
-		configuration.content.setStyle('left', `${rectOfToggle().left}px`);
+		configuration.content.setStyle("left", `${rectOfToggle().left}px`);
 	}
 
 	function alignToRightFromRightEdge() {
-		configuration.content.setStyle('left', `${rectOfToggle().right}px`);
+		configuration.content.setStyle("left", `${rectOfToggle().right}px`);
 	}
 
 	function alignToLeftFromLeftEdge() {
 		configuration.content.setStyle(
-			'left',
+			"left",
 			`${rectOfToggle().left - rectOfContent().width}px`
 		);
 	}
 
 	function alignToLeftFromRightEdge() {
 		configuration.content.setStyle(
-			'left',
+			"left",
 			`${rectOfToggle().right - rectOfContent().width}px`
 		);
 	}
@@ -1164,8 +1216,8 @@ export function Popover(configuration: PopoverCfg) {
 	function alignY() {
 		//down
 		configuration.content
-		.setStyle('left', 'unset')
-		.setStyle('top', `${rectOfToggle().bottom}px`);
+		.setStyle("left", "unset")
+		.setStyle("top", `${rectOfToggle().bottom}px`);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1173,8 +1225,11 @@ export function Popover(configuration: PopoverCfg) {
 
 		//up
 		configuration.content
-		.setStyle('left', 'unset')
-		.setStyle('top', `${rectOfToggle().top - rectOfContent().height}px`);
+		.setStyle("left", "unset")
+		.setStyle(
+			"top",
+			`${rectOfToggle().top - rectOfContent().height}px`
+		);
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1182,28 +1237,28 @@ export function Popover(configuration: PopoverCfg) {
 
 	function alignX() {
 		//to left
-		configuration.content.setStyle('top', 'unset');
+		configuration.content.setStyle("top", "unset");
 
 		alignToRightFromRightEdge();
 		if (checkIsOK() == true) return;
 
 		//to right
-		configuration.content.setStyle('top', 'unset');
+		configuration.content.setStyle("top", "unset");
 
 		alignToLeftFromLeftEdge();
 	}
 
 	function applyFallbackAlignment() {
 		configuration.content
-		.setStyle('bottom', PADDING)
-		.setStyle('maxHeight', `calc(100% - 2*${PADDING})`);
+		.setStyle("bottom", PADDING)
+		.setStyle("maxHeight", `calc(100% - 2*${PADDING})`);
 
 		if (rectOfContent().left < rectOfWindow.left)
 			//content overflows left edge
-			configuration.content.setStyle('left', PADDING);
+			configuration.content.setStyle("left", PADDING);
 			if (rectOfContent().left < rectOfWindow.left)
 				//content overflows right edge
-				configuration.content.setStyle('right', PADDING);
+				configuration.content.setStyle("right", PADDING);
 	}
 
 	function updateContentPosition() {
@@ -1228,10 +1283,10 @@ export function Popover(configuration: PopoverCfg) {
 			console.log(wasOpened);
 
 			if (wasOpened) {
-				document.body.addEventListener('click', closePopover);
+				document.body.addEventListener("click", closePopover);
 				updateContentPosition();
 			} else {
-				document.body.removeEventListener('click', closePopover);
+				document.body.removeEventListener("click", closePopover);
 			}
 		},
 	});
@@ -1240,15 +1295,15 @@ export function Popover(configuration: PopoverCfg) {
 	return Div(
 		configuration.toggle,
 		configuration.content
-		.addToClass('popover-contents')
-		.setStyle('width', configuration.widthStyle)
+		.addToClass("popover-contents")
+		.setStyle("width", configuration.widthStyle)
 	)
-	.listen('click', (e) => {
-		e.preventDefault()
-		e.stopPropagation()
+	.listen("click", (e) => {
+		e.preventDefault();
+		e.stopPropagation();
 	})
-	.addToClass('popover-containers')
-	.toggleAttr('open', configuration.isOpen);
+	.addToClass("popover-containers")
+	.toggleAttr("open", configuration.isOpen);
 }
 
 /* ProgressBar */
@@ -1261,13 +1316,14 @@ export function ProgressBar(
 	value: BindableObject<number>,
 	state: BindableObject<ProgressBarStates>
 ) {
-	return Component<number>('progress')
+	return Component<number>("progress")
 	.setValue(value)
 	.access((self) =>
 			self
 			.createBinding(state, (state) => {
-				const isIndeterminate = state == ProgressBarStates.Indeterminate;
-				if (isIndeterminate) self.rmAttr('value');
+				const isIndeterminate =
+					state == ProgressBarStates.Indeterminate;
+				if (isIndeterminate) self.rmAttr("value");
 				else self.value = value.value;
 			})
 			.updateBinding(state)
@@ -1276,14 +1332,14 @@ export function ProgressBar(
 
 /* RadioButton */
 export function RadioButton<T>(
-	selectionCfg: DataSelectionCfg<T>,
+	selectionCfg: DataSelection<T>,
 	label: string,
-	value: T,
+	value: T
 ) {
-	return Text(label, 'label').addItemsBefore(
+	return Text(label, "label").addItemsBefore(
 		(
 			Input({
-				type: 'radio',
+				type: "radio",
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
@@ -1291,22 +1347,21 @@ export function RadioButton<T>(
 		)
 		.access((self) =>
 				self.createSelectionBinding(
-					new CheckableSelectionItemCfg({
-						selectionCfg,
+					new CheckSelectionCfg({
+						selection: selectionCfg,
 						component: self,
 						ownValue: value,
 						isExclusive: true,
 					})
 				)
 			   )
-			   .setAttr('name', selectionCfg.uuid)
+			   .setAttr("name", selectionCfg.uuid)
 	);
 }
 
 /* ScrollArea */
 export function ScrollArea(...children: Component<any>[]) {
-	return Div(...children)
-	.addToClass('scroll-areas');
+	return Div(...children).addToClass("scroll-areas");
 }
 
 /* Select */
@@ -1324,20 +1379,20 @@ export function Select(
 		initialValue: [],
 		compute: (self) => {
 			self.value = options.value.map((option) =>
-										   Text(option.label, 'option').setValue(option.value)
+										   Text(option.label, "option").setValue(option.value)
 										  );
 		},
 	});
 
-	return Component('select')
+	return Component("select")
 	.setItems(optionViews)
-	.addToClass('selects')
+	.addToClass("selects")
 	.access((self) =>
 			self.createTightBinding(
 				new ValueTBCfg({
 					component: self,
 					data: value,
-					fallbackValue: '',
+					fallbackValue: "",
 				})
 			)
 		   );
@@ -1345,7 +1400,7 @@ export function Select(
 
 /* SelectingListItem */
 export interface SelectingListItemCfg<T> {
-	selectionCfg: DataSelectionCfg<T>;
+	selection: DataSelection<T>;
 	ownValue: T;
 }
 
@@ -1354,35 +1409,35 @@ export function SelectingListItem<T>(
 	...children: Component<any>[]
 ) {
 	return ListItem(...children)
-	.setAccessibilityRole('option')
+	.setAccessibilityRole("option")
 
 	.access((self) => {
-		const selectionItemCfg = new SelectionItemCfg<T>({
+		const selectionItemCfg = new ValueSelectionCfg<T>({
 			component: self,
-			selectionCfg: configuration.selectionCfg,
+			selection: configuration.selection,
 
-			getView: () => self.getAttribute('aria-selected') == 'true',
-				setView: (isSelected) =>
-			self.setAttr('aria-selected', isSelected),
+			getView: () => {
+				return self.getAttribute("aria-selected") == "true";
+			},
+			setView: (isSelected) => {
+				self.setAttr("aria-selected", isSelected);
+			},
 
 			isExclusive: true,
 			ownValue: configuration.ownValue,
 
-			changeEventName: 'click',
+			changeEventName: "click",
 		});
 
-		self
-		.listen('click', () => {
+		self.listen("click", () => {
 			selectionItemCfg.setModel(true);
-		})
-		.createSelectionBinding(selectionItemCfg);
+		}).createSelectionBinding(selectionItemCfg);
 	});
 }
 
 /* Separator */
 export function Separator() {
-	return Component('hr')
-	.addToClass('separators');
+	return Component("hr").addToClass("separators");
 }
 
 /* Sheet */
@@ -1390,16 +1445,17 @@ export function Sheet(
 	isOpen: BindableObject<boolean>,
 	...children: Component<any>[]
 ) {
-	return Container('dialog',
-					 Div(...children)
-					 .addToClass('sheet-contents')
-					 .listen('click', (e) => e.stopPropagation()),
-					)
-					 .addToClass('sheet-containers')
-					 .toggleAttr('open', isOpen)
-					 .listen('click', () => {
-						 isOpen.value = false;
-					 });
+	return Container(
+		"dialog",
+		Div(...children)
+		.addToClass("sheet-contents")
+		.listen("click", (e) => e.stopPropagation())
+	)
+	.addToClass("sheet-containers")
+	.toggleAttr("open", isOpen)
+	.listen("click", () => {
+		isOpen.value = false;
+	});
 }
 
 /* Slider */
@@ -1414,143 +1470,55 @@ export function Slider(
 	options: SliderOpts = {}
 ) {
 	return Input<number>({
-		type: 'range',
+		type: "range",
 		fallbackValue: 0,
 		value,
 		placeholder: undefined,
 	}).access((self) =>
 	self
-	.setAttr('min', options.min ?? 0)
-	.setAttr('max', options.max ?? 100)
-	.setAttr('step', options.step ?? 1)
+	.setAttr("min", options.min ?? 0)
+	.setAttr("max", options.max ?? 100)
+	.setAttr("step", options.step ?? 1)
 			 );
 }
 
 /* Spacer */
 export function Spacer() {
-	return Div().addToClass('spacers');
+	return Div().addToClass("spacers");
 }
 
 /* Text */
-export function Text(value: ValueObject<string>, tagName: keyof HTMLElementTagNameMap = 'span') {
+export function Text(
+	value: ValueObject<string>,
+	tagName: keyof HTMLElementTagNameMap = "span"
+) {
 	return Component(tagName).setText(value);
 }
 
 /* Textarea */
 export function Textarea(value: BindableObject<string>, placeholder: string) {
-	return Component<string>('textarea')
-	.addToClass('textareas')
+	return Component<string>("textarea")
+	.addToClass("textareas")
 	.access((self) =>
 			self
 			.createTightBinding(
 				new ValueTBCfg({
 					component: self,
 					data: value,
-					fallbackValue: '',
+					fallbackValue: "",
 				})
 			)
 
-			.setAttr('placeholder', placeholder)
+			.setAttr("placeholder", placeholder)
 		   );
 }
 
 /* VisualGroup */
 export function VisualGroup(...children: Component<any>[]) {
-	return VStack(...children)
-	.addToClass('visual-groups');
+	return VStack(...children).addToClass("visual-groups");
 }
 
 /* VStack */
 export function VStack(...children: Component<any>[]) {
-	return Div(...children)
-	.addToClass('stacks-vertical');
-}
-
-/*
-   NAVIGATION
-   */
-
-export class Scene {
-	uuid = new UUID();
-	view: Component<any>
-
-	constructor(view: Scene['view']) {
-		this.view = view;
-	}
-}
-
-/* Stack */
-export enum StackedSceneTypes {
-	Master,
-	Navigation,
-	Content,
-}
-
-export class StackedScene extends Scene {
-	type: StackedSceneTypes;
-
-	constructor(type: StackedSceneTypes, view: Scene['view']) {
-		super(view);
-		this.type = type;
-	}
-}
-
-export class NavigationStackVM {
-	uuid = new UUID();
-
-	scenes = new State<StackedScene[]>([]);
-
-	get depth() {
-		return this.scenes.value.length;
-	}
-
-	addScene = (scene: StackedScene, depth: number) => {
-		this.navigateBackTo(depth);
-		this.scenes.value[depth] = scene;
-		this.scenes.triggerAll();
-	}
-
-	navigateBackTo = (depth: number) => {
-		length = this.scenes.value.length;
-
-		if (depth < 0 || depth > length)
-			return console.error(`Cannot go back to level ${depth}: only ${length} levels. NavigationStack ${this.uuid.toString()}`);
-
-		this.scenes.value.splice(depth, length);
-		this.scenes.triggerAll();
-	}
-}
-
-export function NavigationStack(model: NavigationStackVM, initialScene: StackedScene) {
-	return Div(
-		initialScene.view,
-	);
-}
-
-export interface NavigationLinkCfg {
-	model: NavigationStackVM;
-	destination: () => StackedScene;
-}
-
-export function NavigationLink(configuration: NavigationLinkCfg, view: Component<any>) {
-	const depth = configuration.model.depth;
-	let currentScene: StackedScene|undefined = undefined;
-
-	function openLink() {
-		currentScene = configuration.destination();
-		configuration.model.addScene(currentScene, depth);
-	}
-
-	return HStack(
-		view,
-		Spacer(),
-		Icon(''),//todo
-	)
-	.listen('click', openLink)
-	.access(self => self
-			.createBinding(configuration.model.scenes, () => {
-				const isOpen = configuration.model.scenes.value[depth] != currentScene;
-				self.addToClassConditionally('is-open', isOpen);
-			})
-		   );
+	return Div(...children).addToClass("stacks-vertical");
 }

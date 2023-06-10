@@ -55,17 +55,6 @@
     }
 }
 
-@keyframes rearrange {
-    0% {
-        transform: translateY(var(--order-offset))
-    }
-
-    50%,
-    100% {
-        transform: translateY(0px)
-    }
-}
-
 :root {
     --corners: .3rem;
 
@@ -114,10 +103,6 @@ input[disabled] {
 
 .draggable-items {
     transition: transform .2s, border-radius .2s;
-}
-
-:not(:has(.dragging)) .rearranged-items {
-    animation: rearrange .5s;
 }
 
 /* Checkable */

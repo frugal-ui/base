@@ -1,0 +1,4 @@
+trailingComma: "always"
+tabWidth: 4
+semi: true
+singelQuote: true

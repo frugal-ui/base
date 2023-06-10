@@ -13,6 +13,10 @@ body {
     margin: 0rem;
 }
 
+.scenes:not([open]) {
+	display: none;
+}
+
 /*
     COMPONENTS
 */
@@ -20,6 +24,13 @@ body {
 /* Box */
 .boxes {
     overflow: auto;
+
+	width: 100%;
+	height: 100%;
+}
+
+.boxes .stacks-vertical {
+	justify-content: start;
 }
 
 /* Popover */
@@ -86,6 +97,7 @@ body {
 
 .stacks-vertical {
     flex-direction: column;
+	height: 100%;
 }
 
 .stacks-horizontal {

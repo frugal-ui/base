@@ -11,9 +11,19 @@ inoremap <silent> <expr> <Down> coc#pum#visible() ? coc#pum#next(0) : "\<Down>"
 inoremap <silent> <expr> <C-P> coc#pum#visible() ? coc#pum#prev(1) : "\"
 inoremap <silent> <expr> <C-N> coc#pum#visible() ? coc#pum#next(1) : "\"
 inoremap <silent> <LeftMouse> <LeftMouse>:call ScrollbarGrab()
-vmap gx <Plug>NetrwBrowseXVis
+nmap \p <Plug>(Prettier)
+nmap \rn <Plug>(coc-rename)
+xmap gx <Plug>NetrwBrowseXVis
 nmap gx <Plug>NetrwBrowseX
-vnoremap <silent> <Plug>NetrwBrowseXVis :call netrw#BrowseXVis()
+nnoremap <silent> <Plug>(PrettierCliPath) :PrettierCliPath
+nnoremap <silent> <Plug>(PrettierCliVersion) :PrettierCliVersion
+nnoremap <silent> <Plug>(PrettierCli) :PrettierCli
+nnoremap <silent> <Plug>(PrettierVersion) :PrettierVersion
+nnoremap <silent> <Plug>(PrettierPartial) :PrettierPartial
+nnoremap <silent> <Plug>(PrettierFragment) :PrettierFragment
+nnoremap <silent> <Plug>(PrettierAsync) :PrettierAsync
+nnoremap <silent> <Plug>(Prettier) :Prettier
+xnoremap <silent> <Plug>NetrwBrowseXVis :call netrw#BrowseXVis()
 nnoremap <silent> <Plug>NetrwBrowseX :call netrw#BrowseX(netrw#GX(),netrw#CheckIfRemote(netrw#GX()))
 onoremap <silent> <Plug>(coc-classobj-a) :call CocAction('selectSymbolRange', v:false, '', ['Interface', 'Struct', 'Class'])
 onoremap <silent> <Plug>(coc-classobj-i) :call CocAction('selectSymbolRange', v:true, '', ['Interface', 'Struct', 'Class'])
@@ -64,15 +74,14 @@ inoremap <silent> <expr>  coc#pum#visible() ? coc#pum#prev(1) : "\"
 inoremap <silent> <expr>  coc#pum#visible() ? coc#pum#confirm() : "\"
 let &cpo=s:cpo_save
 unlet s:cpo_save
-set background=dark
 set backspace=indent,eol,start
 set fileencodings=ucs-bom,utf-8,default,latin1
 set helplang=en
 set laststatus=2
 set nomodeline
-set printoptions=paper:letter
+set printoptions=paper:a4
 set ruler
-set runtimepath=~/.vim,~/.vim/plugged/vim-scrollbar,~/.vim/plugged/coc.nvim,~/.vim/plugged/vim-airline,~/.vim/plugged/vim-bufferline,/var/lib/vim/addons,/etc/vim,/usr/share/vim/vimfiles,/usr/share/vim/vim82,/usr/share/vim/vimfiles/after,/etc/vim/after,/var/lib/vim/addons/after,~/.vim/after
+set runtimepath=~/.vim,~/.vim/plugged/vim-scrollbar,~/.vim/plugged/coc.nvim,~/.vim/plugged/vim-airline,~/.vim/plugged/vim-bufferline,~/.vim/plugged/vim-prettier,/var/lib/vim/addons,/etc/vim,/usr/share/vim/vimfiles,/usr/share/vim/vim90,/usr/share/vim/vimfiles/after,/etc/vim/after,/var/lib/vim/addons/after,~/.vim/after
 set shiftwidth=4
 set smartindent
 set suffixes=.bak,~,.swp,.o,.info,.aux,.log,.dvi,.bbl,.blg,.brf,.cb,.ind,.idx,.ilg,.inx,.out,.toc
@@ -82,23 +91,20 @@ let s:so_save = &g:so | let s:siso_save = &g:siso | setg so=0 siso=0 | setl so=-
 let v:this_session=expand("<sfile>:p")
 silent only
 silent tabonly
-cd /personal/Development/Projects/FrugalUI/base
+cd ~/Development/Projects/FrugalUI/base
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
-set shortmess=aoO
+if &shortmess =~ 'A'
+  set shortmess=aoOA
+else
+  set shortmess=aoO
+endif
+badd +0 index.ts
 argglobal
 %argdel
 $argadd index.ts
 edit index.ts
-set splitbelow splitright
-set nosplitbelow
-set nosplitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
 argglobal
 setlocal keymap=
 setlocal noarabic
@@ -114,6 +120,7 @@ setlocal buftype=
 setlocal nocindent
 setlocal cinkeys=0{,0},0),0],:,0#,!^F,o,O,e
 setlocal cinoptions=
+setlocal cinscopedecls=public,protected,private
 setlocal cinwords=if,else,while,do,for,switch
 setlocal colorcolumn=
 setlocal comments=sO:*\ -,mO:*\ \ ,exO:*/,s1:/*,mb:*,ex:*/,://
@@ -137,6 +144,7 @@ setlocal noexpandtab
 if &filetype != 'typescript'
 setlocal filetype=typescript
 endif
+setlocal fillchars=
 setlocal fixendofline
 setlocal foldcolumn=0
 setlocal foldenable
@@ -160,12 +168,13 @@ setlocal includeexpr=
 setlocal indentexpr=GetTypescriptIndent()
 setlocal indentkeys=0{,0},0),0],0,,!^F,o,O,e
 setlocal noinfercase
-setlocal iskeyword=@,48-57,_,192-255,$,#
+setlocal iskeyword=@,48-57,_,192-255,#,$
 setlocal keywordprg=
 setlocal nolinebreak
 setlocal nolisp
 setlocal lispwords=
 setlocal nolist
+setlocal listchars=
 setlocal makeencoding=
 setlocal makeprg=
 setlocal matchpairs=(:),{:},[:]
@@ -214,35 +223,38 @@ setlocal termwinscroll=10000
 setlocal termwinsize=
 setlocal textwidth=0
 setlocal thesaurus=
+setlocal thesaurusfunc=
 setlocal noundofile
 setlocal undolevels=-123456
 setlocal varsofttabstop=
 setlocal vartabstop=
+setlocal virtualedit=
 setlocal wincolor=
 setlocal nowinfixheight
 setlocal nowinfixwidth
 setlocal wrap
 setlocal wrapmargin=0
 silent! normal! zE
-let s:l = 1 - ((0 * winheight(0) + 29) / 59)
+let &fdl = &fdl
+let s:l = 1 - ((0 * winheight(0) + 26) / 53)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 1
 normal! 0
 tabnext 1
-badd +0 index.ts
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0
   silent exe 'bwipe ' . s:wipebuf
 endif
 unlet! s:wipebuf
-set winheight=1 winwidth=20 shortmess=filnxtToOS
-set winminheight=1 winminwidth=1
+set winheight=1 winwidth=20
+set shortmess=filnxtToOS
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
+nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
