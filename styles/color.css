@@ -1,35 +1,51 @@
 :root {
-	--sub-background: hsl(0, 0%, 90%);
-	--background: hsl(0, 0%, 98%);
-	--background-alt: hsl(0, 0%, 94%);
+    --background: hsl(0, 0%, 98%);
+    --background-alt: hsl(0, 0%, 94%);
 
-	--text: rgb(19, 19, 19);
+    --text: rgb(19, 19, 19);
 
-	--clickable: hsl(240, 100%, 97%);
-	--on-clickable: hsl(237, 100%, 59%);
-	--pressed: hsl(240, 100%, 94%);
-	--inset: hsl(253, 24%, 95%);
+    --inset: hsl(253, 24%, 95%);
 
-	--destructive: rgb(255, 245, 245);
-	--on-destructive: rgb(220, 0, 0);
-	--accent: hsl(156, 100%, 97%);
-	--on-accent: hsl(165, 100%, 34%);
+    --clickable: hsl(240, 100%, 97%);
+    --on-clickable: hsl(237, 100%, 59%);
+    --clickable-border: hsl(237, 100%, 59%);
 
-	--shadows: hsla(0, 0%, 0%, .15);
-	--lines: hsla(0, 0%, 0%, .2);
-	--backdrop: hsla(0, 0%, 0%, .6);
+    --pressed: hsl(240, 100%, 94%);
+
+    --destructive: hsl(0, 100%, 98%);
+    --on-destructive: hsl(0, 100%, 43%);
+    --destructive-border: hsl(0, 100%, 43%);
+
+    --accent: hsl(156, 100%, 97%);
+    --on-accent: hsl(165, 100%, 34%);
+    --accent-border: hsl(165, 100%, 34%);
+
+    --shadows: hsla(0, 0%, 0%, 0.15);
+    --lines: hsla(0, 0%, 0%, 0.2);
+    --backdrop: hsla(0, 0%, 0%, 0.6);
 }
 
 @media (prefers-color-scheme: dark) {
-	:root {
-		--sub-background: hsl(0, 0%, 14%);
-		--background: hsl(0, 0%, 16%);
-		--background-alt: hsl(0, 0%, 18%);
+    :root {
+        --background: hsl(0, 0%, 16%);
+        --background-alt: hsl(0, 0%, 18%);
 
-		--text: rgb(255, 255, 255);
+        --text: rgb(255, 255, 255);
 
-		--clickable: hsl(0, 0%, 24%);
-		--pressed: hsl(0, 0%, 8%);
-		--typeable: hsl(0, 0%, 9%);
-	}
+        --inset: hsl(0, 0%, 12%);
+
+        --clickable: hsl(240, 100%, 20%);
+        --on-clickable: hsl(237, 100%, 85%);
+        --clickable-border: hsl(237, 100%, 30%);
+
+        --pressed: hsl(240, 100%, 12%);
+
+        --destructive: hsl(0, 100%, 17%);
+        --on-destructive: hsl(0, 100%, 90%);
+		--destructive-border: hsl(0, 100%, 30%);
+
+        --accent: hsl(156, 100%, 8%);
+        --on-accent: hsl(165, 100%, 85%);
+		--accent-border: hsl(165, 100%, 18%);
+    }
 }

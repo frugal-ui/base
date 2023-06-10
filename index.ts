@@ -426,7 +426,7 @@ export function unwrapBindable<T>(
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 export type Styleable = {
 	[property in keyof typeof PrefixedCSSPropertyNames]: (
-		value: string,
+		value: Stringifiable,
 	) => Component<any>;
 };
 
@@ -450,7 +450,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 		value: string,
 		condition: ValueObject<boolean>,
 	) => this;
-	setStyle: (property: keyof CSSStyleDeclaration, value: string) => this;
+	setStyle: (property: keyof CSSStyleDeclaration, value: Stringifiable) => this;
 
 	//children
 	addItems: (...children: Component<any>[]) => this;
@@ -508,7 +508,7 @@ export function Component<ValueType>(
 		const componentProperty = entry[0];
 		const cssProperty = entry[1];
 
-		component[componentProperty as keyof Styleable] = (value: string) => {
+		component[componentProperty as keyof Styleable] = (value) => {
 			component.setStyle(cssProperty as keyof CSSStyleDeclaration, value);
 			return component;
 		};
@@ -607,7 +607,7 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.setStyle = (property, value) => {
-		(component.style as any)[property] = value;
+		(component.style as any)[property] = value.toString();
 		return component;
 	};
 
@@ -1183,7 +1183,6 @@ export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 /* Popover */
 export interface PopoverCfg {
 	isOpen: BindableObject<boolean>;
-	widthStyle: string;
 	toggle: Component<any>;
 	content: Component<any>;
 }
@@ -1312,8 +1311,6 @@ export function Popover(configuration: PopoverCfg) {
 	configuration.isOpen.addBinding({
 		uuid: new UUID(),
 		action: (wasOpened) => {
-			console.log(wasOpened);
-
 			if (wasOpened) {
 				document.body.addEventListener('click', closePopover);
 				updateContentPosition();
@@ -1328,7 +1325,6 @@ export function Popover(configuration: PopoverCfg) {
 		configuration.toggle,
 		configuration.content
 			.addToClass('popover-contents')
-			.setStyle('width', configuration.widthStyle),
 	)
 		.listen('click', (e) => {
 			e.preventDefault();
