@@ -477,7 +477,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 	) => this;
 
 	//navigation
-	setVisibleIf: (shouldBeVisible: BindableObject<boolean>) => this;
+	setVisibleIf: (shouldBeVisible: ValueObject<boolean>) => this;
 	setVisibleIfSelected: (
 		ownIndex: number,
 		currentIndex: BindableObject<number>,
@@ -507,9 +507,11 @@ export function Component<ValueType>(
 	const component = document.createElement(tagName) as Component<ValueType>;
 
 	//styles
-	Object.entries(PrefixedCSSPropertyNames).forEach((entry) => {
-		const componentProperty = entry[0];
-		const cssProperty = entry[1];
+	Object.keys(PrefixedCSSPropertyNames).forEach((componentProperty) => {
+		const cssProperty =
+			PrefixedCSSPropertyNames[
+				componentProperty as keyof typeof PrefixedCSSPropertyNames
+			];
 
 		component[componentProperty as keyof Styleable] = (value) => {
 			component.setStyle(cssProperty as keyof CSSStyleDeclaration, value);
@@ -527,31 +529,42 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.animateIn = () => {
-		//get rect for animation
-		document.body.appendChild(component);
-		component.style.setProperty(
-			'--element-height',
-			`${component.offsetHeight}px`,
-		);
-		component.remove();
+		const shouldAnimate =
+			window.matchMedia('(prefers-reduced-motion)').matches == false;
 
-		component.addToClass('animating-in');
+		if (shouldAnimate) {
+			//get rect for animation
+			document.body.appendChild(component);
+			component.style.setProperty(
+				'--element-height',
+				`${component.offsetHeight}px`,
+			);
+			component.remove();
 
-		setTimeout(() => component.removeFromClass('animating-in'), 400);
+			component.addToClass('animating-in');
+
+			setTimeout(() => component.removeFromClass('animating-in'), 400);
+		}
 
 		return component;
 	};
 	component.animateOut = () => {
-		component.style.setProperty(
-			'--element-height',
-			`${component.offsetHeight}px`,
-		);
+		const shouldAnimate =
+			window.matchMedia('(prefers-reduced-motion)').matches == false;
+		if (shouldAnimate) {
+			component.style.setProperty(
+				'--element-height',
+				`${component.offsetHeight}px`,
+			);
 
-		//animate
-		component.addToClass('animating-out');
+			//animate
+			component.addToClass('animating-out');
 
-		//remove after animation
-		setTimeout(() => component.remove(), 400);
+			//remove after animation
+			setTimeout(() => component.remove(), 200);
+		} else {
+			component.remove();
+		}
 	};
 
 	//attributes
@@ -690,14 +703,15 @@ export function Component<ValueType>(
 
 	//navigation
 	component.setVisibleIf = (shouldBeVisible) => {
+		const bindable = unwrapBindable(shouldBeVisible);
 		component
-			.createBinding(shouldBeVisible, () => {
+			.createBinding(bindable, () => {
 				component.toggleAttribute(
 					'hidden',
-					shouldBeVisible.value == false,
+					bindable.value == false,
 				);
 			})
-			.updateBinding(shouldBeVisible);
+			.updateBinding(bindable);
 
 		return component;
 	};
@@ -876,7 +890,7 @@ export function Checkbox(configuration: CheckboxCfg) {
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
-			}) as CheckableComponent<undefined>
+			}) as CheckableComponent<string>
 		)
 			.addToClass('checkable-items')
 			.access((self) => {
@@ -931,8 +945,8 @@ export function Icon(iconName: string) {
 /* Input */
 export interface InputCfg<T> {
 	type: string;
-	value: BindableObject<T> | undefined;
-	fallbackValue: T | undefined;
+	value: BindableObject<string> | undefined;
+	fallbackValue: string | undefined;
 	placeholder?: string | undefined;
 }
 
@@ -951,11 +965,11 @@ export class TextInputCfg implements InputCfg<string> {
 
 export class NumberInputCfg implements InputCfg<number> {
 	type = 'number';
-	value: BindableObject<number>;
-	fallbackValue: number;
+	value: BindableObject<string>;
+	fallbackValue: string;
 	placeholder: string;
 
-	constructor(value: BindableObject<number>, placeholder = '') {
+	constructor(value: BindableObject<string>, placeholder = '') {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
@@ -963,7 +977,7 @@ export class NumberInputCfg implements InputCfg<number> {
 }
 
 export function Input<T>(configuration: InputCfg<T>) {
-	return Component<T>('input')
+	return Component<string>('input')
 		.addToClass('inputs')
 		.access((self) => {
 			self.setAttr('type', configuration.type).setAttr(
@@ -1372,7 +1386,7 @@ export function RadioButton<T>(configuration: RadioButtonCfg<T>) {
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
-			}) as CheckableComponent<undefined>
+			}) as CheckableComponent<string>
 		)
 			.access((self) =>
 				self.createSelectionBinding(
@@ -1495,12 +1509,12 @@ export interface SliderOpts {
 }
 
 export function Slider(
-	value: BindableObject<number>,
+	value: BindableObject<string>,
 	options: SliderOpts = {},
 ) {
 	return Input<number>({
 		type: 'range',
-		fallbackValue: 0,
+		fallbackValue: '0',
 		value,
 		placeholder: undefined,
 	}).access((self) =>
@@ -1550,4 +1564,111 @@ export function VisualGroup(...children: Component<any>[]) {
 /* VStack */
 export function VStack(...children: Component<any>[]) {
 	return Div(...children).addToClass('stacks-vertical');
+}
+
+/*
+ * NAVIGATION
+ */
+
+/* Scene */
+export enum SceneTypes {
+	Normal = 'scenes-normal',
+	Full = 'scenes-full',
+	Navigation = 'scenes-navigation',
+	Content = 'scenes-content',
+}
+
+export class GenericScene {
+	readonly depth: number;
+	readonly stage: Stage;
+	readonly view: Component<any>;
+	type: SceneTypes = SceneTypes.Normal;
+
+	constructor(depth: number, stage: Stage) {
+		this.depth = depth;
+		this.stage = stage;
+		this.view = this.generateView();
+	}
+
+	private generateView() {
+		return Div(this.draw())
+			.addToClass('scenes')
+			.addToClass(this.type)
+			.animateIn();
+	}
+
+	draw(): Component<any> {
+		return Text('Hello, world!');
+	}
+}
+
+/* Stage */
+export interface Stage extends Component<undefined> {
+	addScene: (Scene: typeof GenericScene) => this;
+	goBackTo: (depth: number) => this;
+}
+
+export function Stage(...initialScenes: typeof GenericScene[]) {
+	return (Div() as Stage)
+		.addToClass('stages')
+		.access((self) => {
+			let persistingChildren: Element[] = [];
+			function getPersistingChildren() {
+				persistingChildren = Array.from(self.children).filter(
+					(child) => !child.classList.contains('animating-out'),
+				);
+
+				return persistingChildren;
+			}
+
+			self.addScene = (Scene) => {
+				const newDepth = getPersistingChildren().length;
+				const scene = new Scene(newDepth, self);
+				self.addItems(scene.view);
+				return self;
+			};
+
+			self.goBackTo = (depth) => {
+				while (getPersistingChildren().length > depth + 1) {
+					const child = persistingChildren[
+						persistingChildren.length - 1
+					] as Component<any>;
+					const isNormalScene = child.classList.contains('scenes-normal');
+					if (child.animateOut && !isNormalScene) child.animateOut();
+					else child.remove();
+				}
+				return self;
+			};
+
+			initialScenes.forEach(scene => {
+				self.addScene(scene);
+			});
+		})
+}
+
+/* Link */
+export interface NavigationLinkCfg {
+	parentScene: GenericScene;
+	destination: typeof GenericScene;
+}
+
+export function NavigationLink(
+	configuration: NavigationLinkCfg,
+	...children: Component<any>[]
+) {
+	const stage = configuration.parentScene.stage;
+	const depth = configuration.parentScene.depth;
+
+	function openScene() {
+		stage.goBackTo(depth);
+		stage.addScene(configuration.destination);
+	}
+
+	return ListItem(
+		HStack(...children),
+		Spacer(),
+		Icon('chevron_right').cssOpacity(0.6),
+	)
+		.addToClass('navigation-links')
+		.listen('click', openScene);
 }

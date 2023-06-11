@@ -1,6 +1,6 @@
 /* 
-    BASIC 
-*/
+BASIC 
+ */
 @keyframes appear {
 	0% {
 		transform: scale(0);
@@ -20,26 +20,10 @@
 		opacity: 0;
 	}
 
-	50%,
 	100% {
 		transform: scaleY(1);
 		margin-bottom: 0rem;
 		opacity: 1;
-	}
-}
-
-@keyframes animate-out {
-	0% {
-		transform: scaleY(1);
-		margin-bottom: 0rem;
-		opacity: 1;
-	}
-
-	50%,
-	100% {
-		transform: scaleY(0);
-		margin-bottom: calc(-1 * var(--element-height));
-		opacity: 0;
 	}
 }
 
@@ -47,6 +31,18 @@
 	0%,
 	100% {
 		visibility: visible;
+	}
+}
+
+@keyframes slide-in {
+	0% {
+		opacity: 0;
+		transform: translateX(100%);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateX(0);
 	}
 }
 
@@ -61,6 +57,9 @@
 	accent-color: var(--accent);
 	color: var(--text);
 	font-size: medium;
+}
+
+*, span:not(.icons) {
 	font-family: sans-rg, sans-serif, sans;
 }
 
@@ -70,13 +69,13 @@ html {
 
 button[disabled],
 input[disabled] {
-	opacity: 0.6;
+	opacity: 0.2;
 	cursor: not-allowed;
 }
 
 /* 
-    GROUPS 
-*/
+GROUPS 
+ */
 
 /* Animation */
 @media (prefers-reduced-motion) {
@@ -86,18 +85,24 @@ input[disabled] {
 	}
 }
 
-.animating-in {
+.animating-in,
+.animating-out {
 	transform-origin: top;
-	animation: animate-in 0.5s;
+	animation-name: animate-in;
+	animation-duration: 0.2s;
 }
 
 .animating-out {
-	transform-origin: top;
-	animation: animate-out 0.5s;
+	animation-direction: reverse;
 }
 
 .draggable-items {
 	transition: transform 0.2s, border-radius 0.2s;
+}
+
+.scenes.animating-in,
+.scenes.animating-out {
+	animation-name: slide-in;
 }
 
 /* Checkable */
@@ -134,8 +139,8 @@ input[disabled] {
 }
 
 /* 
-    COMPONENTS
-*/
+COMPONENTS
+ */
 
 /* Box */
 .boxes {
@@ -169,8 +174,11 @@ input[disabled] {
 
 .buttons span {
 	color: inherit;
-	font-family: inherit;
 	cursor: inherit;
+}
+
+.buttons span:not(.icons) {
+	font-family: inherit;
 }
 
 .buttons span:empty {
@@ -363,4 +371,17 @@ h3 {
 	background-color: var(--background-alt);
 	border-radius: var(--corners);
 	overflow: hidden;
+}
+
+/*
+NAVIGATION
+*/
+
+.scenes {
+	background-color: var(--background);
+	border-right: 1px solid var(--lines);
+}
+
+.navigation-links > .stacks-horizontal {
+	justify-content: start;
 }
