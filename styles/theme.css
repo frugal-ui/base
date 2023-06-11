@@ -13,18 +13,6 @@
 	}
 }
 
-@keyframes fade-in {
-	0% {
-		opacity: 0;
-	}
-}
-
-@keyframes sheet {
-	0% {
-		transform: translateY(2rem);
-	}
-}
-
 @keyframes animate-in {
 	0% {
 		transform: scaleY(0);
@@ -55,6 +43,13 @@
 	}
 }
 
+@keyframes delay-hide {
+	0%,
+	100% {
+		visibility: visible;
+	}
+}
+
 :root {
 	--corners: 0.2rem;
 
@@ -66,7 +61,7 @@
 	accent-color: var(--accent);
 	color: var(--text);
 	font-size: medium;
-	font-family: sans-rg, sans-serif;
+	font-family: sans-rg, sans-serif, sans;
 }
 
 html {
@@ -135,7 +130,7 @@ input[disabled] {
 	border-radius: var(--corners);
 
 	font-size: medium;
-	font-family: sans-md, sans;
+	font-family: sans-md, sans-serif, sans;
 }
 
 /* 
@@ -155,7 +150,7 @@ input[disabled] {
 .buttons,
 .selects {
 	font-size: medium;
-	font-family: mono-md;
+	font-family: mono-md, monospace, mono;
 	color: var(--on-clickable);
 
 	background-color: var(--clickable);
@@ -244,7 +239,7 @@ h2,
 h3,
 h4,
 h5 {
-	font-family: headings, mono-md;
+	font-family: headings, mono-md, monospace, mono;
 	text-transform: uppercase;
 }
 
@@ -294,8 +289,7 @@ h3 {
 }
 
 /* Overlays */
-.popover-contents,
-.sheet-contents {
+.popover-contents {
 	background-color: var(--background-alt);
 	box-shadow: 0px 0px 7px var(--shadows);
 
@@ -303,7 +297,7 @@ h3 {
 	border-radius: var(--corners);
 }
 
-.popover-containers[open] .popover-contents {
+.popover-containers[open] > .popover-contents {
 	animation: appear 0.2s;
 }
 
@@ -311,7 +305,14 @@ h3 {
 	width: 100%;
 	height: 100%;
 
-	animation: sheet 0.2s ease-out;
+	background-color: var(--background);
+
+	transform: translateY(1rem);
+	transition: transform 0.2s;
+}
+
+.sheet-containers[open] > .sheet-contents {
+	transform: translateY(0);
 }
 
 .sheet-containers {
@@ -321,20 +322,28 @@ h3 {
 
 	width: 100%;
 	height: 100%;
-}
-
-.sheet-containers[open] {
-	border: none;
 
 	display: flex;
 	align-items: end;
 
 	padding: 0rem;
-	padding-top: 2rem;
 
-	background-color: var(--backdrop);
+	border: none;
 
-	animation: fade-in 0.1s;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity 0.2s;
+}
+
+.sheet-containers:not([open]) {
+	animation: delay-hide 0.2s;
+}
+
+.sheet-containers[open] {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: all;
 }
 
 /* Separator */

@@ -450,7 +450,10 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 		value: string,
 		condition: ValueObject<boolean>,
 	) => this;
-	setStyle: (property: keyof CSSStyleDeclaration, value: Stringifiable) => this;
+	setStyle: (
+		property: keyof CSSStyleDeclaration,
+		value: Stringifiable,
+	) => this;
 
 	//children
 	addItems: (...children: Component<any>[]) => this;
@@ -1102,7 +1105,7 @@ export function List<T extends Identifiable & Sortable>(
 							self.createBinding(
 								unwrapBindable(itemData.index),
 								(newIndex) => {
-									self.setStyle('order', newIndex.toString());
+									self.cssOrder(newIndex.toString());
 								},
 							);
 
@@ -1194,73 +1197,74 @@ export function Popover(configuration: PopoverCfg) {
 	resetPosition();
 
 	const rectOfToggle = () => configuration.toggle.getBoundingClientRect();
-	const rectOfContent = () => configuration.content.getBoundingClientRect();
-	const rectOfWindow = document.body.getBoundingClientRect();
+	let rectOfContent = () => configuration.content.getBoundingClientRect();
+	let rectOfWindow = () => document.body.getBoundingClientRect();
 
 	function checkIsOK() {
-		const rect = rectOfContent();
-
-		return !(
-			rect.top < rectOfWindow.top ||
-			rect.left < rectOfWindow.left ||
-			rect.right > rectOfWindow.right ||
-			rect.bottom > rectOfWindow.bottom
+		const isOK = !(
+			rectOfContent().top < rectOfWindow().top ||
+			rectOfContent().left < rectOfWindow().left ||
+			rectOfContent().right > rectOfWindow().right ||
+			rectOfContent().bottom > rectOfWindow().bottom
 		);
+		console.log(isOK, rectOfContent(), rectOfWindow());
+		return isOK;
 	}
 
 	function resetPosition() {
 		configuration.content
-			.setStyle('top', 'unset')
-			.setStyle('left', 'unset');
+			.cssTop('unset')
+			.cssLeft('unset')
+			.cssRight('unset')
+			.cssBottom('unset');
 	}
 
 	function alignToRightFromLeftEdge() {
-		configuration.content.setStyle('left', `${rectOfToggle().left}px`);
+		configuration.content.cssLeft(`${rectOfToggle().left}px`);
 	}
 
 	function alignToRightFromRightEdge() {
-		configuration.content.setStyle('left', `${rectOfToggle().right}px`);
+		configuration.content.cssLeft(`${rectOfToggle().right}px`);
 	}
 
 	function alignToLeftFromLeftEdge() {
-		configuration.content.setStyle(
-			'left',
+		configuration.content.cssLeft(
 			`${rectOfToggle().left - rectOfContent().width}px`,
 		);
 	}
 
 	function alignToLeftFromRightEdge() {
-		configuration.content.setStyle(
-			'left',
+		configuration.content.cssLeft(
 			`${rectOfToggle().right - rectOfContent().width}px`,
 		);
 	}
 
 	function tryXAxisFix() {
 		alignToRightFromLeftEdge();
+		console.log('xfix-r');
 		if (checkIsOK() == true) return;
-
 		alignToLeftFromRightEdge();
-		if (checkIsOK() == true) return;
+		console.log('xfix-l');
 	}
 
 	function alignY() {
 		//down
-		configuration.content
-			.setStyle('left', 'unset')
-			.setStyle('top', `${rectOfToggle().bottom}px`);
+		resetPosition();
+
+		configuration.content.cssTop(`${rectOfToggle().bottom}px`);
+		console.log('down');
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
 		if (checkIsOK() == true) return;
 
 		//up
-		configuration.content
-			.setStyle('left', 'unset')
-			.setStyle(
-				'top',
-				`${rectOfToggle().top - rectOfContent().height}px`,
-			);
+		resetPosition();
+
+		configuration.content.cssTop(
+			`${rectOfToggle().top - rectOfContent().height}px`,
+		);
+		console.log('up');
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1268,28 +1272,37 @@ export function Popover(configuration: PopoverCfg) {
 
 	function alignX() {
 		//to left
-		configuration.content.setStyle('top', 'unset');
+		resetPosition();
 
 		alignToRightFromRightEdge();
+		console.log('right');
 		if (checkIsOK() == true) return;
 
 		//to right
-		configuration.content.setStyle('top', 'unset');
+		resetPosition();
 
 		alignToLeftFromLeftEdge();
+		console.log('left');
 	}
 
 	function applyFallbackAlignment() {
-		configuration.content
-			.setStyle('bottom', PADDING)
-			.setStyle('maxHeight', `calc(100% - 2*${PADDING})`);
+		resetPosition();
+		console.log('fallback');
 
-		if (rectOfContent().left < rectOfWindow.left)
+		configuration.content
+			.cssBottom(PADDING)
+			.cssMaxHeight(`calc(100% - 2*${PADDING})`);
+
+		if (rectOfContent().left < rectOfWindow().left) {
 			//content overflows left edge
-			configuration.content.setStyle('left', PADDING);
-		if (rectOfContent().left < rectOfWindow.left)
+			resetPosition();
+			configuration.content.cssLeft(PADDING);
+		}
+		else if (rectOfContent().right < rectOfWindow().right) {
 			//content overflows right edge
-			configuration.content.setStyle('right', PADDING);
+			resetPosition();
+			configuration.content.cssRight(PADDING);
+		}
 	}
 
 	function updateContentPosition() {
@@ -1323,8 +1336,7 @@ export function Popover(configuration: PopoverCfg) {
 	// Main
 	return Div(
 		configuration.toggle,
-		configuration.content
-			.addToClass('popover-contents')
+		configuration.content.addToClass('popover-contents'),
 	)
 		.listen('click', (e) => {
 			e.preventDefault();
