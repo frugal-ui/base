@@ -1207,7 +1207,6 @@ export function Popover(configuration: PopoverCfg) {
 			rectOfContent().right > rectOfWindow().right ||
 			rectOfContent().bottom > rectOfWindow().bottom
 		);
-		console.log(isOK, rectOfContent(), rectOfWindow());
 		return isOK;
 	}
 
@@ -1216,7 +1215,10 @@ export function Popover(configuration: PopoverCfg) {
 			.cssTop('unset')
 			.cssLeft('unset')
 			.cssRight('unset')
-			.cssBottom('unset');
+			.cssBottom('unset')
+
+			.cssMaxHeight('unset')
+			.cssMaxWidth('unset');
 	}
 
 	function alignToRightFromLeftEdge() {
@@ -1241,10 +1243,8 @@ export function Popover(configuration: PopoverCfg) {
 
 	function tryXAxisFix() {
 		alignToRightFromLeftEdge();
-		console.log('xfix-r');
 		if (checkIsOK() == true) return;
 		alignToLeftFromRightEdge();
-		console.log('xfix-l');
 	}
 
 	function alignY() {
@@ -1252,7 +1252,6 @@ export function Popover(configuration: PopoverCfg) {
 		resetPosition();
 
 		configuration.content.cssTop(`${rectOfToggle().bottom}px`);
-		console.log('down');
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1264,7 +1263,6 @@ export function Popover(configuration: PopoverCfg) {
 		configuration.content.cssTop(
 			`${rectOfToggle().top - rectOfContent().height}px`,
 		);
-		console.log('up');
 		if (checkIsOK() == true) return;
 
 		tryXAxisFix();
@@ -1275,34 +1273,23 @@ export function Popover(configuration: PopoverCfg) {
 		resetPosition();
 
 		alignToRightFromRightEdge();
-		console.log('right');
 		if (checkIsOK() == true) return;
 
 		//to right
 		resetPosition();
 
 		alignToLeftFromLeftEdge();
-		console.log('left');
 	}
 
 	function applyFallbackAlignment() {
 		resetPosition();
-		console.log('fallback');
 
 		configuration.content
 			.cssBottom(PADDING)
-			.cssMaxHeight(`calc(100% - 2*${PADDING})`);
-
-		if (rectOfContent().left < rectOfWindow().left) {
-			//content overflows left edge
-			resetPosition();
-			configuration.content.cssLeft(PADDING);
-		}
-		else if (rectOfContent().right < rectOfWindow().right) {
-			//content overflows right edge
-			resetPosition();
-			configuration.content.cssRight(PADDING);
-		}
+			.cssMaxHeight(`calc(100% - 2*${PADDING})`)
+			.cssMaxWidth(`calc(100% - 2*${PADDING})`)
+			.cssLeft(PADDING)
+			.cssRight(PADDING);
 	}
 
 	function updateContentPosition() {
