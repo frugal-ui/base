@@ -370,7 +370,6 @@ h3 {
 .visual-groups {
 	background-color: var(--background-alt);
 	border-radius: var(--corners);
-	overflow: hidden;
 }
 
 /*

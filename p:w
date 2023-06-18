@@ -12,7 +12,7 @@ import './styles/theme.css';
  * MAIN
  */
 
-export function buildInterface(component: Component<any>) {
+export function initialize(component: Component<any>) {
 	document.body.appendChild(component);
 }
 
@@ -104,34 +104,34 @@ export interface Binding<T> {
 export type BindingAction<T> = (newValue: T) => void;
 
 //tight binding
-export interface TightBindingCfgOpts<D, C> {
-	readonly data: BindableObject<D>;
-	readonly component: Component<C>;
-	readonly fallbackValue: D;
+export interface TightBindingCfgOpts<T> {
+	readonly data: BindableObject<T>;
+	readonly component: Component<any>;
+	readonly fallbackValue: T;
 	readonly changeEventName: keyof HTMLElementEventMap;
 
-	getViewProperty: () => D;
-	setViewProperty: (newValue: D) => void;
+	getViewProperty: () => T;
+	setViewProperty: (newValue: T) => void;
 }
 /** Configure a binding for bi-directional changes. */
-export class TightBindingCfg<D, C> {
-	readonly data: BindableObject<D>;
-	readonly component: Component<C>;
-	readonly defaultValue: D;
+export class TightBindingCfg<T> {
+	readonly data: BindableObject<T>;
+	readonly component: Component<any>;
+	readonly defaultValue: T;
 	readonly changeEventName: keyof HTMLElementEventMap;
 
-	constructor(configuration: TightBindingCfgOpts<D, C>) {
+	constructor(configuration: TightBindingCfgOpts<T>) {
 		this.data = configuration.data;
 		this.component = configuration.component;
 		this.defaultValue = configuration.fallbackValue;
 		this.changeEventName = configuration.changeEventName;
 
-		this.getViewValue = configuration.getViewProperty;
-		this.setViewValue = configuration.setViewProperty;
+		this.getViewProperty = configuration.getViewProperty;
+		this.setViewProperty = configuration.setViewProperty;
 	}
 
-	getViewValue: () => D;
-	setViewValue: (newValue: D) => void;
+	getViewProperty: () => T;
+	setViewProperty: (newValue: T) => void;
 }
 
 export interface ValueTBCfgOpts<T> {
@@ -140,7 +140,7 @@ export interface ValueTBCfgOpts<T> {
 	fallbackValue: T;
 }
 /** Tightly binds a component's value. */
-export class ValueTBCfg<T> extends TightBindingCfg<T, T> {
+export class ValueTBCfg<T> extends TightBindingCfg<T> {
 	constructor(configuration: ValueTBCfgOpts<T>) {
 		super({
 			data: configuration.data,
@@ -177,10 +177,10 @@ export class CheckTBCfg extends ValueTBCfg<boolean> {
 		this.component = configuration.component;
 	}
 
-	getViewValue = () => {
+	getViewProperty = () => {
 		return this.component.checked;
 	};
-	setViewValue = (newValue: boolean) => {
+	setViewProperty = (newValue: boolean) => {
 		this.component.checked = newValue;
 	};
 }
@@ -432,7 +432,7 @@ export type Styleable = {
 
 /** UI Component. */
 export interface Component<ValueType> extends HTMLElement, Styleable {
-	value: ValueType;
+	value: ValueType | undefined;
 	access: (accessFn: (self: this) => void) => this;
 	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
 	animateIn: () => this;
@@ -491,7 +491,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 		action: BindingAction<T>,
 	) => this;
 	createSelectionBinding: <T>(configuration: ValueSelectionCfg<T>) => this;
-	createTightBinding: <D, C>(configuration: TightBindingCfg<D, C>) => this;
+	createTightBinding: <T>(configuration: TightBindingCfg<T>) => this;
 	removeBinding: <T>(bindable: BindableObject<T>) => this;
 	updateBinding: <T>(bindable: BindableObject<T>) => this;
 }
@@ -706,7 +706,10 @@ export function Component<ValueType>(
 		const bindable = unwrapBindable(shouldBeVisible);
 		component
 			.createBinding(bindable, () => {
-				component.toggleAttribute('hidden', bindable.value == false);
+				component.toggleAttribute(
+					'hidden',
+					bindable.value == false,
+				);
 			})
 			.updateBinding(bindable);
 
@@ -740,11 +743,11 @@ export function Component<ValueType>(
 	component.createTightBinding = (configuration) => {
 		component
 			.createBinding(configuration.data, (newValue) => {
-				configuration.setViewValue(newValue);
+				configuration.setViewProperty(newValue);
 			})
 			.updateBinding(configuration.data)
 			.listen(configuration.changeEventName, () => {
-				configuration.data.value = configuration.getViewValue();
+				configuration.data.value = configuration.getViewProperty();
 			});
 
 		return component;
@@ -887,7 +890,6 @@ export function Checkbox(configuration: CheckboxCfg) {
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
-				toValueType: (inputValue) => inputValue,
 			}) as CheckableComponent<string>
 		)
 			.addToClass('checkable-items')
@@ -901,7 +903,7 @@ export function Checkbox(configuration: CheckboxCfg) {
 
 				if (configuration.isIndeterminate != undefined)
 					self.createTightBinding(
-						new TightBindingCfg<boolean, string>({
+						new TightBindingCfg<boolean>({
 							component: self,
 							data: configuration.isIndeterminate,
 							fallbackValue: false,
@@ -941,18 +943,16 @@ export function Icon(iconName: string) {
 }
 
 /* Input */
-export interface InputCfg<T extends Stringifiable> {
+export interface InputCfg<T> {
 	type: string;
-	value: BindableObject<T> | undefined;
-	toValueType: (inputValue: string) => T;
-	fallbackValue: T | undefined;
+	value: BindableObject<string> | undefined;
+	fallbackValue: string | undefined;
 	placeholder?: string | undefined;
 }
 
 export class TextInputCfg implements InputCfg<string> {
 	type = 'text';
 	value: BindableObject<string>;
-	toValueType = (inputValue: string) => inputValue;
 	fallbackValue: string;
 	placeholder: string;
 
@@ -965,19 +965,18 @@ export class TextInputCfg implements InputCfg<string> {
 
 export class NumberInputCfg implements InputCfg<number> {
 	type = 'number';
-	value: BindableObject<number>;
-	toValueType = (inputValue: string) => parseInt(inputValue);
-	fallbackValue: number;
+	value: BindableObject<string>;
+	fallbackValue: string;
 	placeholder: string;
 
-	constructor(value: BindableObject<number>, placeholder = '') {
+	constructor(value: BindableObject<string>, placeholder = '') {
 		this.fallbackValue = value.value;
 		this.value = value;
 		this.placeholder = placeholder;
 	}
 }
 
-export function Input<T extends Stringifiable>(configuration: InputCfg<T>) {
+export function Input<T>(configuration: InputCfg<T>) {
 	return Component<string>('input')
 		.addToClass('inputs')
 		.access((self) => {
@@ -990,15 +989,13 @@ export function Input<T extends Stringifiable>(configuration: InputCfg<T>) {
 				configuration.value != undefined &&
 				configuration.fallbackValue != undefined
 			)
-				self.createTightBinding({
-					data: configuration.value,
-					component: self,
-					defaultValue: configuration.fallbackValue,
-					changeEventName: 'input',
-					getViewValue: () => configuration.toValueType(self.value),
-					setViewValue: (newValue) =>
-						(self.value = newValue.toString()),
-				});
+				self.createTightBinding(
+					new ValueTBCfg({
+						data: configuration.value,
+						component: self,
+						fallbackValue: configuration.fallbackValue,
+					}),
+				);
 		});
 }
 
@@ -1102,68 +1099,62 @@ export function List<T extends Identifiable & Sortable>(
 		.listen('mousemove', (e) => handleDragMove(e as PointerEvent))
 
 		.access((listView) =>
-			listView
-				.createBinding(configuration.listData, (listData) => {
-					function removeItemView(
-						itemView: Component<any> | Element,
-					) {
-						const removeFn =
-							(itemView as Component<any>).animateOut ??
-							itemView.remove;
-						removeFn();
-					}
+			listView.createBinding(configuration.listData, (listData) => {
+				function removeItemView(itemView: Component<any> | Element) {
+					const removeFn =
+						(itemView as Component<any>).animateOut ??
+						itemView.remove;
+					removeFn();
+				}
 
-					//add new items
-					configuration.listData.value.forEach((itemData, i) => {
-						const oldItemView = document.getElementById(
-							itemData.uuid.toString(),
-						);
-
-						const newItemView = compute(itemData)
-							.setID(itemData.uuid)
-							.access((self) => {
-								self.createBinding(
-									unwrapBindable(itemData.index),
-									(newIndex) => {
-										self.cssOrder(newIndex.toString());
-									},
-								);
-
-								if (configuration.sortable == true)
-									self.addToClass('draggable-items')
-										.addToClass('rearrangable-items')
-
-										.listen('mousedown', (e) =>
-											startDrag(e, itemData, self),
-										)
-										.listen('touchstart', (e) =>
-											startDrag(e, itemData, self),
-										);
-							})
-							.animateIn();
-
-						//already exists
-						if (oldItemView != null) return;
-
-						if (i > listView.children.length) {
-							listView.append(newItemView);
-						} else {
-							const referenceNode = listView.children[i];
-							listView.insertBefore(newItemView, referenceNode);
-						}
-					});
-
-					//remove deleted items
-					Array.from(listView.children).forEach(
-						(itemView: Element) => {
-							const matchingDataEntry = listData.get(itemView.id);
-							if (matchingDataEntry != undefined) return; //data entry still exists
-
-							removeItemView(itemView);
-						},
+				//add new items
+				configuration.listData.value.forEach((itemData, i) => {
+					const oldItemView = document.getElementById(
+						itemData.uuid.toString(),
 					);
-				})
-				.updateBinding(configuration.listData),
+
+					const newItemView = compute(itemData)
+						.setID(itemData.uuid)
+						.access((self) => {
+							self.createBinding(
+								unwrapBindable(itemData.index),
+								(newIndex) => {
+									self.cssOrder(newIndex.toString());
+								},
+							);
+
+							if (configuration.sortable == true)
+								self.addToClass('draggable-items')
+									.addToClass('rearrangable-items')
+
+									.listen('mousedown', (e) =>
+										startDrag(e, itemData, self),
+									)
+									.listen('touchstart', (e) =>
+										startDrag(e, itemData, self),
+									);
+						})
+						.animateIn();
+
+					//already exists
+					if (oldItemView != null) return;
+
+					if (i > listView.children.length) {
+						listView.append(newItemView);
+					} else {
+						const referenceNode = listView.children[i];
+						listView.insertBefore(newItemView, referenceNode);
+					}
+				});
+
+				//remove deleted items
+				Array.from(listView.children).forEach((itemView: Element) => {
+					const matchingDataEntry = listData.get(itemView.id);
+					if (matchingDataEntry != undefined) return; //data entry still exists
+
+					removeItemView(itemView);
+				});
+			}),
 		);
 }
 
@@ -1395,7 +1386,6 @@ export function RadioButton<T>(configuration: RadioButtonCfg<T>) {
 				fallbackValue: undefined,
 				value: undefined,
 				placeholder: undefined,
-				toValueType: (inputValue) => inputValue,
 			}) as CheckableComponent<string>
 		)
 			.access((self) =>
@@ -1519,15 +1509,14 @@ export interface SliderOpts {
 }
 
 export function Slider(
-	value: BindableObject<number>,
+	value: BindableObject<string>,
 	options: SliderOpts = {},
 ) {
 	return Input<number>({
 		type: 'range',
-		fallbackValue: 0,
+		fallbackValue: '0',
 		value,
 		placeholder: undefined,
-		toValueType: (inputValue) => parseInt(inputValue),
 	}).access((self) =>
 		self
 			.setAttr('min', options.min ?? 0)
@@ -1611,10 +1600,6 @@ export class GenericScene<T> {
 	draw(data: T): Component<any> {
 		return Text('Hello, world!');
 	}
-
-	close = () => {
-		this.stage.goBackTo(this.depth - 1);
-	};
 }
 
 /* Stage */
@@ -1623,47 +1608,49 @@ export interface Stage extends Component<undefined> {
 	goBackTo: (depth: number) => this;
 }
 
-export function Stage(...initialScenes: (typeof GenericScene<undefined>)[]) {
-	return (Div() as Stage).addToClass('stages').access((self) => {
-		let persistingChildren: Element[] = [];
-		function getPersistingChildren() {
-			persistingChildren = Array.from(self.children).filter(
-				(child) => !child.classList.contains('animating-out'),
-			);
+export function Stage(...initialScenes: typeof GenericScene<undefined>[]) {
+	return (Div() as Stage)
+		.addToClass('stages')
+		.access((self) => {
+			let persistingChildren: Element[] = [];
+			function getPersistingChildren() {
+				persistingChildren = Array.from(self.children).filter(
+					(child) => !child.classList.contains('animating-out'),
+				);
 
-			return persistingChildren;
-		}
-
-		self.addScene = (Scene, data) => {
-			const newDepth = getPersistingChildren().length;
-			const scene = new Scene(newDepth, self, data);
-			self.addItems(scene.view);
-			return self;
-		};
-
-		self.goBackTo = (depth) => {
-			while (getPersistingChildren().length > depth + 1) {
-				const child = persistingChildren[
-					persistingChildren.length - 1
-				] as Component<any>;
-				const isNormalScene = child.classList.contains('scenes-normal');
-				if (child.animateOut && !isNormalScene) child.animateOut();
-				else child.remove();
+				return persistingChildren;
 			}
-			return self;
-		};
 
-		initialScenes.forEach((scene) => {
-			self.addScene(scene, undefined);
-		});
-	});
+			self.addScene = (Scene, data) => {
+				const newDepth = getPersistingChildren().length;
+				const scene = new Scene(newDepth, self, data);
+				self.addItems(scene.view);
+				return self;
+			};
+
+			self.goBackTo = (depth) => {
+				while (getPersistingChildren().length > depth + 1) {
+					const child = persistingChildren[
+						persistingChildren.length - 1
+					] as Component<any>;
+					const isNormalScene = child.classList.contains('scenes-normal');
+					if (child.animateOut && !isNormalScene) child.animateOut();
+					else child.remove();
+				}
+				return self;
+			};
+
+			initialScenes.forEach(scene => {
+				self.addScene(scene, undefined);
+			});
+		})
 }
 
 /* Link */
 export interface NavigationLinkCfg<T> {
 	parentScene: GenericScene<T>;
 	data: T;
-	destination: typeof GenericScene<T>;
+	destination: typeof GenericScene;
 }
 
 export function NavigationLink<T>(
@@ -1675,7 +1662,7 @@ export function NavigationLink<T>(
 
 	function openScene() {
 		stage.goBackTo(depth);
-		stage.addScene(configuration.destination, configuration.data);
+			stage.addScene(configuration.destination, configuration.data);
 	}
 
 	return ListItem(

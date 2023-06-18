@@ -109,6 +109,7 @@ body {
 .visual-groups {
 	width: 100%;
 	height: auto;
+	flex: 0;
 }
 
 /*
@@ -145,6 +146,13 @@ body {
 .scenes.scenes-content {
 	position: absolute;
 	width: 100%;
+}
+
+.navigation-links span {
+	white-space: nowrap;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipse;
 }
 
 @media (min-width: 850px) {
