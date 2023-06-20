@@ -104,7 +104,7 @@ export interface Binding<T> {
 export type BindingAction<T> = (newValue: T) => void;
 
 //tight binding
-export interface TightBindingCfgOpts<D, C> {
+export interface GenericTBModelCfg<D, C> {
     readonly data: BindableObject<D>;
     readonly component: Component<C>;
     readonly fallbackValue: D;
@@ -114,13 +114,13 @@ export interface TightBindingCfgOpts<D, C> {
     setViewProperty: (newValue: D) => void;
 }
 /** Configure a binding for bi-directional changes. */
-export class TightBindingCfg<D, C> {
+export class GenericTBModel<D, C> {
     readonly data: BindableObject<D>;
     readonly component: Component<C>;
     readonly defaultValue: D;
     readonly changeEventName: keyof HTMLElementEventMap;
 
-    constructor(configuration: TightBindingCfgOpts<D, C>) {
+    constructor(configuration: GenericTBModelCfg<D, C>) {
         this.data = configuration.data;
         this.component = configuration.component;
         this.defaultValue = configuration.fallbackValue;
@@ -134,14 +134,14 @@ export class TightBindingCfg<D, C> {
     setViewValue: (newValue: D) => void;
 }
 
-export interface ValueTBCfgOpts<T> {
+export interface ValueTBModelOpts<T> {
     data: BindableObject<T>;
     component: Component<T>;
     fallbackValue: T;
 }
 /** Tightly binds a component's value. */
-export class ValueTBCfg<T> extends TightBindingCfg<T, T> {
-    constructor(configuration: ValueTBCfgOpts<T>) {
+export class ValueTBModel<T> extends GenericTBModel<T, T> {
+    constructor(configuration: ValueTBModelOpts<T>) {
         super({
             data: configuration.data,
             component: configuration.component,
@@ -158,17 +158,17 @@ export class ValueTBCfg<T> extends TightBindingCfg<T, T> {
     }
 }
 
-export interface CheckTBCfgOpts {
+export interface CheckedTBModelCfg {
     isChecked: BindableObject<boolean>;
     component: CheckableComponent<any>;
 }
 /** Tightly bind a component's 'checked' property. */
-export class CheckTBCfg extends ValueTBCfg<boolean> {
+export class CheckedTBModel extends ValueTBModel<boolean> {
     readonly component: CheckableComponent<any>;
 
     readonly changeEventName: keyof HTMLElementEventMap = 'change';
 
-    constructor(configuration: CheckTBCfgOpts) {
+    constructor(configuration: CheckedTBModelCfg) {
         super({
             data: configuration.isChecked,
             component: configuration.component,
@@ -191,7 +191,7 @@ export class DataSelection<T> {
     selectedItems = new State<T[]>([]);
 }
 
-export interface ValueSelectionCfgOpts<T> {
+export interface ValueSBModelCfg<T> {
     component: Component<any>;
     ownValue: T;
     selection: DataSelection<T>;
@@ -203,16 +203,16 @@ export interface ValueSelectionCfgOpts<T> {
 }
 
 /** Add or remove ownValue on selectedItems */
-export class ValueSelectionCfg<T> {
+export class ValueSBModel<T> {
     readonly component: Component<any>;
-    readonly selectionCfg: DataSelection<T>;
+    readonly selection: DataSelection<T>;
     readonly ownValue: T;
     readonly changeEventName: keyof HTMLElementEventMap;
     isExclusive = false;
 
-    constructor(configuration: ValueSelectionCfgOpts<T>) {
+    constructor(configuration: ValueSBModelCfg<T>) {
         this.component = configuration.component;
-        this.selectionCfg = configuration.selection;
+        this.selection = configuration.selection;
         this.ownValue = configuration.ownValue;
         this.changeEventName = configuration.changeEventName;
 
@@ -224,44 +224,42 @@ export class ValueSelectionCfg<T> {
     }
 
     getOwnIndex = () => {
-        return this.selectionCfg.selectedItems.value.indexOf(this.ownValue);
+        return this.selection.selectedItems.value.indexOf(this.ownValue);
     };
 
     getView: () => boolean;
     setView: (isSelected: boolean) => void;
 
-    getModel = () => {
+    getData = () => {
         return this.getOwnIndex() != -1;
     };
-    setModel = (isSelected: boolean) => {
+    setData = (isSelected: boolean) => {
         if (isSelected) {
             if (this.getOwnIndex() != -1) return; //already selected
 
             if (this.isExclusive == true)
-                return (this.selectionCfg.selectedItems.value = [
-                    this.ownValue,
-                ]);
-            else this.selectionCfg.selectedItems.value.push(this.ownValue);
+                return (this.selection.selectedItems.value = [this.ownValue]);
+            else this.selection.selectedItems.value.push(this.ownValue);
         } else {
             if (this.getOwnIndex() == -1) return; //already deselected
-            this.selectionCfg.selectedItems.value.splice(this.getOwnIndex(), 1);
+            this.selection.selectedItems.value.splice(this.getOwnIndex(), 1);
         }
 
-        this.selectionCfg.selectedItems.triggerAll();
+        this.selection.selectedItems.triggerAll();
     };
 }
 
-export interface CheckSelectionCfgOpts<T> {
+export interface CheckSBModelCfg<T> {
     component: CheckableComponent<any>;
     ownValue: T;
     selection: DataSelection<T>;
     isExclusive?: boolean;
 }
 /** SelectionCfg for checkable components */
-export class CheckSelectionCfg<T> extends ValueSelectionCfg<T> {
+export class CheckSBModel<T> extends ValueSBModel<T> {
     readonly component: CheckableComponent<any>;
 
-    constructor(configuration: CheckSelectionCfgOpts<T>) {
+    constructor(configuration: CheckSBModelCfg<T>) {
         super({
             ...configuration,
             changeEventName: 'change',
@@ -424,11 +422,6 @@ export function unwrapBindable<T>(
  */
 // GENERAL
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
-export type Styleable = {
-    [property in keyof typeof PrefixedCSSPropertyNames]: (
-        value: Stringifiable,
-    ) => Component<any>;
-};
 export type KeyboardShortcut = {
     modifiers?: (
         | 'ctrlKey'
@@ -440,11 +433,21 @@ export type KeyboardShortcut = {
     key: KeyboardEvent['key'];
     action: (ev: KeyboardEvent) => void;
 };
+export enum ScreenSizes {
+    Mobile = 'screen-mobile',
+    Desktop = 'screen-desktop',
+}
+export type Styleable = {
+    [property in keyof typeof PrefixedCSSPropertyNames]: (
+        value: Stringifiable,
+    ) => Component<any>;
+};
 
 /** UI Component. */
 export interface Component<ValueType> extends HTMLElement, Styleable {
     value: ValueType;
     access: (accessFn: (self: this) => void) => this;
+    setAccessibilityLabel: (label: string) => this;
     setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
     animateIn: () => this;
     animateOut: () => void;
@@ -502,14 +505,17 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
         bindable: BindableObject<T>,
         action: BindingAction<T>,
     ) => this;
-    createSelectionBinding: <T>(configuration: ValueSelectionCfg<T>) => this;
-    createTightBinding: <D, C>(configuration: TightBindingCfg<D, C>) => this;
+    createSelectionBinding: <T>(model: ValueSBModel<T>) => this;
+    createTightBinding: <D, C>(model: GenericTBModel<D, C>) => this;
     removeBinding: <T>(bindable: BindableObject<T>) => this;
     updateBinding: <T>(bindable: BindableObject<T>) => this;
 
     //style
+    forceDefaultStyles: () => this;
+    hideOnScreenSize: (size: ScreenSizes) => this;
     useDefaultPadding: () => this;
     useDefaultSpacing: () => this;
+    useMutedColor: () => this;
 }
 
 export interface CheckableComponent<T> extends Component<T> {
@@ -538,6 +544,10 @@ export function Component<ValueType>(
     //methods
     component.access = (fn) => {
         fn(component);
+        return component;
+    };
+    component.setAccessibilityLabel = (label) => {
+        component.setAttr('aria-label', label);
         return component;
     };
     component.setAccessibilityRole = (roleName) => {
@@ -722,17 +732,18 @@ export function Component<ValueType>(
 
             A: for (const shortcut of shortcuts) {
                 //make sure all modifiers are pressed
-                if (shortcut.modifiers) for (const modifier of shortcut.modifiers) {
-                    if (modifier == 'commandOrControl') {
-                        if (ev.ctrlKey == false && ev.metaKey == false)
+                if (shortcut.modifiers)
+                    for (const modifier of shortcut.modifiers) {
+                        if (modifier == 'commandOrControl') {
+                            if (ev.ctrlKey == false && ev.metaKey == false)
+                                continue A;
+                        } else if (ev[modifier] == false) {
                             continue A;
-                    } else if (ev[modifier] == false) {
-                        continue A;
+                        }
                     }
-                }
                 if (ev.key == shortcut.key) {
                     shortcut.action(ev);
-                } 
+                }
             }
         });
         return component;
@@ -774,28 +785,28 @@ export function Component<ValueType>(
 
         return component;
     };
-    component.createTightBinding = (configuration) => {
+    component.createTightBinding = (model) => {
         component
-            .createBinding(configuration.data, (newValue) => {
-                configuration.setViewValue(newValue);
+            .createBinding(model.data, (newValue) => {
+                model.setViewValue(newValue);
             })
-            .updateBinding(configuration.data)
-            .listen(configuration.changeEventName, () => {
-                configuration.data.value = configuration.getViewValue();
+            .updateBinding(model.data)
+            .listen(model.changeEventName, () => {
+                model.data.value = model.getViewValue();
             });
 
         return component;
     };
-    component.createSelectionBinding = (configuration) => {
+    component.createSelectionBinding = (model) => {
         component
-            .createBinding(configuration.selectionCfg.selectedItems, () => {
-                const isSelected = configuration.getOwnIndex() != -1;
-                configuration.setView(isSelected);
+            .createBinding(model.selection.selectedItems, () => {
+                const isSelected = model.getOwnIndex() != -1;
+                model.setView(isSelected);
             })
-            .updateBinding(configuration.selectionCfg.selectedItems)
-            .listen(configuration.changeEventName, () => {
-                const isSelectedInView = configuration.getView();
-                configuration.setModel(isSelectedInView);
+            .updateBinding(model.selection.selectedItems)
+            .listen(model.changeEventName, () => {
+                const isSelectedInView = model.getView();
+                model.setData(isSelectedInView);
             });
 
         return component;
@@ -829,12 +840,24 @@ export function Component<ValueType>(
     };
 
     //style
+    component.forceDefaultStyles = () => {
+        component.addToClass('forcing-default-styles');
+        return component;
+    };
+    component.hideOnScreenSize = (size) => {
+        component.addToClass('hides-responsively').addToClass(size);
+        return component;
+    };
     component.useDefaultPadding = () => {
-        component.cssPadding('.5rem');
+        component.addToClass('using-default-padding');
         return component;
     };
     component.useDefaultSpacing = () => {
-        component.cssGap('.5rem');
+        component.cssGap('var(--gap)');
+        return component;
+    };
+    component.useMutedColor = () => {
+        component.cssOpacity(0.7);
         return component;
     };
 
@@ -939,7 +962,7 @@ export function Checkbox(configuration: CheckboxCfg) {
             .addToClass('checkable-items')
             .access((self) => {
                 self.createTightBinding(
-                    new CheckTBCfg({
+                    new CheckedTBModel({
                         isChecked: configuration.isChecked,
                         component: self,
                     }),
@@ -947,7 +970,7 @@ export function Checkbox(configuration: CheckboxCfg) {
 
                 if (configuration.isIndeterminate != undefined)
                     self.createTightBinding(
-                        new TightBindingCfg<boolean, string>({
+                        new GenericTBModel<boolean, string>({
                             component: self,
                             data: configuration.isIndeterminate,
                             fallbackValue: false,
@@ -972,6 +995,15 @@ export function Container(
 
 export function Div(...children: Component<any>[]) {
     return Container('div', ...children);
+}
+
+/* GroupContainer */
+export function GroupContainer(...children: Component<any>[]) {
+    return VStack(...children)
+        .useDefaultSpacing()
+        .cssFlex(0)
+        .cssAlignItems('start')
+        .cssMarginTop('1rem');
 }
 
 /* HStack */
@@ -1012,7 +1044,7 @@ export class TextInputCfg implements InputCfg<string> {
 export class NumberInputCfg implements InputCfg<number> {
     type = 'number';
     value: BindableObject<number>;
-    toValueType = (inputValue: string) => parseInt(inputValue);
+    toValueType = (inputValue: string) => parseFloat(inputValue);
     fallbackValue: number;
     placeholder: string;
 
@@ -1445,7 +1477,7 @@ export function RadioButton<T>(configuration: RadioButtonCfg<T>) {
         )
             .access((self) =>
                 self.createSelectionBinding(
-                    new CheckSelectionCfg({
+                    new CheckSBModel({
                         selection: configuration.selectionCfg,
                         component: self,
                         ownValue: configuration.value,
@@ -1487,7 +1519,7 @@ export function Select(
         .addToClass('selects')
         .access((self) =>
             self.createTightBinding(
-                new ValueTBCfg({
+                new ValueTBModel({
                     component: self,
                     data: value,
                     fallbackValue: '',
@@ -1500,6 +1532,7 @@ export function Select(
 export interface SelectingListItemCfg<T> {
     selection: DataSelection<T>;
     ownValue: T;
+    isExclusive?: boolean;
 }
 
 export function SelectingListItem<T>(
@@ -1510,7 +1543,7 @@ export function SelectingListItem<T>(
         .setAccessibilityRole('option')
 
         .access((self) => {
-            const selectionItemCfg = new ValueSelectionCfg<T>({
+            const bindingModel = new ValueSBModel<T>({
                 component: self,
                 selection: configuration.selection,
 
@@ -1521,15 +1554,20 @@ export function SelectingListItem<T>(
                     self.setAttr('aria-selected', isSelected);
                 },
 
-                isExclusive: true,
+                isExclusive: configuration.isExclusive ?? true,
                 ownValue: configuration.ownValue,
 
                 changeEventName: 'click',
             });
 
+            self.createSelectionBinding(bindingModel);
             self.listen('click', () => {
-                selectionItemCfg.setModel(true);
-            }).createSelectionBinding(selectionItemCfg);
+                const isChecked =
+                    configuration.isExclusive == true
+                        ? !bindingModel.getView()
+                        : true;
+                bindingModel.setData(isChecked);
+            });
         });
 }
 
@@ -1601,7 +1639,7 @@ export function Textarea(value: BindableObject<string>, placeholder: string) {
         .access((self) =>
             self
                 .createTightBinding(
-                    new ValueTBCfg({
+                    new ValueTBModel({
                         component: self,
                         data: value,
                         fallbackValue: '',
@@ -1628,22 +1666,31 @@ export function VStack(...children: Component<any>[]) {
 
 /* Scene */
 export enum SceneTypes {
-    Normal = 'scenes-normal',
+    Column = 'scenes-column',
+    Content = 'scenes-content',
     Full = 'scenes-full',
     Navigation = 'scenes-navigation',
-    Content = 'scenes-content',
 }
 
 export class GenericScene<T> {
     readonly depth: number;
     readonly stage: Stage;
     readonly view: Component<any>;
-    type: SceneTypes = SceneTypes.Normal;
+    readonly linkSelection = new DataSelection<UUID>();
+    type: SceneTypes = SceneTypes.Full;
 
     constructor(depth: number, stage: Stage, data: T) {
         this.depth = depth;
         this.stage = stage;
         this.view = this.generateView(data);
+
+        this.stage.depth.addBinding({
+            uuid: new UUID(),
+            action: (stageDepth) => {
+                if (stageDepth > depth + 1) return; //has child scenes
+                this.linkSelection.selectedItems.value = [];
+            },
+        });
     }
 
     private generateView(data: T) {
@@ -1664,8 +1711,14 @@ export class GenericScene<T> {
 
 /* Stage */
 export interface Stage extends Component<undefined> {
+    depth: State<number>;
     addScene: <T>(Scene: typeof GenericScene<T>, data: T) => this;
-    goBackTo: (depth: number) => this;
+    replaceScene: <T>(
+        Scene: typeof GenericScene<T>,
+        data: T,
+        depth: number,
+    ) => this;
+    goBackTo: (depth: number, shouldUpdate?: boolean) => this;
 }
 
 export function Stage(...initialScenes: (typeof GenericScene<undefined>)[]) {
@@ -1675,26 +1728,46 @@ export function Stage(...initialScenes: (typeof GenericScene<undefined>)[]) {
             persistingChildren = Array.from(self.children).filter(
                 (child) => !child.classList.contains('animating-out'),
             );
-
             return persistingChildren;
         }
+        function getDepth() {
+            return getPersistingChildren().length;
+        }
+        function updateDepth() {
+            const depth = getDepth();
+            self.depth.value = depth;
+        }
+
+        self.depth = new State(0);
 
         self.addScene = (Scene, data) => {
-            const newDepth = getPersistingChildren().length;
-            const scene = new Scene(newDepth, self, data);
+            const scene = new Scene(getDepth(), self, data);
             self.addItems(scene.view);
+            updateDepth();
             return self;
         };
 
-        self.goBackTo = (depth) => {
+        self.replaceScene = (Scene, data, depth) => {
+            self.goBackTo(depth - 1, false);
+            const scene = new Scene(depth, self, data);
+            self.addItems(scene.view);
+            updateDepth();
+
+            return self;
+        };
+
+        self.goBackTo = (depth, shouldUpdate = true) => {
             while (getPersistingChildren().length > depth + 1) {
                 const child = persistingChildren[
                     persistingChildren.length - 1
                 ] as Component<any>;
-                const isNormalScene = child.classList.contains('scenes-normal');
-                if (child.animateOut && !isNormalScene) child.animateOut();
+                const isColumnScene = child.classList.contains(
+                    SceneTypes.Column,
+                );
+                if (child.animateOut && !isColumnScene) child.animateOut();
                 else child.remove();
             }
+            if (shouldUpdate) updateDepth();
             return self;
         };
 
@@ -1706,7 +1779,7 @@ export function Stage(...initialScenes: (typeof GenericScene<undefined>)[]) {
 
 /* Link */
 export interface NavigationLinkCfg<T> {
-    parentScene: GenericScene<T>;
+    parentScene: GenericScene<any>;
     data: T;
     destination: typeof GenericScene<T>;
 }
@@ -1719,11 +1792,18 @@ export function NavigationLink<T>(
     const depth = configuration.parentScene.depth;
 
     function openScene() {
-        stage.goBackTo(depth);
-        stage.addScene(configuration.destination, configuration.data);
+        stage.replaceScene(
+            configuration.destination,
+            configuration.data,
+            depth + 1,
+        );
     }
 
-    return ListItem(
+    return SelectingListItem(
+        {
+            ownValue: new UUID(),
+            selection: configuration.parentScene.linkSelection,
+        },
         HStack(...children),
         Spacer(),
         Icon('chevron_right').cssOpacity(0.6),

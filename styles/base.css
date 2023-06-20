@@ -129,7 +129,7 @@ body {
 	overflow: hidden;
 }
 
-.stages:has(.scenes-normal) {
+.stages:has(.scenes-column) {
 	overflow-x: auto;
 }
 
@@ -169,5 +169,21 @@ body {
 	.scenes-content {
 		max-width: calc(100% - var(--navigation-width));
 		left: var(--navigation-width);
+	}
+}
+
+/* 
+ * RESPONSIVE
+ */
+
+ @media (max-width: 850px) {
+	.hides-responsively.screen-mobile{
+		display: none;
+	}
+}
+
+@media (min-width: 850px) {
+	.hides-responsively.screen-desktop {
+		display: none;
 	}
 }
