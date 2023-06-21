@@ -158,7 +158,7 @@ body {
 
 @media (min-width: 850px) {
 	.scenes {
-		--navigation-width: 16rem;
+		--navigation-width: 18rem;
 	}
 
 	.scenes-navigation {
@@ -176,8 +176,14 @@ body {
  * RESPONSIVE
  */
 
- @media (max-width: 850px) {
+ @media (max-width: 520px) {
 	.hides-responsively.screen-mobile{
+		display: none;
+	}
+}
+
+@media (min-width: 520px) and (max-width: 850px) {
+	.hides-responsively.screen-tablet {
 		display: none;
 	}
 }

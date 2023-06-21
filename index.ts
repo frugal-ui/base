@@ -435,6 +435,7 @@ export type KeyboardShortcut = {
 };
 export enum ScreenSizes {
     Mobile = 'screen-mobile',
+    Tablet = 'screen-tablet',
     Desktop = 'screen-desktop',
 }
 export type Styleable = {
@@ -449,7 +450,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
     access: (accessFn: (self: this) => void) => this;
     setAccessibilityLabel: (label: string) => this;
     setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
-    animateIn: () => this;
+    animateIn: (animationName?: string) => this;
     animateOut: () => void;
 
     //attributes
@@ -554,22 +555,37 @@ export function Component<ValueType>(
         component.setAttr('role', roleName);
         return component;
     };
-    component.animateIn = () => {
+
+    //animation
+    function prepareAnimation() {
+        //get dimensions for animation
+        const width = component.offsetWidth;
+        const height = component.offsetHeight;
+
+        component.style.setProperty('--element-width', `${width}px`);
+        component.style.setProperty('--element-height', `${height}px`);
+    }
+    component.animateIn = (animationName = 'standard') => {
         const shouldAnimate =
             window.matchMedia('(prefers-reduced-motion)').matches == false;
 
         if (shouldAnimate) {
-            //get rect for animation
+            //allow retreiving dimentions
             document.body.appendChild(component);
-            component.style.setProperty(
-                '--element-height',
-                `${component.offsetHeight}px`,
-            );
+            prepareAnimation();
             component.remove();
 
-            component.addToClass('animating-in');
+            component
+                .addToClass(`animation-${animationName}`)
+                .addToClass('in-hidden-animation-state')
+                .addToClass('animating-in');
 
-            setTimeout(() => component.removeFromClass('animating-in'), 400);
+            setTimeout(
+                () => component.removeFromClass('in-hidden-animation-state'),
+                1,
+            );
+
+            setTimeout(() => component.removeFromClass('animating-in'), 300);
         }
 
         return component;
@@ -578,16 +594,12 @@ export function Component<ValueType>(
         const shouldAnimate =
             window.matchMedia('(prefers-reduced-motion)').matches == false;
         if (shouldAnimate) {
-            component.style.setProperty(
-                '--element-height',
-                `${component.offsetHeight}px`,
-            );
+            prepareAnimation();
+            component
+                .addToClass('animating-out')
+                .addToClass('in-hidden-animation-state');
 
-            //animate
-            component.addToClass('animating-out');
-
-            //remove after animation
-            setTimeout(() => component.remove(), 200);
+            setTimeout(() => component.remove(), 300);
         } else {
             component.remove();
         }
@@ -857,7 +869,7 @@ export function Component<ValueType>(
         return component;
     };
     component.useMutedColor = () => {
-        component.cssOpacity(0.7);
+        component.cssOpacity(0.6);
         return component;
     };
 
@@ -1197,6 +1209,9 @@ export function List<T extends Identifiable & Sortable>(
                             itemData.uuid.toString(),
                         );
 
+                        //already exists
+                        if (oldItemView != null) return;
+
                         const newItemView = compute(itemData)
                             .setID(itemData.uuid)
                             .access((self) => {
@@ -1219,9 +1234,6 @@ export function List<T extends Identifiable & Sortable>(
                                         );
                             })
                             .animateIn();
-
-                        //already exists
-                        if (oldItemView != null) return;
 
                         if (i > listView.children.length) {
                             listView.append(newItemView);
@@ -1697,7 +1709,7 @@ export class GenericScene<T> {
         return Div(this.draw(data))
             .addToClass('scenes')
             .addToClass(this.type)
-            .animateIn();
+            .animateIn('scene');
     }
 
     draw(data: T): Component<any> {

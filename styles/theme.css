@@ -13,36 +13,10 @@ BASIC
     }
 }
 
-@keyframes animate-in {
-    0% {
-        transform: scaleY(0);
-        margin-bottom: calc(-1 * var(--element-height));
-        opacity: 0;
-    }
-
-    100% {
-        transform: scaleY(1);
-        margin-bottom: 0rem;
-        opacity: 1;
-    }
-}
-
 @keyframes delay-hide {
     0%,
     100% {
         visibility: visible;
-    }
-}
-
-@keyframes slide-in {
-    0% {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(0);
     }
 }
 
@@ -91,24 +65,34 @@ GROUPS
 
 .animating-in,
 .animating-out {
+    transition: all 0.2s ease-out;
+}
+
+/* standard */
+.animation-standard {
     transform-origin: top;
-    animation-name: animate-in;
-    animation-duration: 0.2s;
 }
 
-.animating-out {
-    animation-direction: reverse;
+.animation-standard.in-hidden-animation-state {
+    transform: scaleY(0);
+    margin-bottom: calc(-1 * var(--element-height)) !important;
+    opacity: 0;
 }
 
+/* scene */
+@media (max-width: 520px) {
+    .animation-scene.in-hidden-animation-state {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* transitions */
 .draggable-items {
     transition: transform 0.2s, border-radius 0.2s;
 }
 
-.scenes.animating-in,
-.scenes.animating-out {
-    animation-name: slide-in;
-}
-
+/* Basic */
 .using-default-padding {
     padding: var(--padding-md);
 }
@@ -408,14 +392,15 @@ h5 {
 }
 
 .visual-groups :is(.buttons, .selects, .inputs):not(.forcing-default-styles) {
-	width: 100%;
-    border: none;
-    box-shadow: none;
-    justify-content: start;
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    justify-content: start !important;
 }
 
-.visual-groups :is(.buttons, .selects, .inputs):not(.forcing-default-styles):not(:active) {
-    background-color: transparent;
+.visual-groups
+    :is(.buttons, .selects, .inputs):not(.forcing-default-styles):not(:active) {
+    background-color: transparent !important;
 }
 
 .visual-groups .icons:not(.forcing-default-styles) {
