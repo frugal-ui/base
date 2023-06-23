@@ -496,7 +496,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
     setVisibleIf: (shouldBeVisible: ValueObject<boolean>) => this;
     setVisibleIfSelected: (
         ownIndex: number,
-        currentIndex: BindableObject<number>,
+        visibleIndex: BindableObject<number>,
     ) => this;
 
     //state
@@ -1040,7 +1040,7 @@ export function Header(configuration: HeaderCfg, ...actions: Component<any>[]) {
                         iconName: 'chevron_left',
                         accessibilityLabel: '', // TODO
                         action: configuration.parentScene.close,
-                    }),
+                    }).hideOnScreenSize(ScreenSizes.Desktop),
                 );
         })
         .addItems(Text(configuration.text, 'h5'), Spacer(), ...actions)
