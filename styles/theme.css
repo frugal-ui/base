@@ -83,12 +83,12 @@ GROUPS
 
 /* scene */
 .animation-scene.in-hidden-animation-state {
-    display: none;
+    transform: translateX(100%);
+    opacity: 0;
 }
-@media (max-width: 520px) {
+@media (min-width: 520px) {
     .animation-scene.in-hidden-animation-state {
-        transform: translateX(100%);
-        opacity: 0;
+        display: none;
     }
 }
 
@@ -476,11 +476,11 @@ NAVIGATION
     .tab-views > .stacks-horizontal {
         border-top: none;
         border-bottom: 1px solid var(--lines);
-        padding: var(--padding-xs)
+        padding: var(--padding-xs);
     }
 
     .tab-views > .stacks-horizontal .buttons {
-        padding: var(--padding-xs)
+        padding: var(--padding-xs);
     }
 
     .tab-views > .stacks-horizontal .buttons span {
