@@ -257,12 +257,7 @@ h5 {
     font-family: headings, mono-md, monospace, mono;
     text-transform: uppercase;
     margin: 0rem;
-}
 
-h2,
-h3,
-h4,
-h5 {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;

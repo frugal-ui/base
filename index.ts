@@ -84,6 +84,10 @@ export class IdentifiableObjectMap<T extends Identifiable> {
     forEach = (callbackFn: (value: T, index: number, array: T[]) => void) => {
         this.values().forEach(callbackFn);
     };
+
+    get length() {
+        return this.values().length;
+    }
 }
 
 /*
@@ -1021,7 +1025,8 @@ export function GroupContainer(label: string, ...children: Component<any>[]) {
     )
         .useDefaultSpacing()
         .cssJustifyContent('start')
-        .cssMarginTop('1rem');
+        .cssMarginTop('1rem')
+        .cssFlex(0);
 }
 
 /* Header */
@@ -1769,7 +1774,7 @@ export interface Stage extends Component<undefined> {
     goBackTo: (depth: number, shouldUpdate?: boolean) => this;
 }
 
-export function Stage(...initialScenes: (typeof GenericScene<undefined>)[]) {
+export function Stage<T>(initialScene: typeof GenericScene<T>, initialSceneData: T) {
     return (Div() as Stage).addToClass('stages').access((self) => {
         let persistingChildren: Element[] = [];
         function getPersistingChildren() {
@@ -1818,9 +1823,7 @@ export function Stage(...initialScenes: (typeof GenericScene<undefined>)[]) {
             return self;
         };
 
-        initialScenes.forEach((scene) => {
-            self.addScene(scene, undefined);
-        });
+        self.addScene(initialScene, initialSceneData);
     });
 }
 
