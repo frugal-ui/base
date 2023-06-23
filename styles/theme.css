@@ -23,6 +23,7 @@ BASIC
 :root {
     --corners: 0.2rem;
 
+    --padding-xs: 0.4rem 0.4rem;
     --padding-sm: 0.6rem 0.6rem;
     --padding-md: 0.6rem 0.9rem;
     --padding-lg: 0.9rem 0.9rem;
@@ -444,6 +445,7 @@ h5 {
 NAVIGATION
 */
 
+/* Stage-based */
 .scenes {
     background-color: var(--background);
     border-right: 1px solid var(--lines);
@@ -452,4 +454,36 @@ NAVIGATION
 .navigation-links > .stacks-horizontal {
     justify-content: start;
     gap: var(--gap);
+}
+
+/* Tab-based */
+.tab-views > .stacks-horizontal {
+    padding: var(--padding-md);
+    border-top: 1px solid var(--lines);
+}
+
+@media (max-width: 520px) {
+    .tab-views > .stacks-horizontal .buttons {
+        gap: 0.2rem;
+    }
+
+    .tab-views > .stacks-horizontal .buttons .button-texts {
+        font-size: x-small;
+    }
+}
+
+@media (min-width: 850px) {
+    .tab-views > .stacks-horizontal {
+        border-top: none;
+        border-bottom: 1px solid var(--lines);
+        padding: var(--padding-xs)
+    }
+
+    .tab-views > .stacks-horizontal .buttons {
+        padding: var(--padding-xs)
+    }
+
+    .tab-views > .stacks-horizontal .buttons span {
+        font-size: small;
+    }
 }

@@ -1711,6 +1711,7 @@ export function VStack(...children: Component<any>[]) {
  * NAVIGATION
  */
 
+/* STAGE-BASED */
 /* Scene */
 export enum SceneTypes {
     Column = 'scenes-column',
@@ -1862,4 +1863,44 @@ export function NavigationLink<T>(
     )
         .addToClass('navigation-links')
         .listen('click', openScene);
+}
+
+/* TAB-BASED */
+export interface TabCfg {
+    iconName: string;
+    text: string;
+    view: Component<any>;
+}
+
+export function TabView(...configuration: TabCfg[]) {
+    const visibleTabIndex = new State(0);
+
+    return VStack(
+        Div(
+            ...configuration.map((tab, i) =>
+                tab.view.setVisibleIfSelected(i, visibleTabIndex),
+            ),
+        ),
+        HStack(
+            ButtonGroup(
+                ...configuration.map((tab, i) =>
+                    Button({
+                        iconName: tab.iconName,
+                        text: tab.text,
+                        accessibilityLabel: tab.text,
+                        action: () => (visibleTabIndex.value = i),
+                    }).addToClassConditionally(
+                        'buttons-pressed',
+                        new ComputedState({
+                            statesToBind: [visibleTabIndex],
+                            initialValue: false,
+                            compute(self) {
+                                self.value = visibleTabIndex.value == i;
+                            },
+                        }),
+                    ),
+                ),
+            ),
+        ).cssFlex(0),
+    ).addToClass('tab-views');
 }
