@@ -282,6 +282,11 @@ h5 {
     font-size: x-small;
 }
 
+/* Header */
+.headers {
+    padding: var(--padding-md);
+}
+
 /* Icon */
 .icons {
     font-size: 1.2rem;

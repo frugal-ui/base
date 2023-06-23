@@ -1046,7 +1046,7 @@ export function Header(configuration: HeaderCfg, ...actions: Component<any>[]) {
         .addItems(Text(configuration.text, 'h5'), Spacer(), ...actions)
         .cssFlex(0)
         .useDefaultSpacing()
-        .useDefaultPadding();
+        .addToClass('headers');
 }
 
 /* HStack */
