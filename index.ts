@@ -1005,17 +1005,48 @@ export function Container(
     return Component(tagName).addItems(...children);
 }
 
+/* Div */
 export function Div(...children: Component<any>[]) {
     return Container('div', ...children);
 }
 
 /* GroupContainer */
-export function GroupContainer(...children: Component<any>[]) {
-    return VStack(...children)
+export function GroupContainer(label: string, ...children: Component<any>[]) {
+    return VStack(
+        Text(label, 'h5').useMutedColor(),
+        VStack(...children)
+            .cssFlex(0)
+            .cssAlignItems('start')
+            .cssJustifyContent('start'),
+    )
         .useDefaultSpacing()
-        .cssFlex(0)
-        .cssAlignItems('start')
+        .cssJustifyContent('start')
         .cssMarginTop('1rem');
+}
+
+/* Header */
+export interface HeaderCfg {
+    parentScene?: GenericScene<any>;
+    text: ValueObject<string>;
+}
+
+export function Header(configuration: HeaderCfg, ...actions: Component<any>[]) {
+    return HStack()
+        .access((self) => {
+            if (configuration.parentScene)
+                self.addItems(
+                    Button({
+                        style: ButtonStyles.Transparent,
+                        iconName: 'chevron_left',
+                        accessibilityLabel: '', // TODO
+                        action: configuration.parentScene.close,
+                    }),
+                );
+        })
+        .addItems(Text(configuration.text, 'h5'), Spacer(), ...actions)
+        .cssFlex(0)
+        .useDefaultSpacing()
+        .useDefaultPadding();
 }
 
 /* HStack */
@@ -1107,9 +1138,16 @@ export function Link(label: ValueObject<string>, href: string) {
 }
 
 /* List */
+export enum ListStyles {
+    Normal = 'list',
+    Group = 'list',
+    Box = 'listbox',
+}
+
 export interface ListCfg<T extends Identifiable & Sortable> {
     listData: BindableObject<IdentifiableObjectMap<T>>;
     sortable?: boolean;
+    style?: ListStyles;
 }
 
 export function List<T extends Identifiable & Sortable>(
@@ -1185,13 +1223,18 @@ export function List<T extends Identifiable & Sortable>(
     }
 
     // Main
+    const style = configuration.style ?? ListStyles.Normal;
+
     return VStack()
-        .setAccessibilityRole('list')
+        .setAccessibilityRole(style)
 
         .listen('touchmove', (e) => handleDragMove(e as TouchEvent))
         .listen('mousemove', (e) => handleDragMove(e as PointerEvent))
 
-        .access((listView) =>
+        .access((listView) => {
+            if (style == ListStyles.Box) listView.addToClass('boxes');
+            if (style == ListStyles.Group) listView.addToClass('visual-groups');
+
             listView
                 .createBinding(configuration.listData, (listData) => {
                     function removeItemView(
@@ -1253,16 +1296,8 @@ export function List<T extends Identifiable & Sortable>(
                         },
                     );
                 })
-                .updateBinding(configuration.listData),
-        );
-}
-
-/* ListBox */
-export function ListBox<T extends Identifiable & Sortable>(
-    configuration: ListCfg<T>,
-    compute: (itemData: T) => Component<any>,
-) {
-    return Box(List(configuration, compute).setAccessibilityRole('listbox'));
+                .updateBinding(configuration.listData);
+        });
 }
 
 /* ListItem */
@@ -1755,7 +1790,6 @@ export function Stage(...initialScenes: (typeof GenericScene<undefined>)[]) {
         self.addScene = (Scene, data) => {
             const scene = new Scene(getDepth(), self, data);
             self.addItems(scene.view);
-            updateDepth();
             return self;
         };
 
@@ -1794,6 +1828,7 @@ export interface NavigationLinkCfg<T> {
     parentScene: GenericScene<any>;
     data: T;
     destination: typeof GenericScene<T>;
+    initiallySelected?: boolean;
 }
 
 export function NavigationLink<T>(
@@ -1802,6 +1837,7 @@ export function NavigationLink<T>(
 ) {
     const stage = configuration.parentScene.stage;
     const depth = configuration.parentScene.depth;
+    const uuid = new UUID();
 
     function openScene() {
         stage.replaceScene(
@@ -1811,9 +1847,13 @@ export function NavigationLink<T>(
         );
     }
 
+    if (configuration.initiallySelected == true) {
+        configuration.parentScene.linkSelection.selectedItems.value = [uuid];
+    }
+
     return SelectingListItem(
         {
-            ownValue: new UUID(),
+            ownValue: uuid,
             selection: configuration.parentScene.linkSelection,
         },
         HStack(...children),

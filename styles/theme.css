@@ -80,6 +80,9 @@ GROUPS
 }
 
 /* scene */
+.animation-scene.in-hidden-animation-state {
+    display: none;
+}
 @media (max-width: 520px) {
     .animation-scene.in-hidden-animation-state {
         transform: translateX(100%);
@@ -197,6 +200,7 @@ COMPONENTS
     border-color: var(--destructive-border);
 }
 
+.navigation-links:active,
 .buttons:not([disabled]):active,
 .buttons-pressed {
     background: var(--pressed);

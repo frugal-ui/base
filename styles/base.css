@@ -18,18 +18,27 @@ body {
 	display: none !important;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5 {
+	flex-shrink: 0;
+}
+
 /*
     COMPONENTS
 */
 
 /* Box */
 .boxes {
-	overflow: auto;
+	overflow: auto !important;
 
 	width: 100%;
 	height: 100%;
 }
 
+/* List */
 .stacks-vertical[role="list"] {
 	justify-content: start;
 }
