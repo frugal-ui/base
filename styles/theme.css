@@ -23,6 +23,7 @@ BASIC
 :root {
     --corners: 0.2rem;
 
+    --padding-sm: 0.6rem 0.6rem;
     --padding-md: 0.6rem 0.9rem;
     --padding-lg: 0.9rem 0.9rem;
 
@@ -239,6 +240,11 @@ COMPONENTS
     border-bottom-right-radius: var(--corners);
 
     border-right-width: 1px;
+}
+
+.buttons:has(.button-texts:empty) {
+    flex: 0;
+    padding: var(--padding-sm);
 }
 
 /* Headings */

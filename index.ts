@@ -935,7 +935,7 @@ export function Button(configuration: ButtonCfg) {
     return Component('button')
         .addItems(
             Icon(configuration.iconName ?? ''),
-            Text(configuration.text ?? ''),
+            Text(configuration.text ?? '').addToClass('button-texts'),
         )
 
         .setAttr('aria-label', configuration.accessibilityLabel)
