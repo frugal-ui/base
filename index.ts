@@ -565,7 +565,8 @@ export function Component<ValueType>(
     };
     component.focusOnChange = (state, matchingValue) => {
         component.createBinding(state, (newValue) => {
-            if (newValue == matchingValue) component.focus();
+            // timeout needed for overlays
+            if (newValue == matchingValue) setTimeout(() => component.focus(), 100);
         });
         return component;
     };
