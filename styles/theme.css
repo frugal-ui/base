@@ -16,12 +16,6 @@ html {
     background: var(--background);
 }
 
-button[disabled],
-input[disabled] {
-    opacity: 0.2;
-    cursor: not-allowed;
-}
-
 /* 
 GROUPS 
  */
