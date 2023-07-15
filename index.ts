@@ -957,7 +957,7 @@ export interface ButtonCfg {
     style?: ButtonStyles;
     text?: ValueObject<Stringifiable>;
     iconName?: string;
-    accessibilityLabel: ValueObject<string>;
+    accessibilityLabel: ValueObject<Stringifiable>;
     action: (e: Event) => void;
 }
 
