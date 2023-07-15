@@ -452,7 +452,12 @@ export type Styleable = {
 export interface Component<ValueType> extends HTMLElement, Styleable {
     value: ValueType;
     access: (accessFn: (self: this) => void) => this;
-    setAccessibilityLabel: (label: string) => this;
+    focusOnCange: <T>(state: BindableObject<T>, matchingValue: T) => this;
+    setAccessibilityCurrentState: (
+        state: 'page' | 'step',
+        shouldApply: BindableObject<boolean>,
+    ) => this;
+    setAccessibilityLabel: (label: ValueObject<string>) => this;
     setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
     animateIn: (animationName?: string) => this;
     animateOut: () => void;
@@ -549,6 +554,18 @@ export function Component<ValueType>(
     //methods
     component.access = (fn) => {
         fn(component);
+        return component;
+    };
+    component.focusOnCange = (state, matchingValue) => {
+        component.createBinding(state, (newValue) => {
+            if (newValue == matchingValue) component.focus();
+        });
+        return component;
+    };
+    component.setAccessibilityCurrentState = (state, shouldApply) => {
+        component.createBinding(shouldApply, (shouldApply) => {
+            component.setAttr('aria-current', shouldApply ? state : '');
+        })
         return component;
     };
     component.setAccessibilityLabel = (label) => {
@@ -771,7 +788,10 @@ export function Component<ValueType>(
         const bindableB = unwrapBindable(b);
 
         function update() {
-            component.toggleAttribute('hidden', bindableA.value != bindableB.value);
+            component.toggleAttribute(
+                'hidden',
+                bindableA.value != bindableB.value,
+            );
         }
 
         component
@@ -1489,7 +1509,8 @@ export function Popover(configuration: PopoverCfg) {
             e.stopPropagation();
         })
         .addToClass('popover-containers')
-        .toggleAttr('open', configuration.isOpen);
+        .toggleAttr('open', configuration.isOpen)
+        .focusOnCange(configuration.isOpen, true);
 }
 
 /* ProgressBar */
@@ -1780,7 +1801,10 @@ export interface Stage extends Component<undefined> {
     goBackTo: (depth: number, shouldUpdate?: boolean) => this;
 }
 
-export function Stage<T>(initialScene: typeof GenericScene<T>, initialSceneData: T) {
+export function Stage<T>(
+    initialScene: typeof GenericScene<T>,
+    initialSceneData: T,
+) {
     return (Div() as Stage).addToClass('stages').access((self) => {
         let persistingChildren: Element[] = [];
         function getPersistingChildren() {
@@ -1837,6 +1861,7 @@ export function Stage<T>(initialScene: typeof GenericScene<T>, initialSceneData:
 export interface NavigationLinkCfg<T> {
     parentScene: GenericScene<any>;
     data: T;
+    accessibilityLabel: ValueObject<string>;
     destination: typeof GenericScene<T>;
     initiallySelected?: boolean;
 }
@@ -1861,6 +1886,14 @@ export function NavigationLink<T>(
         configuration.parentScene.linkSelection.selectedItems.value = [uuid];
     }
 
+    const isSelected = new ComputedState({
+        statesToBind: [configuration.parentScene.linkSelection.selectedItems],
+        initialValue: false,
+        compute(self) {
+            self.value = configuration.parentScene.linkSelection.selectedItems.value.indexOf(uuid) > -1;
+        },
+    })
+
     return SelectingListItem(
         {
             ownValue: uuid,
@@ -1871,6 +1904,9 @@ export function NavigationLink<T>(
         Icon('chevron_right').cssOpacity(0.6),
     )
         .addToClass('navigation-links')
+        .setAccessibilityRole('link')
+        .setAccessibilityLabel(configuration.accessibilityLabel)
+        .setAccessibilityCurrentState('page', isSelected)
         .listen('click', openScene);
 }
 
@@ -1893,18 +1929,25 @@ export function TabView(...configuration: TabCfg[]) {
                         text: tab.text,
                         accessibilityLabel: tab.text,
                         action: () => (visibleTabIndex.value = i),
-                    }).addToClassConditionally(
-                        'buttons-pressed',
-                        new ComputedState({
+                    }).access((self) => {
+                        const isPressed = new ComputedState({
                             statesToBind: [visibleTabIndex],
                             initialValue: false,
                             compute(self) {
                                 self.value = visibleTabIndex.value == i;
                             },
-                        }),
-                    ),
+                        });
+
+                        return self
+                            .setAccessibilityRole('link')
+                            .setAccessibilityCurrentState('page', isPressed)
+                            .addToClassConditionally(
+                                'buttons-pressed',
+                                isPressed,
+                            );
+                    }),
                 ),
-            ),
+            ).setAccessibilityRole('navigation'),
         ).cssFlex(0),
         Div(
             ...configuration.map((tab, i) =>
