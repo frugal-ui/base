@@ -488,7 +488,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
     setItems: (children: ValueObject<Component<any>[]>) => this;
 
     //content
-    setText: (text: ValueObject<string>) => this;
+    setText: (text: ValueObject<Stringifiable>) => this;
     setValue: (value: ValueObject<ValueType>) => this;
     setHTML: (text: ValueObject<string>) => this;
 
@@ -730,7 +730,7 @@ export function Component<ValueType>(
 
         component
             .createBinding(bindable, (newValue) => {
-                component.innerText = newValue;
+                component.innerText = newValue.toString();
             })
             .updateBinding(bindable);
 
@@ -955,7 +955,7 @@ export enum ButtonStyles {
 
 export interface ButtonCfg {
     style?: ButtonStyles;
-    text?: ValueObject<string>;
+    text?: ValueObject<Stringifiable>;
     iconName?: string;
     accessibilityLabel: ValueObject<string>;
     action: (e: Event) => void;
@@ -1715,15 +1715,15 @@ export function Spacer() {
 
 /* Text */
 export function Text(
-    value: ValueObject<string>,
+    value: ValueObject<Stringifiable>,
     tagName: keyof HTMLElementTagNameMap = 'span',
 ) {
     return Component(tagName).setText(value);
 }
 
 /* Textarea */
-export function Textarea(value: BindableObject<string>, placeholder: string) {
-    return Component<string>('textarea')
+export function Textarea(value: BindableObject<Stringifiable>, placeholder: string) {
+    return Component<Stringifiable>('textarea')
         .addToClass('textareas')
         .access((self) =>
             self
