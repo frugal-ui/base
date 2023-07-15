@@ -452,14 +452,15 @@ export type Styleable = {
 export interface Component<ValueType> extends HTMLElement, Styleable {
     value: ValueType;
     access: (accessFn: (self: this) => void) => this;
-    focusOnCange: <T>(state: BindableObject<T>, matchingValue: T) => this;
+    focusOnCreate: () => this;
+    focusOnChange: <T>(state: BindableObject<T>, matchingValue: T) => this;
     setAccessibilityCurrentState: (
         state: 'page' | 'step',
         shouldApply: BindableObject<boolean>,
     ) => this;
     setAccessibilityLabel: (label: ValueObject<string>) => this;
     setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
-    makeFocusable: () => this;
+    allowKeyboardFocus: () => this;
     animateIn: (animationName?: string) => this;
     animateOut: () => void;
 
@@ -558,7 +559,11 @@ export function Component<ValueType>(
         fn(component);
         return component;
     };
-    component.focusOnCange = (state, matchingValue) => {
+    component.focusOnCreate = () => {
+        component.focus();
+        return component;
+    };
+    component.focusOnChange = (state, matchingValue) => {
         component.createBinding(state, (newValue) => {
             if (newValue == matchingValue) component.focus();
         });
@@ -578,10 +583,10 @@ export function Component<ValueType>(
         component.setAttr('role', roleName);
         return component;
     };
-    component.makeFocusable = () => {
-        component.setAttr('tabIndex', -1);
+    component.allowKeyboardFocus = () => {
+        component.setAttr('tabIndex', 0);
         return component;
-    }
+    };
 
     //animation
     function prepareAnimation() {
@@ -791,7 +796,7 @@ export function Component<ValueType>(
     //navigation
     component.hideConditionally = (isHidden) => {
         component.toggleAttr('hidden', isHidden);
-        component.setAttr('aria-hidden', isHidden)
+        component.setAttr('aria-hidden', isHidden);
         return component;
     };
     component.setVisibleIfMatch = (a, b) => {
@@ -1509,17 +1514,19 @@ export function Popover(configuration: PopoverCfg) {
     // Main
     return Div(
         configuration.toggle,
-        configuration.content.addToClass('popover-contents'),
+        configuration.content
+            .addToClass('popover-contents')
+            .setAttr('aria-modal', 'true')
+            .setAccessibilityRole('dialog')
+            .allowKeyboardFocus()
+            .focusOnChange(configuration.isOpen, true),
     )
         .listen('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
         })
         .addToClass('popover-containers')
-        .toggleAttr('open', configuration.isOpen)
-        .makeFocusable()
-        .setAttr('aria-modal', 'true')
-        .focusOnCange(configuration.isOpen, true);
+        .toggleAttr('open', configuration.isOpen);
 }
 
 /* ProgressBar */
@@ -1673,9 +1680,9 @@ export function Sheet(
         'dialog',
         Div(...children)
             .addToClass('sheet-contents')
-            .makeFocusable()
-            .focusOnCange(isOpen, true)
-            .listen('click', (e) => e.stopPropagation()),
+            .listen('click', (e) => e.stopPropagation())
+            .allowKeyboardFocus()
+            .focusOnChange(isOpen, true),
     )
         .addToClass('sheet-containers')
         .toggleAttr('open', isOpen)
@@ -1921,7 +1928,24 @@ export function NavigationLink<T>(
         .setAccessibilityRole('link')
         .setAccessibilityLabel(configuration.accessibilityLabel)
         .setAccessibilityCurrentState('page', isSelected)
-        .listen('click', openScene);
+        .allowKeyboardFocus()
+        .listen('click', openScene)
+        .access((self) =>
+            self.registerKeyboardShortcuts(
+                {
+                    key: ' ',
+                    action: () => self.click(),
+                },
+                {
+                    key: 'Enter',
+                    action: () => self.click(),
+                },
+                {
+                    key: 'ArrowRight',
+                    action: () => self.click(),
+                },
+            ),
+        );
 }
 
 /* TAB-BASED */
@@ -1968,8 +1992,8 @@ export function TabView(...configuration: TabCfg[]) {
                 tab.view
                     .setVisibleIfSelected(i, visibleTabIndex)
                     .setAccessibilityLabel(tab.text)
-                    .makeFocusable()
-                    .focusOnCange(visibleTabIndex, i),
+                    .allowKeyboardFocus()
+                    .focusOnChange(visibleTabIndex, i),
             ),
         ),
     ).addToClass('tab-views');
