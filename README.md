@@ -1,2 +1,2 @@
 # base
-Base for frugal-ui-apps
+Documetation coming soon.

@@ -1,7 +1,7 @@
 {
   "name": "@frugal-ui/base",
   "version": "0.0.1",
-  "description": "Base for frugal-ui-apps",
+  "description": "Reactive and component-based UI framework",
   "main": "index.js",
   "scripts": {
     "test": "node test.js"
