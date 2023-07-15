@@ -502,6 +502,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
     registerKeyboardShortcuts: (...shortcuts: KeyboardShortcut[]) => this;
 
     //navigation
+    hideConditionally: (isHidden: ValueObject<boolean>) => this;
     setVisibleIfMatch: <T>(a: ValueObject<T>, b: ValueObject<T>) => this;
     setVisibleIfSelected: (
         ownIndex: number,
@@ -565,7 +566,7 @@ export function Component<ValueType>(
     component.setAccessibilityCurrentState = (state, shouldApply) => {
         component.createBinding(shouldApply, (shouldApply) => {
             component.setAttr('aria-current', shouldApply ? state : '');
-        })
+        });
         return component;
     };
     component.setAccessibilityLabel = (label) => {
@@ -783,15 +784,17 @@ export function Component<ValueType>(
     };
 
     //navigation
+    component.hideConditionally = (isHidden) => {
+        component.toggleAttr('hidden', isHidden);
+        component.setAttr('aria-hidden', isHidden)
+        return component;
+    };
     component.setVisibleIfMatch = (a, b) => {
         const bindableA = unwrapBindable(a);
         const bindableB = unwrapBindable(b);
 
         function update() {
-            component.toggleAttribute(
-                'hidden',
-                bindableA.value != bindableB.value,
-            );
+            component.hideConditionally(bindableA.value != bindableB.value);
         }
 
         component
@@ -802,12 +805,11 @@ export function Component<ValueType>(
 
         return component;
     };
-
     component.setVisibleIfSelected = (ownIndex, currentIndex) => {
         component
             .createBinding(currentIndex, () => {
                 const isOpen = currentIndex.value == ownIndex;
-                component.toggleAttribute('hidden', !isOpen);
+                component.hideConditionally(!isOpen);
             })
             .updateBinding(currentIndex);
 
@@ -1890,9 +1892,12 @@ export function NavigationLink<T>(
         statesToBind: [configuration.parentScene.linkSelection.selectedItems],
         initialValue: false,
         compute(self) {
-            self.value = configuration.parentScene.linkSelection.selectedItems.value.indexOf(uuid) > -1;
+            self.value =
+                configuration.parentScene.linkSelection.selectedItems.value.indexOf(
+                    uuid,
+                ) > -1;
         },
-    })
+    });
 
     return SelectingListItem(
         {
@@ -1951,7 +1956,9 @@ export function TabView(...configuration: TabCfg[]) {
         ).cssFlex(0),
         Div(
             ...configuration.map((tab, i) =>
-                tab.view.setVisibleIfSelected(i, visibleTabIndex),
+                tab.view
+                    .setVisibleIfSelected(i, visibleTabIndex)
+                    .focusOnCange(visibleTabIndex, i),
             ),
         ),
     ).addToClass('tab-views');
