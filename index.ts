@@ -506,10 +506,6 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
     //navigation
     hideConditionally: (isHidden: ValueObject<boolean>) => this;
     setVisibleIfMatch: <T>(a: ValueObject<T>, b: ValueObject<T>) => this;
-    setVisibleIfSelected: (
-        ownIndex: number,
-        visibleIndex: BindableObject<number>,
-    ) => this;
 
     //state
     /** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
@@ -814,16 +810,6 @@ export function Component<ValueType>(
             .updateBinding(bindableA)
             .createBinding(bindableB, update)
             .updateBinding(bindableB);
-
-        return component;
-    };
-    component.setVisibleIfSelected = (ownIndex, currentIndex) => {
-        component
-            .createBinding(currentIndex, () => {
-                const isOpen = currentIndex.value == ownIndex;
-                component.hideConditionally(!isOpen);
-            })
-            .updateBinding(currentIndex);
 
         return component;
     };
@@ -2005,7 +1991,7 @@ export function TabView(...configuration: TabCfg[]) {
         Div(
             ...configuration.map((tab, i) =>
                 tab.view
-                    .setVisibleIfSelected(i, visibleTabIndex)
+                    .setVisibleIfMatch(i, visibleTabIndex)
                     .setAccessibilityLabel(tab.text)
                     .allowKeyboardFocus()
                     .focusOnChange(visibleTabIndex, i),
