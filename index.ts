@@ -560,13 +560,14 @@ export function Component<ValueType>(
         return component;
     };
     component.focusOnCreate = () => {
-        component.focus();
+        setTimeout(() => component.focus(), 100);
         return component;
     };
     component.focusOnChange = (state, matchingValue) => {
         component.createBinding(state, (newValue) => {
             // timeout needed for overlays
-            if (newValue == matchingValue) setTimeout(() => component.focus(), 100);
+            if (newValue == matchingValue)
+                setTimeout(() => component.focus(), 100);
         });
         return component;
     };
@@ -1380,6 +1381,7 @@ export interface PopoverCfg {
     isOpen: BindableObject<boolean>;
     toggle: Component<any>;
     content: Component<any>;
+    accessibilityLabel: string;
 }
 
 export function Popover(configuration: PopoverCfg) {
@@ -1518,7 +1520,7 @@ export function Popover(configuration: PopoverCfg) {
         configuration.content
             .addToClass('popover-contents')
             .setAttr('aria-modal', 'true')
-            .setAccessibilityRole('dialog')
+            .setAccessibilityLabel(configuration.accessibilityLabel)
             .allowKeyboardFocus()
             .focusOnChange(configuration.isOpen, true),
     )
@@ -1673,22 +1675,25 @@ export function Separator() {
 }
 
 /* Sheet */
-export function Sheet(
-    isOpen: BindableObject<boolean>,
-    ...children: Component<any>[]
-) {
+export interface SheetCfg {
+    isOpen: BindableObject<boolean>;
+    accessibilityLabel: string;
+}
+
+export function Sheet(configuration: SheetCfg, ...children: Component<any>[]) {
     return Container(
         'dialog',
         Div(...children)
             .addToClass('sheet-contents')
             .listen('click', (e) => e.stopPropagation())
+            .setAccessibilityLabel(configuration.accessibilityLabel)
             .allowKeyboardFocus()
-            .focusOnChange(isOpen, true),
+            .focusOnChange(configuration.isOpen, true),
     )
         .addToClass('sheet-containers')
-        .toggleAttr('open', isOpen)
+        .toggleAttr('open', configuration.isOpen)
         .listen('click', () => {
-            isOpen.value = false;
+            configuration.isOpen.value = false;
         });
 }
 
@@ -1776,6 +1781,7 @@ export class GenericScene<T> {
     readonly stage: Stage;
     readonly view: Component<any>;
     readonly linkSelection = new DataSelection<UUID>();
+    accessibilityLabel: string | undefined;
     type: SceneTypes = SceneTypes.Full;
 
     constructor(depth: number, stage: Stage, data: T) {
@@ -1793,10 +1799,18 @@ export class GenericScene<T> {
     }
 
     private generateView(data: T) {
-        return Div(this.draw(data))
+        const main = Div(this.draw(data))
             .addToClass('scenes')
             .addToClass(this.type)
-            .animateIn('scene');
+            .animateIn('scene')
+            .setAccessibilityLabel(this.accessibilityLabel ?? '')
+            .allowKeyboardFocus()
+            .focusOnCreate();
+
+        if (this.accessibilityLabel == undefined)
+            console.warn('Scene does not have an accessibilityLabel.', this);
+
+        return main;
     }
 
     draw(data: T): Component<any> {
