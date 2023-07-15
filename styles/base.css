@@ -243,6 +243,7 @@ h5 {
 /* Overlays */
 .popover-contents {
     border-radius: var(--corners);
+    z-index: 1;
 }
 
 .popover-containers[open] > .popover-contents {
