@@ -459,6 +459,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
     ) => this;
     setAccessibilityLabel: (label: ValueObject<string>) => this;
     setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
+    makeFocusable: () => this;
     animateIn: (animationName?: string) => this;
     animateOut: () => void;
 
@@ -577,6 +578,10 @@ export function Component<ValueType>(
         component.setAttr('role', roleName);
         return component;
     };
+    component.makeFocusable = () => {
+        component.setAttr('tabIndex', -1);
+        return component;
+    }
 
     //animation
     function prepareAnimation() {
@@ -1512,6 +1517,8 @@ export function Popover(configuration: PopoverCfg) {
         })
         .addToClass('popover-containers')
         .toggleAttr('open', configuration.isOpen)
+        .makeFocusable()
+        .setAttr('aria-modal', 'true')
         .focusOnCange(configuration.isOpen, true);
 }
 
@@ -1666,6 +1673,8 @@ export function Sheet(
         'dialog',
         Div(...children)
             .addToClass('sheet-contents')
+            .makeFocusable()
+            .focusOnCange(isOpen, true)
             .listen('click', (e) => e.stopPropagation()),
     )
         .addToClass('sheet-containers')
@@ -1958,6 +1967,8 @@ export function TabView(...configuration: TabCfg[]) {
             ...configuration.map((tab, i) =>
                 tab.view
                     .setVisibleIfSelected(i, visibleTabIndex)
+                    .setAccessibilityLabel(tab.text)
+                    .makeFocusable()
                     .focusOnCange(visibleTabIndex, i),
             ),
         ),
