@@ -1885,11 +1885,6 @@ export function TabView(...configuration: TabCfg[]) {
     const visibleTabIndex = new State(0);
 
     return VStack(
-        Div(
-            ...configuration.map((tab, i) =>
-                tab.view.setVisibleIfSelected(i, visibleTabIndex),
-            ),
-        ),
         HStack(
             ButtonGroup(
                 ...configuration.map((tab, i) =>
@@ -1911,5 +1906,10 @@ export function TabView(...configuration: TabCfg[]) {
                 ),
             ),
         ).cssFlex(0),
+        Div(
+            ...configuration.map((tab, i) =>
+                tab.view.setVisibleIfSelected(i, visibleTabIndex),
+            ),
+        ),
     ).addToClass('tab-views');
 }

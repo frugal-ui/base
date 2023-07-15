@@ -462,6 +462,10 @@ h5 {
 }
 
 /* Tab-based */
+.tab-views {
+    flex-direction: column-reverse;
+}
+
 .tab-views > div {
     height: 100%;
     flex: 1;
@@ -477,17 +481,17 @@ h5 {
 
 @media (max-width: 520px) {
     .tab-views > .stacks-horizontal .buttons {
-        flex-direction: column;
+        flex-direction: column-reverse;
     }
 }
 
 @media (min-width: 850px) {
     .tab-views {
-        flex-direction: column-reverse;
+        flex-direction: column;
     }
 
     .tab-views > .stacks-horizontal > .button-groups {
-        grid-template-columns: repeat(auto-fit, minmax(1rem, 12rem));
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1rem));
     }
 }
 
