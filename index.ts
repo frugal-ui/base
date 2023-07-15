@@ -497,7 +497,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
     registerKeyboardShortcuts: (...shortcuts: KeyboardShortcut[]) => this;
 
     //navigation
-    setVisibleIf: (shouldBeVisible: ValueObject<boolean>) => this;
+    setVisibleIfMatch: <T>(a: ValueObject<T>, b: ValueObject<T>) => this;
     setVisibleIfSelected: (
         ownIndex: number,
         visibleIndex: BindableObject<number>,
@@ -766,13 +766,19 @@ export function Component<ValueType>(
     };
 
     //navigation
-    component.setVisibleIf = (shouldBeVisible) => {
-        const bindable = unwrapBindable(shouldBeVisible);
+    component.setVisibleIfMatch = (a, b) => {
+        const bindableA = unwrapBindable(a);
+        const bindableB = unwrapBindable(b);
+
+        function update() {
+            component.toggleAttribute('hidden', bindableA.value != bindableB.value);
+        }
+
         component
-            .createBinding(bindable, () => {
-                component.toggleAttribute('hidden', bindable.value == false);
-            })
-            .updateBinding(bindable);
+            .createBinding(bindableA, update)
+            .updateBinding(bindableA)
+            .createBinding(bindableB, update)
+            .updateBinding(bindableB);
 
         return component;
     };
