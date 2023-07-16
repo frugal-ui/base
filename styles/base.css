@@ -112,6 +112,10 @@ input[disabled] {
     cursor: not-allowed;
 }
 
+pre {
+    font-family: mono-rg;
+}
+
 /*
     COMPONENTS
 */
