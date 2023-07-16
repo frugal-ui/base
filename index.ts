@@ -1821,7 +1821,7 @@ export class GenericScene<T> {
 /* Stage */
 export interface Stage extends Component<undefined> {
     depth: State<number>;
-    addScene: <T>(Scene: typeof GenericScene<T>, data: T) => this;
+    addScene: <T>(Scene: typeof GenericScene<T>, data: T, depth?: number) => this;
     replaceScene: <T>(
         Scene: typeof GenericScene<T>,
         data: T,
@@ -1852,8 +1852,8 @@ export function Stage<T>(
 
         self.depth = new State(0);
 
-        self.addScene = (Scene, data) => {
-            const scene = new Scene(getDepth(), self, data);
+        self.addScene = (Scene, data, depth = getDepth()) => {
+            const scene = new Scene(depth, self, data);
             self.addItems(scene.view);
             scene.setup(data);
             return self;
@@ -1861,8 +1861,7 @@ export function Stage<T>(
 
         self.replaceScene = (Scene, data, depth) => {
             self.goBackTo(depth - 1, false);
-            const scene = new Scene(depth, self, data);
-            self.addItems(scene.view);
+            self.addScene(Scene, data, depth);
             updateDepth();
 
             return self;
