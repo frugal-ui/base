@@ -1722,7 +1722,10 @@ export function Text(
 }
 
 /* Textarea */
-export function Textarea(value: BindableObject<Stringifiable>, placeholder: string) {
+export function Textarea(
+    value: BindableObject<Stringifiable>,
+    placeholder: string,
+) {
     return Component<Stringifiable>('textarea')
         .addToClass('textareas')
         .access((self) =>
@@ -1808,6 +1811,7 @@ export class GenericScene<T> {
     };
 
     get isOpen() {
+        if (!this.view) return false;
         return this.view.parentNode != null;
     }
 }
