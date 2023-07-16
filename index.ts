@@ -1806,6 +1806,8 @@ export class GenericScene<T> {
         return Text('Hello, world!');
     }
 
+    setup(data: T): void {}
+
     close = () => {
         this.stage.goBackTo(this.depth - 1);
     };
@@ -1853,6 +1855,7 @@ export function Stage<T>(
         self.addScene = (Scene, data) => {
             const scene = new Scene(getDepth(), self, data);
             self.addItems(scene.view);
+            scene.setup(data);
             return self;
         };
 
