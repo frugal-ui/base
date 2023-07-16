@@ -280,6 +280,8 @@ h5 {
     pointer-events: none;
 
     transition: opacity 0.2s;
+
+    z-index: 1;
 }
 
 .sheet-contents {
