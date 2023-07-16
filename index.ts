@@ -1806,6 +1806,10 @@ export class GenericScene<T> {
     close = () => {
         this.stage.goBackTo(this.depth - 1);
     };
+
+    get isOpen() {
+        return this.view.parentNode != null;
+    }
 }
 
 /* Stage */
