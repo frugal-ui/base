@@ -174,14 +174,14 @@ pre {
     border-right-width: 0px;
 }
 
-.button-groups .buttons:first-child {
+.button-groups > .buttons:first-child {
     border-top-left-radius: var(--corners);
     border-bottom-left-radius: var(--corners);
 
     border-left-width: 1px;
 }
 
-.button-groups .buttons:last-child {
+.button-groups > .buttons:last-child {
     border-top-right-radius: var(--corners);
     border-bottom-right-radius: var(--corners);
 
