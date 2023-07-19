@@ -20,6 +20,13 @@
     }
 }
 
+@keyframes slide-up {
+    0% {
+        opacity: 0;
+        transform: translateY(1rem);
+    }
+}
+
 @media (prefers-reduced-motion) {
     * {
         animation: none !important;
@@ -35,7 +42,7 @@
 /* standard */
 .animation-standard.in-hidden-animation-state {
     opacity: 0;
-    transform: translateY(2rem);
+    transform: translateY(1rem);
 }
 
 /* list-item */
