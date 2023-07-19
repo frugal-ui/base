@@ -1307,7 +1307,7 @@ export function List<T extends Identifiable & Sortable>(
                                             startDrag(e, itemData, self),
                                         );
                             })
-                            .animateIn();
+                            .animateIn('list-item');
 
                         if (i > listView.children.length) {
                             listView.append(newItemView);
@@ -1336,7 +1336,7 @@ export function ListItem(...children: Component<any>[]) {
     return Div(...children)
         .addToClass('list-items')
         .setAccessibilityRole('listitem')
-        .animateIn();
+        .animateIn('list-item');
 }
 
 /* Meter */
@@ -1821,7 +1821,11 @@ export class GenericScene<T> {
 /* Stage */
 export interface Stage extends Component<undefined> {
     depth: State<number>;
-    addScene: <T>(Scene: typeof GenericScene<T>, data: T, depth?: number) => this;
+    addScene: <T>(
+        Scene: typeof GenericScene<T>,
+        data: T,
+        depth?: number,
+    ) => this;
     replaceScene: <T>(
         Scene: typeof GenericScene<T>,
         data: T,
