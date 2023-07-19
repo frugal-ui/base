@@ -1,6 +1,6 @@
 {
   "name": "@frugal-ui/base",
-  "version": "1.0.0-beta16",
+  "version": "1.0.0-beta17",
   "description": "Reactive and component-based UI framework",
   "main": "index.js",
   "scripts": {
