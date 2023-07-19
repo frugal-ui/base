@@ -1059,6 +1059,8 @@ export function GroupContainer(label: string, ...children: Component<any>[]) {
 export interface HeaderCfg {
     parentScene?: GenericScene<any>;
     text: ValueObject<string>;
+    hideTextOnMobile?: boolean;
+    forceShowBackButton?: boolean;
 }
 
 export function Header(configuration: HeaderCfg, ...actions: Component<any>[]) {
@@ -1069,12 +1071,22 @@ export function Header(configuration: HeaderCfg, ...actions: Component<any>[]) {
                     Button({
                         style: ButtonStyles.Transparent,
                         iconName: 'chevron_left',
-                        accessibilityLabel: '', // TODO
+                        accessibilityLabel: 'go back', // TODO
                         action: configuration.parentScene.close,
-                    }).hideOnScreenSize(ScreenSizes.Desktop),
+                    }).access((self) => {
+                        if (!configuration.forceShowBackButton == true)
+                            self.hideOnScreenSize(ScreenSizes.Desktop);
+                    }),
                 );
         })
-        .addItems(Text(configuration.text, 'h5'), Spacer(), ...actions)
+        .addItems(
+            Text(configuration.text, 'h5').access((self) => {
+                if (configuration.hideTextOnMobile == true)
+                    self.hideOnScreenSize(ScreenSizes.Mobile);
+            }),
+            Spacer(),
+            ...actions,
+        )
         .cssFlex(0)
         .useDefaultSpacing()
         .addToClass('headers');
