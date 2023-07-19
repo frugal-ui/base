@@ -1086,7 +1086,7 @@ export function HStack(...children: Component<any>[]) {
 }
 
 /* Icon */
-export function Icon(iconName: string) {
+export function Icon(iconName: BindableObject<string>) {
     return Text(iconName)
         .addToClass('icons')
         .addToClass('material-icons-round');
