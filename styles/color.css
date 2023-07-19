@@ -23,6 +23,9 @@
     --shadows: hsla(0, 0%, 0%, 0.15);
     --lines: hsla(0, 0%, 0%, 0.2);
     --backdrop: hsla(0, 0%, 0%, 0.6);
+
+    --error: hsl(0, 100%, 55%);
+    --success: hsl(140, 43%, 53%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,10 +45,12 @@
 
         --destructive: hsl(0, 100%, 17%);
         --on-destructive: hsl(0, 100%, 90%);
-		--destructive-border: hsl(0, 100%, 30%);
+        --destructive-border: hsl(0, 100%, 30%);
 
         --accent: hsl(156, 100%, 8%);
         --on-accent: hsl(165, 100%, 85%);
-		--accent-border: hsl(165, 100%, 18%);
+        --accent-border: hsl(165, 100%, 18%);
+
+        --success: hsl(140, 100%, 63%);
     }
 }
