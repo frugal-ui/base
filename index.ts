@@ -85,6 +85,10 @@ export class IdentifiableObjectMap<T extends Identifiable> {
 		this.values().forEach(callbackFn);
 	};
 
+	clear = () => {
+		this.map.clear();
+	}
+
 	get length() {
 		return this.values().length;
 	}
