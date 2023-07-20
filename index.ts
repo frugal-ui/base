@@ -1173,6 +1173,10 @@ export class DateInputCfg implements InputCfg<Date> {
 	}
 }
 
+export class TimeInputCfg extends DateInputCfg {
+	type = 'time';
+}
+
 export function Input<T extends Stringifiable>(configuration: InputCfg<T>) {
 	return Component<string>('input')
 		.addToClass('inputs')
