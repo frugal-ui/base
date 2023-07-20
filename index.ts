@@ -87,7 +87,7 @@ export class IdentifiableObjectMap<T extends Identifiable> {
 
 	clear = () => {
 		this.map.clear();
-	}
+	};
 
 	get length() {
 		return this.values().length;
@@ -466,7 +466,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
 	allowKeyboardFocus: () => this;
 	animateIn: (animationName?: string) => this;
-	animateOut: () => void;
+	animateOut: () => Promise<void>;
 
 	//attributes
 	setID: (id: string | UUID) => this;
@@ -625,18 +625,25 @@ export function Component<ValueType>(
 		return component;
 	};
 	component.animateOut = () => {
-		const shouldAnimate =
-			window.matchMedia('(prefers-reduced-motion)').matches == false;
-		if (shouldAnimate) {
-			prepareAnimation();
-			component
-				.addToClass('animating-out')
-				.addToClass('in-hidden-animation-state');
+		return new Promise((resolve) => {
+			function remove() {
+				component.remove();
+				resolve();
+			}
 
-			setTimeout(() => component.remove(), 300);
-		} else {
-			component.remove();
-		}
+			const shouldAnimate =
+				window.matchMedia('(prefers-reduced-motion)').matches == false;
+			if (shouldAnimate) {
+				prepareAnimation();
+				component
+					.addToClass('animating-out')
+					.addToClass('in-hidden-animation-state');
+
+				setTimeout(() => remove(), 300);
+			} else {
+				remove();
+			}
+		});
 	};
 
 	//attributes
@@ -1892,8 +1899,8 @@ export interface Stage extends Component<undefined> {
 		Scene: typeof GenericScene<T>,
 		data: T,
 		depth: number,
-	) => this;
-	goBackTo: (depth: number, shouldUpdate?: boolean) => this;
+	) => Promise<this>;
+	goBackTo: (depth: number, shouldUpdate?: boolean) => Promise<this>;
 }
 
 export function Stage<T>(
@@ -1925,15 +1932,15 @@ export function Stage<T>(
 			return self;
 		};
 
-		self.replaceScene = (Scene, data, depth) => {
-			self.goBackTo(depth - 1, false);
+		self.replaceScene = async (Scene, data, depth) => {
+			await self.goBackTo(depth - 1, false);
 			self.addScene(Scene, data, depth);
 			updateDepth();
 
 			return self;
 		};
 
-		self.goBackTo = (depth, shouldUpdate = true) => {
+		self.goBackTo = async (depth, shouldUpdate = true) => {
 			while (getPersistingChildren().length > depth + 1) {
 				const child = persistingChildren[
 					persistingChildren.length - 1
@@ -1941,7 +1948,7 @@ export function Stage<T>(
 				const isColumnScene = child.classList.contains(
 					SceneTypes.Column,
 				);
-				if (child.animateOut && !isColumnScene) child.animateOut();
+				if (child.animateOut && !isColumnScene) await child.animateOut();
 				else child.remove();
 			}
 			if (shouldUpdate) updateDepth();
