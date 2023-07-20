@@ -1175,6 +1175,13 @@ export class DateInputCfg implements InputCfg<Date> {
 
 export class TimeInputCfg extends DateInputCfg {
 	type = 'time';
+	toValueType = (inputValue: string) => {
+		const date = new Date();
+		const [hours, minutes] = inputValue.split(':');
+		date.setHours(parseInt(hours));
+		date.setMinutes(parseInt(minutes));
+		return date;
+	};
 	valueToString = (value: Date) => {
 		const hour = value.getHours();
 		const minute = value.getMinutes();
