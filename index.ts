@@ -999,6 +999,7 @@ export function Checkbox(configuration: CheckboxCfg) {
                 value: undefined,
                 placeholder: undefined,
                 toValueType: (inputValue) => inputValue,
+                valueToString: (inputValue) => inputValue,
             }) as CheckableComponent<string>
         )
             .addToClass('checkable-items')
@@ -1109,6 +1110,7 @@ export interface InputCfg<T extends Stringifiable> {
     type: string;
     value: BindableObject<T> | undefined;
     toValueType: (inputValue: string) => T;
+	valueToString: (value: T) => string;
     fallbackValue: T | undefined;
     placeholder?: string | undefined;
 }
@@ -1117,6 +1119,7 @@ export class TextInputCfg implements InputCfg<string> {
     type = 'text';
     value: BindableObject<string>;
     toValueType = (inputValue: string) => inputValue;
+	valueToString = (value: string) => value;
     fallbackValue: string;
     placeholder: string;
 
@@ -1131,6 +1134,7 @@ export class NumberInputCfg implements InputCfg<number> {
     type = 'number';
     value: BindableObject<number>;
     toValueType = (inputValue: string) => parseFloat(inputValue);
+	valueToString = (value: number) => value.toString();
     fallbackValue: number;
     placeholder: string;
 
@@ -1161,7 +1165,7 @@ export function Input<T extends Stringifiable>(configuration: InputCfg<T>) {
                     changeEventName: 'input',
                     getViewValue: () => configuration.toValueType(self.value),
                     setViewValue: (newValue) =>
-                        (self.value = newValue.toString()),
+                        (self.value = configuration.valueToString(newValue)),
                 });
         });
 }
@@ -1569,6 +1573,7 @@ export function RadioButton<T>(configuration: RadioButtonCfg<T>) {
                 value: undefined,
                 placeholder: undefined,
                 toValueType: (inputValue) => inputValue,
+                valueToString: (inputValue) => inputValue,
             }) as CheckableComponent<string>
         )
             .access((self) =>
@@ -1712,6 +1717,7 @@ export function Slider(
         value,
         placeholder: undefined,
         toValueType: (inputValue) => parseInt(inputValue),
+        valueToString: (inputValue) => inputValue.toString(),
     }).access((self) =>
         self
             .setAttr('min', options.min ?? 0)
