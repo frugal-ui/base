@@ -1175,6 +1175,12 @@ export class DateInputCfg implements InputCfg<Date> {
 
 export class TimeInputCfg extends DateInputCfg {
 	type = 'time';
+	valueToString = (value: Date) => {
+		const hour = value.getHours();
+		const minute = value.getMinutes();
+		const second = value.getSeconds();
+		return `${hour}:${minute}:${second}`;
+	};
 }
 
 export function Input<T extends Stringifiable>(configuration: InputCfg<T>) {
