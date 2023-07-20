@@ -61,9 +61,10 @@
     transform: translateX(100%);
     opacity: 0;
 }
+
 @media (min-width: 520px) {
     .animation-scene.in-hidden-animation-state {
-        display: none;
+		transform: translateY(1rem);
     }
 }
 
