@@ -1185,8 +1185,7 @@ export class TimeInputCfg extends DateInputCfg {
 	valueToString = (value: Date) => {
 		const hour = value.getHours();
 		const minute = value.getMinutes();
-		const second = value.getSeconds();
-		return `${hour}:${minute}:${second}`;
+		return `${hour}:${minute}`;
 	};
 }
 
