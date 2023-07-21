@@ -151,7 +151,8 @@ pre {
 
 /* Button-like */
 .buttons,
-.selects {
+.selects,
+.submits {
     border-radius: var(--corners);
     padding: var(--padding-md);
 }
