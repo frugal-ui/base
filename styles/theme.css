@@ -53,7 +53,7 @@ COMPONENTS
 /* Button-like */
 .buttons,
 .selects,
-.inputs[type='submit'] {
+.submits {
 	font-size: medium;
 	font-family: mono-md, monospace, mono;
 	color: var(--on-clickable);
@@ -75,7 +75,7 @@ COMPONENTS
 }
 
 .buttons.buttons-primary,
-.inputs[type='submit'] {
+.submits {
 	background: var(--accent);
 	color: var(--on-accent);
 	border-color: var(--accent-border);

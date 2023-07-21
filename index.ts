@@ -1798,6 +1798,8 @@ export function Spacer() {
 /* Submit */
 export function Submit(text: string) {
 	return Component('input')
+		.addToClass('submits')
+	
 		.setAttr('value', text)
 		.setAttr('type', 'submit');
 }
