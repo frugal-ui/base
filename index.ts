@@ -1052,6 +1052,18 @@ export function Div(...children: Component<any>[]) {
 	return Container('div', ...children);
 }
 
+/* Form */
+export interface FormCfg {
+	action: string;
+	method: string;
+}
+
+export function Form(configuration: FormCfg, ...children: Component<any>[]) {
+	return Container('form', ...children)
+		.setAttr('action', configuration.action)
+		.setAttr('method', configuration.method);
+}
+
 /* GroupContainer */
 export function GroupContainer(label: string, ...children: Component<any>[]) {
 	return VStack(
@@ -1783,6 +1795,13 @@ export function Spacer() {
 	return Div().addToClass('spacers');
 }
 
+/* Submit */
+export function Submit(text: string) {
+	return Component('input')
+		.setAttr('value', text)
+		.setAttr('type', 'submit');
+}
+
 /* Text */
 export function Text(
 	value: ValueObject<Stringifiable>,
@@ -1949,7 +1968,8 @@ export function Stage<T>(
 				const isColumnScene = child.classList.contains(
 					SceneTypes.Column,
 				);
-				if (child.animateOut && !isColumnScene) await child.animateOut();
+				if (child.animateOut && !isColumnScene)
+					await child.animateOut();
 				else child.remove();
 			}
 			if (shouldUpdate) updateDepth();
