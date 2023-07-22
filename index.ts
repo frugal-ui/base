@@ -1054,8 +1054,8 @@ export function Div(...children: Component<any>[]) {
 
 /* Form */
 export interface FormCfg {
-	action: string;
-	method: string;
+	action: ValueObject<Stringifiable>;
+	method: ValueObject<Stringifiable>;
 }
 
 export function Form(configuration: FormCfg, ...children: Component<any>[]) {
