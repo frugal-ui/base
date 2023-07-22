@@ -172,13 +172,13 @@ h5 {
 }
 
 .visual-groups
-	:is(.buttons, .selects, .inputs, .textareas):not(.forcing-default-styles) {
+	:is(.buttons, .selects, .inputs, .textareas, .submits):not(.forcing-default-styles) {
 	border: none !important;
 	box-shadow: none !important;
 }
 
 .visual-groups
-	:is(.buttons, .selects, .inputs, .textareas):not(
+	:is(.buttons, .selects, .inputs, .textareas, .submits):not(
 		.forcing-default-styles
 	):not(:active) {
 	background-color: transparent !important;
