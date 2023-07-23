@@ -1270,10 +1270,12 @@ export function List<T extends Identifiable & Sortable>(
 	let draggedData: T | undefined = undefined;
 	let dragStartTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
+	const compareFn = (a: T, b: T) => a.index.value - b.index.value;
+
 	function cleanIndices() {
 		configuration.listData.value
 			.values()
-			.sort((a, b) => a.index.value - b.index.value)
+			.sort(compareFn)
 			.forEach((item, i) => (item.index.value = i));
 	}
 
@@ -1358,7 +1360,7 @@ export function List<T extends Identifiable & Sortable>(
 					}
 
 					//add new items
-					configuration.listData.value.forEach((itemData, i) => {
+					configuration.listData.value.getSorted(compareFn).forEach((itemData, i) => {
 						const oldItemView = document.getElementById(
 							itemData.uuid.toString(),
 						);
