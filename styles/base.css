@@ -258,6 +258,14 @@ h5 {
     cursor: pointer;
 }
 
+.list-items span {
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
 /* Overlays */
 .popover-contents {
     border-radius: var(--corners);
