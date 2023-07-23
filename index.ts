@@ -1953,6 +1953,7 @@ export function Stage<T>(
 			const scene = new Scene(depth, self, data);
 			self.addItems(scene.view);
 			scene.setup(data);
+			scene.view.scrollIntoView();
 			return self;
 		};
 
