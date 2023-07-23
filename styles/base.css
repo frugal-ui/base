@@ -259,7 +259,7 @@ h5 {
     cursor: pointer;
 }
 
-.list-items span {
+.list-items > *{
 	text-align: left;
 	white-space: nowrap;
 	overflow: hidden;
