@@ -265,6 +265,7 @@ h5 {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	max-width: 100%;
+	flex: 1;
 }
 
 /* Overlays */

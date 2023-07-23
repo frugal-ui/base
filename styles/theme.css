@@ -134,7 +134,7 @@ h5 {
 	font-size: small;
 }
 
-.list-items * {
+.list-items > * {
 	color: inherit;
 }
 
