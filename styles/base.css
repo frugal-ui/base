@@ -69,7 +69,7 @@
 }
     
 .animation-scene.scenes-column.in-hidden-animation-state {
-	transform: translateY(1rem);
+	transform: none;
 }
 
 /* transitions */
