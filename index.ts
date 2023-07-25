@@ -1367,16 +1367,17 @@ export function List<T extends Identifiable & Sortable>(
 
 						//already exists
 						if (oldItemView != null) return;
+						const indexBindable = unwrapBindable(itemData.index);
 
 						const newItemView = compute(itemData)
 							.setID(itemData.uuid)
 							.access((self) => {
 								self.createBinding(
-									unwrapBindable(itemData.index),
+									indexBindable,
 									(newIndex) => {
 										self.cssOrder(newIndex.toString());
 									},
-								);
+								).updateBinding(indexBindable);
 
 								if (configuration.sortable == true)
 									self.addToClass('draggable-items')
@@ -1391,12 +1392,7 @@ export function List<T extends Identifiable & Sortable>(
 							})
 							.animateIn('list-item');
 
-						if (i > listView.children.length) {
 							listView.append(newItemView);
-						} else {
-							const referenceNode = listView.children[i];
-							listView.insertBefore(newItemView, referenceNode);
-						}
 					});
 
 					//remove deleted items
