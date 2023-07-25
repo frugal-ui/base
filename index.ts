@@ -1125,7 +1125,8 @@ export function HStack(...children: Component<any>[]) {
 export function Icon(iconName: ValueObject<string>) {
 	return Text(iconName)
 		.addToClass('icons')
-		.addToClass('material-icons-round');
+		.addToClass('material-icons-round')
+		.setAttr('translate', 'no');
 }
 
 /* Input */
