@@ -188,16 +188,16 @@ h5 {
 	font-size: 1rem;
 }
 
-.visual-groups > *:is(.ordered-containers > :not(.last-item), *:not(.ordereed-containers) :not(:last-child):not(.last-item)):not(.forcing-default-styles) {
+.visual-groups > *:is(.ordered-containers:last-child > :not(.last-item), *:not(.ordered-containers) :not(:last-child):not(.last-item)):not(.forcing-default-styles) {
 	border-bottom: 1px solid var(--lines) !important;
 }
 
-.visual-groups > :is(.ordered-containers .first-item, :not(.ordered-containers) > *:first-child) {
+.visual-groups > :is(.ordered-containers:first-child .first-item, :not(.ordered-containers) > *:first-child) {
 	border-top-left-radius: var(--corners);
 	border-top-right-radius: var(--corners);
 }
 
-.visual-groups > :is(.ordered-containers .last-item, :not(.ordered-containers) > *:last-child) {
+.visual-groups > :is(.ordered-containers:last-child .last-item, :not(.ordered-containers) > *:last-child) {
 	border-bottom-left-radius: var(--corners);
 	border-bottom-right-radius: var(--corners);
 }
