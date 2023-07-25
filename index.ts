@@ -1360,40 +1360,56 @@ export function List<T extends Identifiable & Sortable>(
 					}
 
 					//add new items
-					configuration.listData.value.getSorted(compareFn).forEach((itemData, i) => {
-						const oldItemView = document.getElementById(
-							itemData.uuid.toString(),
-						);
+					configuration.listData.value
+						.getSorted(compareFn)
+						.forEach((itemData, i) => {
+							const oldItemView = document.getElementById(
+								itemData.uuid.toString(),
+							);
 
-						//already exists
-						if (oldItemView != null) return;
-						const indexBindable = unwrapBindable(itemData.index);
+							//already exists
+							if (oldItemView != null) return;
+							const indexBindable = unwrapBindable(
+								itemData.index,
+							);
+							configuration.listData.addBinding({
+								uuid: new UUID(),
+								action: () => indexBindable.triggerAll(),
+							});
 
-						const newItemView = compute(itemData)
-							.setID(itemData.uuid)
-							.access((self) => {
-								self.createBinding(
-									indexBindable,
-									(newIndex) => {
-										self.cssOrder(newIndex.toString());
-									},
-								).updateBinding(indexBindable);
+							const newItemView = compute(itemData)
+								.setID(itemData.uuid)
+								.access((self) => {
+									self.createBinding(
+										indexBindable,
+										(newIndex) => {
+											self.cssOrder(newIndex.toString());
+											self.addToClassConditionally(
+												'first-item',
+												newIndex == 0,
+											);
+											self.addToClassConditionally(
+												'last-item',
+												newIndex == listData.length - 1,
+											);
+										},
+									).updateBinding(indexBindable);
 
-								if (configuration.sortable == true)
-									self.addToClass('draggable-items')
-										.addToClass('rearrangable-items')
+									if (configuration.sortable == true)
+										self.addToClass('draggable-items')
+											.addToClass('rearrangable-items')
 
-										.listen('mousedown', (e) =>
-											startDrag(e, itemData, self),
-										)
-										.listen('touchstart', (e) =>
-											startDrag(e, itemData, self),
-										);
-							})
-							.animateIn('list-item');
+											.listen('mousedown', (e) =>
+												startDrag(e, itemData, self),
+											)
+											.listen('touchstart', (e) =>
+												startDrag(e, itemData, self),
+											);
+								})
+								.animateIn('list-item');
 
 							listView.append(newItemView);
-					});
+						});
 
 					//remove deleted items
 					Array.from(listView.children).forEach(
@@ -1405,7 +1421,8 @@ export function List<T extends Identifiable & Sortable>(
 						},
 					);
 				})
-				.updateBinding(configuration.listData);
+				.updateBinding(configuration.listData)
+				.addToClass('ordered-containers');
 		});
 }
 
@@ -1797,7 +1814,7 @@ export function Spacer() {
 export function Submit(text: string) {
 	return Component('input')
 		.addToClass('submits')
-	
+
 		.setAttr('value', text)
 		.setAttr('type', 'submit');
 }
