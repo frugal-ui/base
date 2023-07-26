@@ -105,7 +105,7 @@ h2,
 h3,
 h4,
 h5) {
-	font-family: headings, mono-md, monospace, mono;
+	font-family: headings, mono-md, monospace, mono !important;
 	text-transform: uppercase;
 }
 
