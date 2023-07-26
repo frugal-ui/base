@@ -926,7 +926,7 @@ export function Component<ValueType>(
 		return component;
 	};
 
-	return component.addToClass('frugal-ui-commponents');
+	return component.addToClass('frugal-ui-components');
 }
 
 // SPECIFIC
