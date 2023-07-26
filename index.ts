@@ -353,7 +353,7 @@ export interface ComputedStateCfg<T> {
 	initialValue: T;
 	compute: (self: ComputedState<T>) => void;
 }
-/** State binding another state. Mono-directional. */
+/** State binding another state. One-way. */
 export class ComputedState<T> extends State<T> {
 	constructor(configuration: ComputedStateCfg<T>) {
 		super(configuration.initialValue);
@@ -366,6 +366,19 @@ export class ComputedState<T> extends State<T> {
 		configuration.statesToBind.forEach((bindable) => {
 			bindable.addBinding(binding);
 			bindable.triggerBinding(binding);
+		});
+	}
+}
+
+
+/** State linked to LocalStorage */
+export class LocalStorageState extends State<string> {
+	constructor(key: string, initialValue: string) {
+		super(localStorage.getItem(key) ?? initialValue);
+		
+		this.addBinding({
+			uuid: new UUID(),
+			action: (newValue) => localStorage.setItem(key, newValue)
 		});
 	}
 }
