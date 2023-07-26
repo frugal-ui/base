@@ -370,15 +370,14 @@ export class ComputedState<T> extends State<T> {
 	}
 }
 
-
 /** State linked to LocalStorage */
 export class LocalStorageState extends State<string> {
 	constructor(key: string, initialValue: string) {
 		super(localStorage.getItem(key) ?? initialValue);
-		
+
 		this.addBinding({
 			uuid: new UUID(),
-			action: (newValue) => localStorage.setItem(key, newValue)
+			action: (newValue) => localStorage.setItem(key, newValue),
 		});
 	}
 }
@@ -927,7 +926,7 @@ export function Component<ValueType>(
 		return component;
 	};
 
-	return component;
+	return component.addToClass('frugal-ui-commponents');
 }
 
 // SPECIFIC
