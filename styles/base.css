@@ -342,7 +342,7 @@ pre.frugal-ui-components {
 	visibility: hidden;
 }
 
-.frugal-ui-components.popover-containers[open] .popover-contents {
+.frugal-ui-components.popover-containers[open] > .popover-contents {
 	visibility: visible;
 }
 
