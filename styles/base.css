@@ -223,6 +223,10 @@ pre.frugal-ui-components {
 	min-height: 3.75rem;
 }
 
+.headers h5.frugal-ui-components {
+	flex-shrink: 1;
+}
+
 /* Headings */
 .frugal-ui-components:is(h1, h2, h3, h4, h5) {
 	margin: 0rem;
