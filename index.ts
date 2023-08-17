@@ -1,10 +1,8 @@
 import 'material-icons/iconfont/round.css';
-
 import { PrefixedCSSPropertyNames } from 'css-property-names';
-
 import AccessibilityRoleMap from './assets/roles.js';
 import './styles/base.css';
-import './styles/color.css';
+import './styles/color.css'; //TODO remove
 import './styles/fonts.css';
 import './styles/theme.css';
 
@@ -18,6 +16,10 @@ export function buildInterface(component: Component<any>) {
 
 /*
  * BASIC
+ */
+/**
+ * Random UUID.
+ * Stringifiable.
  */
 export class UUID implements Stringifiable {
 	readonly value: string;
@@ -46,18 +48,35 @@ export class UUID implements Stringifiable {
 	}
 }
 
+/**
+ * Has a UUID.
+ */
 export interface Identifiable {
 	readonly uuid: UUID;
 }
 
+/**
+ * Has an index.
+ */
 export interface Sortable {
 	index: BindableObject<number>;
 }
 
+/**
+ * Has a toString() => string method.
+ */
 export interface Stringifiable {
+	/**
+	 * Returns string from object.
+	 */
 	toString: () => string;
 }
 
+/**
+ * Contains a Map<string, T extends Identifiable>.
+ * Has methods for manipulating the map.
+ * Access map using readonly map.
+ */
 export class IdentifiableObjectMap<T extends Identifiable> {
 	readonly map = new Map<string, T>();
 
@@ -98,17 +117,22 @@ export class IdentifiableObjectMap<T extends Identifiable> {
  *  REACTIVITY
  */
 // VALUE
-/** Object holding a value. Used by UI components. */
+/** 
+ * Either BindableObject or plain value. 
+ * Unwrap using unwrapBindable() or unwrapValue() functions.
+ */
 export type ValueObject<T> = T | BindableObject<T>;
 
 // BINDING
-/** Binds a BindableObject. */
+/** 
+ * Can be added to BindableObjects.
+ * action() will be called when object changes.
+ */
 export interface Binding<T> {
 	uuid: UUID;
 	action: BindingAction<T>;
 }
 
-/** Action executed when bound object changes. */
 export type BindingAction<T> = (newValue: T) => void;
 
 //tight binding
@@ -121,7 +145,9 @@ export interface GenericTBModelCfg<D, C> {
 	getViewProperty: () => D;
 	setViewProperty: (newValue: D) => void;
 }
-/** Configure a binding for bi-directional changes. */
+/** 
+* Model for Two-way binding.
+*/
 export class GenericTBModel<D, C> {
 	readonly data: BindableObject<D>;
 	readonly component: Component<C>;
@@ -147,7 +173,9 @@ export interface ValueTBModelOpts<T> {
 	component: Component<T>;
 	fallbackValue: T;
 }
-/** Tightly binds a component's value. */
+/** 
+ * Two-way binding between BindableObject and a Component's value.
+ */
 export class ValueTBModel<T> extends GenericTBModel<T, T> {
 	constructor(configuration: ValueTBModelOpts<T>) {
 		super({
@@ -170,7 +198,9 @@ export interface CheckedTBModelCfg {
 	isChecked: BindableObject<boolean>;
 	component: CheckableComponent<any>;
 }
-/** Tightly bind a component's 'checked' property. */
+/** 
+ * Two-way binding between BindableObject<boolean> and a Component's 'checked' property.
+ */
 export class CheckedTBModel extends ValueTBModel<boolean> {
 	readonly component: CheckableComponent<any>;
 
@@ -194,6 +224,9 @@ export class CheckedTBModel extends ValueTBModel<boolean> {
 }
 
 //selection
+/**
+ * Tracks 'selected' items in State<T[]>.
+ */
 export class DataSelection<T> {
 	readonly uuid = new UUID();
 	selectedItems = new State<T[]>([]);
@@ -285,7 +318,10 @@ export class CheckSBModel<T> extends ValueSBModel<T> {
 }
 
 // BINDABLE
-/** Can be bound, no further functionality. Should be extended by classes. */
+/** 
+ * Plain bindable object.
+ * Use only for extending classes.
+ */
 export class BindableObject<T> {
 	readonly uuid = new UUID();
 	_value: T;
@@ -311,7 +347,10 @@ export class BindableObject<T> {
 	removeBinding = (binding: Binding<T>) => {};
 }
 
-/**  Can be bound, working with one item. Used by unwrapBindable(). */
+/** 
+ * Polyfill BindableObject.
+ * Can hold only one binding.
+ */
 export class BindableDummy<T> extends BindableObject<T> {
 	action: BindingAction<T> | undefined;
 
@@ -327,7 +366,10 @@ export class BindableDummy<T> extends BindableObject<T> {
 	};
 }
 
-/** Reactive Variable. Bindings will be triggered on change. */
+/**
+ * Fully functional BindableObject.
+ * Recommended in most cases.
+ */
 export class State<T> extends BindableObject<T> {
 	private bindings = new Map<Binding<T>['uuid'], Binding<T>['action']>();
 
@@ -353,7 +395,10 @@ export interface ComputedStateCfg<T> {
 	initialValue: T;
 	compute: (self: ComputedState<T>) => void;
 }
-/** State binding another state. One-way. */
+/**
+ * State that binds other states.
+ * compute() will be called when any of the states changes.
+ */
 export class ComputedState<T> extends State<T> {
 	constructor(configuration: ComputedStateCfg<T>) {
 		super(configuration.initialValue);
@@ -370,7 +415,9 @@ export class ComputedState<T> extends State<T> {
 	}
 }
 
-/** State linked to LocalStorage */
+/**
+ * State<string> that is linked to localStorage.
+ */
 export class LocalStorageState extends State<string> {
 	constructor(key: string, initialValue: string) {
 		super(localStorage.getItem(key) ?? initialValue);
@@ -387,7 +434,11 @@ export interface ProxyStateCfg<T, O> {
 	convertFromOriginal: (originalValue: O) => T;
 	convertToOriginal: (value: T) => O;
 }
-/** State binding and updating another state. Bi-directional. */
+/** 
+ * State that binds another state.
+ * Changes of the ProxyState will also change the bound state.
+ * Conversion methods are specified via configuration.
+ */
 export class ProxyState<T, O> extends State<T> {
 	readonly original: BindableObject<O>;
 	readonly convertFromOriginal: (proxyValue: O) => T;
@@ -466,83 +517,217 @@ export type Styleable = {
 
 /** UI Component. */
 export interface Component<ValueType> extends HTMLElement, Styleable {
+	/** 
+	* Value of the Component.
+	*/
 	value: ValueType;
+	/** 
+	 * Provides access to component in callback function.
+	 * Use if component must be accessed as variable.
+	 */
 	access: (accessFn: (self: this) => void) => this;
+	/**
+	 * Focuses component after creation.
+	 */
 	focusOnCreate: () => this;
+	/**
+	 * Focuses component when state changes to a specific value.
+	 */ //TODO rename -> focusOnMatch
 	focusOnChange: <T>(state: BindableObject<T>, matchingValue: T) => this;
+	/**
+	 * Toggles ARIA-current.
+	 */
 	setAccessibilityCurrentState: (
 		state: 'page' | 'step',
 		shouldApply: BindableObject<boolean>,
 	) => this;
+	/**
+	 * Sets ARIA-label.
+	 */
 	setAccessibilityLabel: (label: ValueObject<string>) => this;
+	/**
+	 * Sets ARIA-role.
+	 */
 	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
 	allowKeyboardFocus: () => this;
+	/**
+	 * Sets in-animation.
+	 */
 	animateIn: (animationName?: string) => this;
+	/**
+	 * Animates out and removed component.
+	 */
 	animateOut: () => Promise<void>;
 
 	//attributes
+	/**
+	 * Sets HTML id.
+	 */
 	setID: (id: string | UUID) => this;
+	/**
+	 * Sets HTML attribute.
+	 */
 	setAttr: (key: string, value?: ValueObject<Stringifiable>) => this;
+	/**
+	 * Removes HTML attribute.
+	 */
 	rmAttr: (key: string) => this;
+	/** 
+	 * Toggles HTML attribute.
+	 * Supports BindableObject<boolean>.
+	 */
 	toggleAttr: (key: string, condition: ValueObject<boolean>) => this;
+	/**
+	 * Resets HTML className.
+	 */
 	resetClasses: (value: string) => this;
+	/**
+	 * Removes HTML className.
+	 */
 	removeFromClass: (value: string) => this;
+	/**
+	 * Adds HTML className.
+	 */
 	addToClass: (value: string) => this;
+	/**
+	 * Toggles HTML className.
+	 * Supports BindableObject<boolean>.
+	 */
 	addToClassConditionally: (
 		value: string,
 		condition: ValueObject<boolean>,
 	) => this;
+	/**
+	 * Sets CSS style.
+	 * Not recommended. Use .cssProperty() methods instead (e.g. cssWidth('100%').
+	 */
 	setStyle: (
 		property: keyof CSSStyleDeclaration,
 		value: Stringifiable,
 	) => this;
 
 	//children
+	/**
+	 * Appends child Components.
+	 */
 	addItems: (...children: Component<any>[]) => this;
+	/**
+	 * Prepends child Components.
+	 */
 	addItemsBefore: (...children: Component<any>[]) => this;
+	/**
+	 * Clears innerHTML.
+	 */
 	clear: () => this;
+	/**
+	 * Sets child Components by array.
+	 * Supports BindableObject<Component<any>[]>.
+	 */
 	setItems: (children: ValueObject<Component<any>[]>) => this;
 
 	//content
+	/**
+	 * Sets innerText.
+	 */
 	setText: (text: ValueObject<Stringifiable>) => this;
+	/**
+	 * Sets value.
+	 */
 	setValue: (value: ValueObject<ValueType>) => this;
+	/**
+	 * Sets innerHTML.
+	 */
 	setHTML: (text: ValueObject<string>) => this;
 
 	//events
+	/**
+	 * Adds eventListener.
+	 */
 	listen: (
 		eventName: keyof HTMLElementEventMap,
 		handler: ComponentEventHandler,
 	) => this;
+	/**
+	 * Removes eventListener.
+	 */
 	ignore: (
 		eventName: keyof HTMLElementEventMap,
 		handler: ComponentEventHandler,
 	) => this;
+	/**
+	 * Registers keyboard shortcuts on component.
+	 */
 	registerKeyboardShortcuts: (...shortcuts: KeyboardShortcut[]) => this;
 
 	//navigation
+	/**
+	 * Hides based on boolean.
+	 * Supports BindableObject<boolean>.
+	 */
 	hideConditionally: (isHidden: ValueObject<boolean>) => this;
+	/**
+	 * Shows if both values match.
+	 * Supports BindableObjects.
+	 */
 	setVisibleIfMatch: <T>(a: ValueObject<T>, b: ValueObject<T>) => this;
 
 	//state
-	/** Tracks bindings of the component. Key is BindableObject.uuid, value is the Binding. */
+	/** 
+	 * Tracks Bindings of the Component. 
+	 * Key is BindableObject.uuid, value is the Binding.
+	 */
 	bindings: Map<string, Binding<any>>;
+	/**
+	 * Creates a Binding and adds it to a BindableObject.
+	 */
 	createBinding: <T>(
 		bindable: BindableObject<T>,
 		action: BindingAction<T>,
 	) => this;
+	/**
+	 * Creates Binding to a DataSelection.
+	 */
 	createSelectionBinding: <T>(model: ValueSBModel<T>) => this;
+	/**
+	 * Creates two-way binding.
+	 */
 	createTightBinding: <D, C>(model: GenericTBModel<D, C>) => this;
+	/**
+	 * Removes Binding from BindableObject.
+	 */
 	removeBinding: <T>(bindable: BindableObject<T>) => this;
+	/**
+	 * Triggers the action associated with the Binding.
+	 */
 	updateBinding: <T>(bindable: BindableObject<T>) => this;
 
 	//style
+	/**
+	 * Disables container-specific styles.
+	 */
+	//TODO remove
 	forceDefaultStyles: () => this;
+	/**
+	 * Hides component on specific screen size.
+	 */
 	hideOnScreenSize: (size: ScreenSizes) => this;
+	/**
+	 * Applies default padding.
+	 */
 	useDefaultPadding: () => this;
+	/**
+	 * Applies default gap.
+	 */
 	useDefaultSpacing: () => this;
+	/**
+	 * Applies gray color.
+	 */
 	useMutedColor: () => this;
 }
 
+/**
+ * Component with checked: boolean property.
+ */
 export interface CheckableComponent<T> extends Component<T> {
 	checked: boolean;
 }
@@ -941,6 +1126,9 @@ export function Accordion(label: string, ...children: Component<any>[]) {
 }
 
 /* AutoComplete */
+/**
+ * Contains Input and datalist-div.
+ */
 export function AutoComplete<T>(
 	optionData: BindableObject<string[]>,
 	input: Component<T>,
@@ -963,6 +1151,8 @@ export function AutoComplete<T>(
 }
 
 /* Box */
+/** Div with 'box' styles.
+ */
 export function Box(...children: Component<any>[]) {
 	return Div(...children).addToClass('boxes');
 }
@@ -1070,25 +1260,13 @@ export interface FormCfg {
 	method: ValueObject<Stringifiable>;
 }
 
+/**
+ * HTML form element.
+ */
 export function Form(configuration: FormCfg, ...children: Component<any>[]) {
 	return Container('form', ...children)
 		.setAttr('action', configuration.action)
 		.setAttr('method', configuration.method);
-}
-
-/* GroupContainer */
-export function GroupContainer(label: string, ...children: Component<any>[]) {
-	return VStack(
-		Text(label, 'h5').useMutedColor(),
-		VStack(...children)
-			.cssFlex(0)
-			.cssAlignItems('start')
-			.cssJustifyContent('start'),
-	)
-		.useDefaultSpacing()
-		.cssJustifyContent('start')
-		.cssMarginTop('1rem')
-		.cssFlex(0);
 }
 
 /* Header */
@@ -1107,7 +1285,7 @@ export function Header(configuration: HeaderCfg, ...actions: Component<any>[]) {
 					Button({
 						style: ButtonStyles.Transparent,
 						iconName: 'chevron_left',
-						accessibilityLabel: 'go back', // TODO
+						accessibilityLabel: 'go back',
 						action: configuration.parentScene.close,
 					}).access((self) => {
 						if (!configuration.forceShowBackButton == true)
@@ -1129,6 +1307,9 @@ export function Header(configuration: HeaderCfg, ...actions: Component<any>[]) {
 }
 
 /* HStack */
+/**
+ * Horizontal stack.
+ */
 export function HStack(...children: Component<any>[]) {
 	return Div(...children).addToClass('stacks-horizontal');
 }
@@ -1151,6 +1332,9 @@ export interface InputCfg<T extends Stringifiable> {
 	placeholder?: string | undefined;
 }
 
+/**
+ * Configures input as type='text'.
+ */
 export class TextInputCfg implements InputCfg<string> {
 	type = 'text';
 	value: BindableObject<string>;
@@ -1166,6 +1350,9 @@ export class TextInputCfg implements InputCfg<string> {
 	}
 }
 
+/**
+ * Configures input as type='number'.
+ */
 export class NumberInputCfg implements InputCfg<number> {
 	type = 'number';
 	value: BindableObject<number>;
@@ -1181,6 +1368,9 @@ export class NumberInputCfg implements InputCfg<number> {
 	}
 }
 
+/**
+ * Configures input as type='date'.
+ */
 export class DateInputCfg implements InputCfg<Date> {
 	type = 'date';
 	value: BindableObject<Date>;
@@ -1205,6 +1395,9 @@ export class DateInputCfg implements InputCfg<Date> {
 	}
 }
 
+/**
+ * Configures input as type='time'.
+ */
 export class TimeInputCfg extends DateInputCfg {
 	type = 'time';
 	toValueType = (inputValue: string) => {
@@ -1222,6 +1415,10 @@ export class TimeInputCfg extends DateInputCfg {
 	};
 }
 
+/**
+ * HTML input.
+ * Use of pre-defined configurations is recommended (e.g. new TextInputCfg()).
+ */
 export function Input<T extends Stringifiable>(configuration: InputCfg<T>) {
 	return Component<string>('input')
 		.addToClass('inputs')
@@ -1248,6 +1445,10 @@ export function Input<T extends Stringifiable>(configuration: InputCfg<T>) {
 }
 
 /* Label */
+/**
+ * HTML label.
+ * Contains labeled item.
+ */
 export function Label(labelText: string, labeledItem: Component<any>) {
 	return Component('label')
 		.setText(labelText)
@@ -1257,11 +1458,14 @@ export function Label(labelText: string, labeledItem: Component<any>) {
 }
 
 /* Link */
+/**
+ * HTML anchor.
+ */
 export function Link(label: ValueObject<string>, href: string) {
 	return Text(label, 'a').setAttr('href', href);
 }
 
-/* List */
+/* List */ //TODO rebuild
 export enum ListStyles {
 	Normal = 'list',
 	Group = 'list',
@@ -1270,10 +1474,9 @@ export enum ListStyles {
 
 export interface ListCfg<T extends Identifiable & Sortable> {
 	listData: BindableObject<IdentifiableObjectMap<T>>;
-	sortable?: boolean;
+	sortable?: boolean; //TODO rename -> dragToSort
 	style?: ListStyles;
 }
-
 export function List<T extends Identifiable & Sortable>(
 	configuration: ListCfg<T>,
 	compute: (itemData: T) => Component<any>,
@@ -1455,6 +1658,9 @@ export interface MeterOpts {
 	high?: number;
 }
 
+/** 
+ * HTML meter.
+ */
 export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
 	const min = options.min ?? 0;
 	const max = options.max ?? 1;
@@ -1693,6 +1899,9 @@ export interface SelectOption {
 	value: string;
 }
 
+/**
+ * HTML select.
+ */
 export function Select(
 	value: BindableObject<string>,
 	options: BindableObject<SelectOption[]>,
@@ -1721,7 +1930,7 @@ export function Select(
 		);
 }
 
-/* SelectingListItem */
+/* SelectingListItem */ //TODO maybe rebuild alongside List()
 export interface SelectingListItemCfg<T> {
 	selection: DataSelection<T>;
 	ownValue: T;
@@ -1775,6 +1984,9 @@ export interface SheetCfg {
 	accessibilityLabel: string;
 }
 
+/**
+ * Modal, convering entire screen.
+ */
 export function Sheet(configuration: SheetCfg, ...children: Component<any>[]) {
 	return Container(
 		'dialog',
@@ -1824,6 +2036,9 @@ export function Spacer() {
 }
 
 /* Submit */
+/**
+ * HTML submit input.
+ */
 export function Submit(text: string) {
 	return Component('input')
 		.addToClass('submits')
@@ -1866,7 +2081,23 @@ export function VisualGroup(...children: Component<any>[]) {
 	return VStack(...children).addToClass('visual-groups');
 }
 
+//TODO test
+export function LabeledVisualGroup(label: string, ...children: Component<any>[]) {
+	return VStack(
+		Text(label, 'h5').useMutedColor(),
+		VStack(...children)
+			.addToClass('visual-groups'),
+	)
+		.useDefaultSpacing()
+		.cssJustifyContent('start')
+		.cssMarginTop('1rem')
+		.cssFlex(0);
+}
+
 /* VStack */
+/**
+ * Vertical stack.
+ */
 export function VStack(...children: Component<any>[]) {
 	return Div(...children).addToClass('stacks-vertical');
 }
@@ -1921,12 +2152,21 @@ export class GenericScene<T> {
 		return main;
 	}
 
+	/**
+	 * Draws the Scene's UI.
+	 */
 	draw(data: T): Component<any> {
 		return Text('Hello, world!');
 	}
 
+	/**
+	 * Called after scene is created.
+	 */
 	setup(data: T): void {}
 
+	/**
+	 * Closes scene.
+	 */
 	close = () => {
 		this.stage.goBackTo(this.depth - 1);
 	};
@@ -1938,6 +2178,10 @@ export class GenericScene<T> {
 }
 
 /* Stage */
+/**
+ * Contains one or multiple Scenes.
+ * Layout is determined by Scene types.
+ */
 export interface Stage extends Component<undefined> {
 	depth: State<number>;
 	addScene: <T>(
@@ -2020,6 +2264,10 @@ export interface NavigationLinkCfg<T> {
 	initiallySelected?: boolean;
 }
 
+/**
+ * Links to a Scene inside a Stage.
+ */
+//TODO rename -> SceneLink
 export function NavigationLink<T>(
 	configuration: NavigationLinkCfg<T>,
 	...children: Component<any>[]
@@ -2091,6 +2339,9 @@ export interface TabCfg {
 	view: Component<any>;
 }
 
+/**
+ * Tab-based navigation.
+ */
 export function TabView(...configuration: TabCfg[]) {
 	const visibleTabIndex = new State(0);
 
