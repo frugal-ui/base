@@ -6,10 +6,6 @@ BASIC
 	color: var(--text);
 }
 
-.frugal-ui-components:not(.icons) {
-	font-family: sans-rg, sans-serif, sans;
-}
-
 html {
 	background: var(--background);
 }
@@ -83,6 +79,7 @@ COMPONENTS
 	border-color: var(--destructive-border);
 }
 
+summary.frugal-ui-components:active,
 .frugal-ui-components.navigation-links:active,
 .frugal-ui-components.buttons:not([disabled]):active,
 .frugal-ui-components.buttons-pressed {
@@ -165,7 +162,8 @@ h5.frugal-ui-components {
 }
 
 /* VisualGroup */
-.frugal-ui-components.visual-groups {
+.frugal-ui-components.visual-groups,
+.frugal-ui-components.accordions {
 	background-color: var(--background-alt);
 }
 

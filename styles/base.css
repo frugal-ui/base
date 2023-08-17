@@ -113,6 +113,11 @@
 
 .frugal-ui-components {
 	box-sizing: border-box;
+	font-size: var(--font-size);
+}
+
+.frugal-ui-components:not(.icons) {
+	font-family: sans-rg, sans-serif, sans;
 }
 
 html,
@@ -159,6 +164,14 @@ pre.frugal-ui-components {
     COMPONENTS
 */
 
+/* Accordion */
+summary.frugal-ui-components:not(.icons) {
+	cursor: default;
+	font-family: mono-bd;
+	padding: var(--padding-xs);
+	border-radius: var(--corners);
+}
+
 /* Checkable */
 .frugal-ui-components.draggable-items.dragging {
 	transform: scale(0.95);
@@ -193,7 +206,6 @@ pre.frugal-ui-components {
 .buttons span.frugal-ui-components {
 	color: inherit;
 	cursor: inherit;
-	font-size: var(--font-size);
 }
 
 .buttons span.frugal-ui-components:empty {
@@ -435,10 +447,10 @@ span.frugal-ui-components {
 .frugal-ui-components.typeable-items {
 	padding: var(--padding-md);
 	border-radius: var(--corners);
-	font-size: var(--font-size);
 }
 
 /* VisualGroup */
+.frugal-ui-components.accordions,
 .frugal-ui-components.visual-groups {
 	width: 100%;
 	height: auto;
