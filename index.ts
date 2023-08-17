@@ -10,6 +10,10 @@ import './styles/theme.css';
  * MAIN
  */
 
+/**
+ * 'Root function'. Appends component to body.
+ * Should be called exactly once.
+ */
 export function buildInterface(component: Component<any>) {
 	document.body.appendChild(component);
 }
