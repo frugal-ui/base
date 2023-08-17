@@ -2085,7 +2085,6 @@ export function VisualGroup(...children: Component<any>[]) {
 	return VStack(...children).addToClass('visual-groups');
 }
 
-//TODO test
 export function LabeledVisualGroup(label: string, ...children: Component<any>[]) {
 	return VStack(
 		Text(label, 'h5').useMutedColor(),
