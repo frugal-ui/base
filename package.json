@@ -4,7 +4,7 @@
   "description": "Reactive and component-based UI framework",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "doc": "typedoc index.ts"
   },
   "repository": {
     "type": "git",
