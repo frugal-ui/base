@@ -93,6 +93,22 @@
 
 	--gap: 0.5rem;
 	--gap-sm: 0.25rem;
+
+	--font-size: 1rem;
+}
+
+@media (min-width: 800px) {
+	:root {
+		--padding-xs: 0.2rem 0.2rem;
+		--padding-sm: 0.3rem 0.3rem;
+		--padding-md: 0.3rem 0.5rem;
+		--padding-lg: 0.5rem 0.5rem;
+	
+		--gap: 0.25rem;
+		--gap-sm: 0.125rem;
+
+		--font-size: .9rem;
+	}
 }
 
 .frugal-ui-components {
@@ -177,6 +193,7 @@ pre.frugal-ui-components {
 .buttons span.frugal-ui-components {
 	color: inherit;
 	cursor: inherit;
+	font-size: var(--font-size);
 }
 
 .buttons span.frugal-ui-components:empty {
@@ -418,6 +435,7 @@ span.frugal-ui-components {
 .frugal-ui-components.typeable-items {
 	padding: var(--padding-md);
 	border-radius: var(--corners);
+	font-size: var(--font-size);
 }
 
 /* VisualGroup */

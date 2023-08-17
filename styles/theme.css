@@ -4,7 +4,6 @@ BASIC
 .frugal-ui-components {
 	accent-color: var(--accent);
 	color: var(--text);
-	font-size: medium;
 }
 
 .frugal-ui-components:not(.icons) {
@@ -33,7 +32,6 @@ GROUPS
 
 	border: 1px solid var(--lines);
 
-	font-size: medium;
 	font-family: sans-md, sans-serif, sans;
 }
 
@@ -53,7 +51,6 @@ COMPONENTS
 .frugal-ui-components.buttons,
 .frugal-ui-components.selects,
 .frugal-ui-components.submits {
-	font-size: medium;
 	font-family: mono-md, monospace, mono;
 	color: var(--on-clickable);
 
@@ -92,6 +89,7 @@ COMPONENTS
 	background: var(--pressed);
 	color: var(--on-clickable);
 	border-color: var(--clickable-border);
+	box-shadow: 0px 0px 2px var(--shadows) inset;
 }
 
 .button-groups .frugal-ui-components.buttons:not(.buttons-pressed) {
