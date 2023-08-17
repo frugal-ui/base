@@ -2,7 +2,7 @@ import 'material-icons/iconfont/round.css';
 import { PrefixedCSSPropertyNames } from 'css-property-names';
 import AccessibilityRoleMap from './assets/roles.js';
 import './styles/base.css';
-import './styles/color.css'; //TODO remove
+import './styles/color.css';
 import './styles/fonts.css';
 import './styles/theme.css';
 
@@ -532,8 +532,8 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 	focusOnCreate: () => this;
 	/**
 	 * Focuses component when state changes to a specific value.
-	 */ //TODO rename -> focusOnMatch
-	focusOnChange: <T>(state: BindableObject<T>, matchingValue: T) => this;
+	 */
+	focusOnMatch: <T>(state: BindableObject<T>, matchingValue: T) => this;
 	/**
 	 * Toggles ARIA-current.
 	 */
@@ -760,7 +760,7 @@ export function Component<ValueType>(
 		setTimeout(() => component.focus(), 100);
 		return component;
 	};
-	component.focusOnChange = (state, matchingValue) => {
+	component.focusOnMatch = (state, matchingValue) => {
 		component.createBinding(state, (newValue) => {
 			// timeout needed for overlays
 			if (newValue == matchingValue)
@@ -1474,7 +1474,7 @@ export enum ListStyles {
 
 export interface ListCfg<T extends Identifiable & Sortable> {
 	listData: BindableObject<IdentifiableObjectMap<T>>;
-	sortable?: boolean; //TODO rename -> dragToSort
+	dragToSort?: boolean;
 	style?: ListStyles;
 }
 export function List<T extends Identifiable & Sortable>(
@@ -1611,7 +1611,7 @@ export function List<T extends Identifiable & Sortable>(
 										},
 									).updateBinding(indexBindable);
 
-									if (configuration.sortable == true)
+									if (configuration.dragToSort == true)
 										self.addToClass('draggable-items')
 											.addToClass('rearrangable-items')
 
@@ -1822,7 +1822,7 @@ export function Popover(configuration: PopoverCfg) {
 			.setAttr('aria-modal', 'true')
 			.setAccessibilityLabel(configuration.accessibilityLabel)
 			.allowKeyboardFocus()
-			.focusOnChange(configuration.isOpen, true),
+			.focusOnMatch(configuration.isOpen, true),
 	)
 		.listen('click', (e) => {
 			e.preventDefault();
@@ -1930,7 +1930,11 @@ export function Select(
 		);
 }
 
-/* SelectingListItem */ //TODO maybe rebuild alongside List()
+/* SelectingListItem */
+/**
+ * ListItem that updates a DataSelection.
+ * Alternative to Select in certain applications.
+ */
 export interface SelectingListItemCfg<T> {
 	selection: DataSelection<T>;
 	ownValue: T;
@@ -1995,7 +1999,7 @@ export function Sheet(configuration: SheetCfg, ...children: Component<any>[]) {
 			.listen('click', (e) => e.stopPropagation())
 			.setAccessibilityLabel(configuration.accessibilityLabel)
 			.allowKeyboardFocus()
-			.focusOnChange(configuration.isOpen, true),
+			.focusOnMatch(configuration.isOpen, true),
 	)
 		.addToClass('sheet-containers')
 		.toggleAttr('open', configuration.isOpen)
@@ -2267,8 +2271,7 @@ export interface NavigationLinkCfg<T> {
 /**
  * Links to a Scene inside a Stage.
  */
-//TODO rename -> SceneLink
-export function NavigationLink<T>(
+export function SceneLink<T>(
 	configuration: NavigationLinkCfg<T>,
 	...children: Component<any>[]
 ) {
@@ -2380,7 +2383,7 @@ export function TabView(...configuration: TabCfg[]) {
 					.setVisibleIfMatch(i, visibleTabIndex)
 					.setAccessibilityLabel(tab.text)
 					.allowKeyboardFocus()
-					.focusOnChange(visibleTabIndex, i),
+					.focusOnMatch(visibleTabIndex, i),
 			),
 		),
 	).addToClass('tab-views');
