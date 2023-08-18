@@ -80,14 +80,14 @@ export interface Stringifiable {
  *  REACTIVITY
  */
 // VALUE
-/** 
- * Either BindableObject or plain value. 
+/**
+ * Either BindableObject or plain value.
  * Unwrap using unwrapBindable() or unwrapValue() functions.
  */
 export type ValueObject<T> = T | BindableObject<T>;
 
 // BINDING
-/** 
+/**
  * Can be added to BindableObjects.
  * action() will be called when object changes.
  */
@@ -108,9 +108,9 @@ export interface GenericTBModelCfg<D, C> {
 	getViewProperty: () => D;
 	setViewProperty: (newValue: D) => void;
 }
-/** 
-* Model for Two-way binding.
-*/
+/**
+ * Model for Two-way binding.
+ */
 export class GenericTBModel<D, C> {
 	readonly data: BindableObject<D>;
 	readonly component: Component<C>;
@@ -136,7 +136,7 @@ export interface ValueTBModelOpts<T> {
 	component: Component<T>;
 	fallbackValue: T;
 }
-/** 
+/**
  * Two-way binding between BindableObject and a Component's value.
  */
 export class ValueTBModel<T> extends GenericTBModel<T, T> {
@@ -161,7 +161,7 @@ export interface CheckedTBModelCfg {
 	isChecked: BindableObject<boolean>;
 	component: CheckableComponent<any>;
 }
-/** 
+/**
  * Two-way binding between BindableObject<boolean> and a Component's 'checked' property.
  */
 export class CheckedTBModel extends ValueTBModel<boolean> {
@@ -281,7 +281,7 @@ export class CheckSBModel<T> extends ValueSBModel<T> {
 }
 
 // BINDABLE
-/** 
+/**
  * Plain bindable object.
  * Use only for extending classes.
  */
@@ -310,7 +310,7 @@ export class BindableObject<T> {
 	removeBinding = (binding: Binding<T>) => {};
 }
 
-/** 
+/**
  * Polyfill BindableObject.
  * Can hold only one binding.
  */
@@ -397,7 +397,7 @@ export interface ProxyStateCfg<T, O> {
 	convertFromOriginal: (originalValue: O) => T;
 	convertToOriginal: (value: T) => O;
 }
-/** 
+/**
  * State that binds another state.
  * Changes of the ProxyState will also change the bound state.
  * Conversion methods are specified via configuration.
@@ -441,7 +441,9 @@ export class ProxyState<T, O> extends State<T> {
  * State that contains a Map.
  * Has methods for manipulating the map.
  */
-export class IdentifiableObjectMap<T extends Identifiable> extends State<Map<string, T>> {
+export class IdentifiableObjectMap<T extends Identifiable> extends State<
+	Map<string, T>
+> {
 	constructor() {
 		super(new Map<string, T>());
 	}
@@ -525,11 +527,11 @@ export type Styleable = {
 
 /** UI Component. */
 export interface Component<ValueType> extends HTMLElement, Styleable {
-	/** 
-	* Value of the Component.
-	*/
+	/**
+	 * Value of the Component.
+	 */
 	value: ValueType;
-	/** 
+	/**
 	 * Provides access to component in callback function.
 	 * Use if component must be accessed as variable.
 	 */
@@ -580,7 +582,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 	 * Removes HTML attribute.
 	 */
 	rmAttr: (key: string) => this;
-	/** 
+	/**
 	 * Toggles HTML attribute.
 	 * Supports BindableObject<boolean>.
 	 */
@@ -680,8 +682,8 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 	setVisibleIfMatch: <T>(a: ValueObject<T>, b: ValueObject<T>) => this;
 
 	//state
-	/** 
-	 * Tracks Bindings of the Component. 
+	/**
+	 * Tracks Bindings of the Component.
 	 * Key is BindableObject.uuid, value is the Binding.
 	 */
 	bindings: Map<string, Binding<any>>;
@@ -1605,20 +1607,23 @@ export function List<T extends Identifiable & Sortable>(
 							const newItemView = compute(itemData)
 								.setID(itemData.uuid)
 								.access((self) => {
-									self.createBinding(
-										itemData.index,
-										(newIndex) => {
-											self.cssOrder(newIndex.toString());
-											self.addToClassConditionally(
-												'first-item',
-												newIndex == 0,
-											);
-											self.addToClassConditionally(
-												'last-item',
-												newIndex == configuration.listData.length - 1,
-											);
-										},
-									).updateBinding(itemData.index);
+									//remove when index changed
+									self.createBinding(itemData.index, () => {
+										//set order
+										self.cssOrder(
+											itemData.index.value.toString(),
+										);
+										self.addToClassConditionally(
+											'first-item',
+											itemData.index.value == 0,
+										);
+										self.addToClassConditionally(
+											'last-item',
+											itemData.index.value ==
+												configuration.listData.length -
+													1,
+										);
+									}).updateBinding(itemData.index);
 
 									if (configuration.dragToSort == true)
 										self.addToClass('draggable-items')
@@ -1668,7 +1673,7 @@ export interface MeterOpts {
 	high?: number;
 }
 
-/** 
+/**
  * HTML meter.
  */
 export function Meter(value: BindableObject<number>, options: MeterOpts = {}) {
@@ -2095,11 +2100,13 @@ export function VisualGroup(...children: Component<any>[]) {
 	return VStack(...children).addToClass('visual-groups');
 }
 
-export function LabeledVisualGroup(label: string, ...children: Component<any>[]) {
+export function LabeledVisualGroup(
+	label: string,
+	...children: Component<any>[]
+) {
 	return VStack(
 		Text(label, 'h5').useMutedColor(),
-		VStack(...children)
-			.addToClass('visual-groups'),
+		VStack(...children).addToClass('visual-groups'),
 	)
 		.useDefaultSpacing()
 		.cssJustifyContent('start')
