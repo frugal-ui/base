@@ -1647,6 +1647,7 @@ export function List<T extends Identifiable & Sortable>(
 					);
 				})
 				.updateBinding(configuration.listData)
+				.cssJustifyContent('start')
 				.addToClass('ordered-containers');
 		});
 }

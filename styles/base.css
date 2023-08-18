@@ -35,7 +35,7 @@
 }
 
 .frugal-ui-components.animating-in,
-.animating-out {
+.frugal-ui-components.animating-out {
 	transition: all 0.1s ease-out;
 }
 
@@ -70,13 +70,6 @@
 
 .frugal-ui-components.animation-scene.scenes-column.in-hidden-animation-state {
 	transform: none;
-}
-
-/* transitions */
-.frugal-ui-components.draggable-items {
-	transition:
-		transform 0.2s,
-		border-radius 0.2s;
 }
 
 /* 
