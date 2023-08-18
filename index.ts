@@ -76,47 +76,6 @@ export interface Stringifiable {
 	toString: () => string;
 }
 
-/**
- * Contains a Map<string, T extends Identifiable>.
- * Has methods for manipulating the map.
- * Access map using readonly map.
- */
-export class IdentifiableObjectMap<T extends Identifiable> {
-	readonly map = new Map<string, T>();
-
-	get = (id: string | UUID) => {
-		return this.map.get(id.toString());
-	};
-
-	set = (value: T) => {
-		this.map.set(value.uuid.toString(), value);
-	};
-
-	remove = (value: T) => {
-		this.map.delete(value.uuid.toString());
-	};
-
-	values = () => {
-		return Array.from(this.map.values());
-	};
-
-	getSorted = (compareFn: (a: T, b: T) => number) => {
-		return this.values().sort(compareFn);
-	};
-
-	forEach = (callbackFn: (value: T, index: number, array: T[]) => void) => {
-		this.values().forEach(callbackFn);
-	};
-
-	clear = () => {
-		this.map.clear();
-	};
-
-	get length() {
-		return this.values().length;
-	}
-}
-
 /*
  *  REACTIVITY
  */
@@ -475,6 +434,51 @@ export class ProxyState<T, O> extends State<T> {
 
 	get value() {
 		return this._value;
+	}
+}
+
+/**
+ * State that contains a Map.
+ * Has methods for manipulating the map.
+ */
+export class IdentifiableObjectMap<T extends Identifiable> extends State<Map<string, T>> {
+	constructor() {
+		super(new Map<string, T>());
+	}
+
+	get = (id: string | UUID) => {
+		return this._value.get(id.toString());
+	};
+
+	set = (value: T) => {
+		this.value.set(value.uuid.toString(), value);
+		this.triggerAll();
+	};
+
+	remove = (value: T) => {
+		this.value.delete(value.uuid.toString());
+		this.triggerAll();
+	};
+
+	values = () => {
+		return Array.from(this.value.values());
+	};
+
+	getSorted = (compareFn: (a: T, b: T) => number) => {
+		return this.values().sort(compareFn);
+	};
+
+	forEach = (callbackFn: (value: T, index: number, array: T[]) => void) => {
+		this.values().forEach(callbackFn);
+	};
+
+	clear = () => {
+		this.value.clear();
+		this.triggerAll();
+	};
+
+	get length() {
+		return this.values().length;
 	}
 }
 
@@ -1471,7 +1475,7 @@ export function Link(label: ValueObject<string>, href: string) {
 	return Text(label, 'a').setAttr('href', href);
 }
 
-/* List */ //TODO rebuild
+/* List */
 export enum ListStyles {
 	Normal = 'list',
 	Group = 'list',
@@ -1479,7 +1483,7 @@ export enum ListStyles {
 }
 
 export interface ListCfg<T extends Identifiable & Sortable> {
-	listData: BindableObject<IdentifiableObjectMap<T>>;
+	listData: IdentifiableObjectMap<T>;
 	dragToSort?: boolean;
 	style?: ListStyles;
 }
@@ -1495,7 +1499,7 @@ export function List<T extends Identifiable & Sortable>(
 	const compareFn = (a: T, b: T) => a.index.value - b.index.value;
 
 	function cleanIndices() {
-		configuration.listData.value
+		configuration.listData
 			.values()
 			.sort(compareFn)
 			.forEach((item, i) => (item.index.value = i));
@@ -1532,7 +1536,7 @@ export function List<T extends Identifiable & Sortable>(
 		);
 
 		if (elementUnderCursor == null) return;
-		const data = configuration.listData.value.get(elementUnderCursor.id);
+		const data = configuration.listData.get(elementUnderCursor.id);
 		if (data == null) return;
 
 		const ownIndex = data.index.value;
@@ -1571,7 +1575,9 @@ export function List<T extends Identifiable & Sortable>(
 			if (style == ListStyles.Group) listView.addToClass('visual-groups');
 
 			listView
-				.createBinding(configuration.listData, (listData) => {
+				.createBinding(configuration.listData, (itemMap) => {
+					cleanIndices();
+
 					function removeItemView(
 						itemView: Component<any> | Element,
 					) {
@@ -1582,7 +1588,7 @@ export function List<T extends Identifiable & Sortable>(
 					}
 
 					//add new items
-					configuration.listData.value
+					configuration.listData
 						.getSorted(compareFn)
 						.forEach((itemData, i) => {
 							const oldItemView = document.getElementById(
@@ -1591,19 +1597,16 @@ export function List<T extends Identifiable & Sortable>(
 
 							//already exists
 							if (oldItemView != null) return;
-							const indexBindable = unwrapBindable(
-								itemData.index,
-							);
 							configuration.listData.addBinding({
 								uuid: new UUID(),
-								action: () => indexBindable.triggerAll(),
+								action: () => itemData.index.triggerAll(),
 							});
 
 							const newItemView = compute(itemData)
 								.setID(itemData.uuid)
 								.access((self) => {
 									self.createBinding(
-										indexBindable,
+										itemData.index,
 										(newIndex) => {
 											self.cssOrder(newIndex.toString());
 											self.addToClassConditionally(
@@ -1612,10 +1615,10 @@ export function List<T extends Identifiable & Sortable>(
 											);
 											self.addToClassConditionally(
 												'last-item',
-												newIndex == listData.length - 1,
+												newIndex == configuration.listData.length - 1,
 											);
 										},
-									).updateBinding(indexBindable);
+									).updateBinding(itemData.index);
 
 									if (configuration.dragToSort == true)
 										self.addToClass('draggable-items')
@@ -1636,7 +1639,7 @@ export function List<T extends Identifiable & Sortable>(
 					//remove deleted items
 					Array.from(listView.children).forEach(
 						(itemView: Element) => {
-							const matchingDataEntry = listData.get(itemView.id);
+							const matchingDataEntry = itemMap.get(itemView.id);
 							if (matchingDataEntry != undefined) return; //data entry still exists
 
 							removeItemView(itemView);
