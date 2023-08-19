@@ -93,6 +93,17 @@ summary.frugal-ui-components:active,
 	box-shadow: none;
 }
 
+/* CommandShell */
+.command-shells input.frugal-ui-components:focus {
+	background: var(--accent) !important;
+	color: var(--on-accent) !important;
+}
+
+.command-shells input[invalid].frugal-ui-components {
+	background: var(--inset) !important;
+	color: var(--error) !important;
+}
+
 /* Headings */
 .frugal-ui-components:is(
 h1,

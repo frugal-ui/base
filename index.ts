@@ -1142,15 +1142,16 @@ export function Accordion(label: string, ...children: Component<any>[]) {
  * Contains Input and datalist-div.
  */
 export function AutoComplete<T>(
-	optionData: BindableObject<string[]>,
+	optionData: ValueObject<string[]>,
 	input: Component<T>,
 ) {
+	const bindableOptionData = unwrapBindable(optionData);
 	const uuid = new UUID();
 	const optionViews = new ComputedState<Component<any>[]>({
-		statesToBind: [optionData],
+		statesToBind: [bindableOptionData],
 		initialValue: [],
 		compute: (self) => {
-			self.value = optionData.value.map((option) =>
+			self.value = bindableOptionData.value.map((option) =>
 				Text(option, 'option'),
 			);
 		},
@@ -1251,6 +1252,86 @@ export function Checkbox(configuration: CheckboxCfg) {
 					);
 			}),
 	);
+}
+
+/* Command Shell */
+/**
+ * One of the commands to register with in CommandShell.
+ * Action will be executed when user runs the command.
+ */
+export interface Command {
+	commandName: string;
+	action: () => void;
+}
+
+/**
+ * UI shell with vim-like command bar at the bottom.
+ * Consider using this instead of keyboard shortcuts.
+ */
+export function CommandShell(commands: Command[], mainView: Component<any>) {
+	let previouslyFocusedElement = document.activeElement as HTMLElement;
+
+	/** blurs input when triggered */
+	const inputBlurrer = new State(null);
+
+	const commandQuery = new State('');
+	const isInputFocused = new State(false);
+	const isInvalid = new State(false);
+	const optionData = commands.map((command) => command.commandName);
+
+	function focusCommandPalette() {
+		previouslyFocusedElement = document.activeElement as HTMLElement;
+		isInputFocused.value = true;
+	}
+	function blurCommandPalette() {
+		commandQuery.value = '';
+		inputBlurrer.triggerAll();
+		previouslyFocusedElement?.focus();
+	}
+	function executeCommand() {
+		const matchingCommand = commands.find(
+			(command) => command.commandName == commandQuery.value,
+		);
+		if (matchingCommand == undefined) {
+			isInvalid.value = true;
+			return;
+		} else {
+			matchingCommand.action();
+			isInvalid.value = false;
+			blurCommandPalette();
+		}
+	}
+
+	document.body.addEventListener('keyup', (e) => {
+		if (e.key != ':') return;
+		focusCommandPalette();
+	});
+
+	return VStack(
+		mainView.cssHeight('100%'),
+		AutoComplete(
+			optionData,
+			Input(new TextInputCfg(commandQuery, 'Press ":" to run a command'))
+				.focusOnMatch(isInputFocused, true)
+				.cssWidth('100%')
+				.cssBorderRadius('0rem')
+
+				.toggleAttr('invalid', isInvalid)
+				.access((self) => self.createBinding(inputBlurrer, () => self.blur()))
+
+				.registerKeyboardShortcuts(
+					{
+						key: 'Escape',
+						action: blurCommandPalette,
+					},
+					{
+						key: 'Enter',
+						action: executeCommand,
+					},
+				)
+				.hideOnScreenSize(ScreenSizes.Mobile),
+		),
+	).addToClass('command-shells');
 }
 
 /* Container */
