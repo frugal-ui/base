@@ -2,7 +2,6 @@ import 'material-icons/iconfont/round.css';
 import { PrefixedCSSPropertyNames } from 'css-property-names';
 import AccessibilityRoleMap from './assets/roles.js';
 import './styles/base.css';
-import './styles/color.css'; // TODO remove
 import './styles/fonts.css';
 import './styles/theme.css';
 
