@@ -94,6 +94,16 @@ summary.frugal-ui-components:active,
 }
 
 /* CommandShell */
+@media (pointer: coarse) {
+	.command-shells {
+		display: none;
+	}
+}
+
+.command-shells input.frugal-ui-component {
+	padding: var(--padding-xs) !important;
+}
+
 .command-shells input.frugal-ui-components:focus {
 	background: var(--accent) !important;
 	color: var(--on-accent) !important;

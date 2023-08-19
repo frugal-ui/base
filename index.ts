@@ -1328,10 +1328,9 @@ export function CommandShell(commands: Command[], mainView: Component<any>) {
 						key: 'Enter',
 						action: executeCommand,
 					},
-				)
-				.hideOnScreenSize(ScreenSizes.Mobile),
-		),
-	).addToClass('command-shells');
+				),
+		).addToClass('command-shells'),
+	);
 }
 
 /* Container */
