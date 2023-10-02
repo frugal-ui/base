@@ -56,22 +56,6 @@
 	opacity: 0;
 }
 
-/* scene */
-.animation-scene.in-hidden-animation-state {
-	transform: translateX(100%);
-	opacity: 0;
-}
-
-@media (min-width: 520px) {
-	.frugal-ui-components.animation-scene.in-hidden-animation-state {
-		transform: translateY(1rem);
-	}
-}
-
-.frugal-ui-components.animation-scene.scenes-column.in-hidden-animation-state {
-	transform: none;
-}
-
 /* 
     BASIC
 */

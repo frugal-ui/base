@@ -2240,7 +2240,6 @@ export class GenericScene<T> {
 		const main = Div(this.draw(data))
 			.addToClass('scenes')
 			.addToClass(this.type)
-			.animateIn('scene')
 			.setAccessibilityLabel(this.accessibilityLabel ?? '')
 			.allowKeyboardFocus()
 			.focusOnCreate();
@@ -2339,12 +2338,7 @@ export function Stage<T>(
 				const child = persistingChildren[
 					persistingChildren.length - 1
 				] as Component<any>;
-				const isColumnScene = child.classList.contains(
-					SceneTypes.Column,
-				);
-				if (child.animateOut && !isColumnScene)
-					await child.animateOut();
-				else child.remove();
+				child.remove()
 			}
 			if (shouldUpdate) updateDepth();
 			return self;
