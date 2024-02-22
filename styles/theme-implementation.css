@@ -16,14 +16,14 @@ GROUPS
 
 /* Checkable */
 .frugal-ui-components.checkable-items {
-	background-color: var(--checkable);
+	background: var(--checkable);
 }
 
 /* Typeable */
 .frugal-ui-components.inputs:not([type='checkbox']):not([type='radio']):not([type='range']),
 .frugal-ui-components.textareas,
 .frugal-ui-components.typeable-items {
-	background-color: var(--inset);
+	background: var(--inset);
 	box-shadow: 0px 0px 2px var(--shadows) inset;
 
 	border: 1px solid var(--lines);
@@ -40,7 +40,7 @@ COMPONENTS
 	box-shadow: 0px 0px 3px var(--shadows) inset;
 	border: 1px solid var(--lines);
 
-	background-color: var(--inset);
+	background: var(--inset);
 }
 
 /* Button-like */
@@ -50,12 +50,12 @@ COMPONENTS
 	font-family: mono-md, monospace, mono;
 	color: var(--on-clickable);
 
-	background-color: var(--clickable);
+	background: var(--clickable);
 	border: 1px solid var(--lines);
 }
 
 .frugal-ui-components.buttons {
-	background-color: transparent;
+	background: transparent;
 }
 
 .buttons span.frugal-ui-components:not(.icons) {
@@ -161,14 +161,14 @@ h5.frugal-ui-components {
 
 /* Overlays */
 .frugal-ui-components.popover-contents {
-	background-color: var(--background-alt);
+	background: var(--background-alt);
 	box-shadow: 0px 0px 7px var(--shadows);
 
 	border: 1px solid var(--lines);
 }
 
 .frugal-ui-components.sheet-contents {
-	background-color: var(--background);
+	background: var(--background);
 }
 
 /* Separator */
@@ -185,7 +185,7 @@ h5.frugal-ui-components {
 /* VisualGroup */
 .frugal-ui-components.visual-groups,
 .frugal-ui-components.accordions {
-	background-color: var(--background-alt);
+	background: var(--background-alt);
 }
 
 .visual-groups
@@ -198,7 +198,7 @@ h5.frugal-ui-components {
 	.frugal-ui-components:is(.buttons, .selects, .inputs, .textareas, .submits):not(
 		.forcing-default-styles
 	):not(:active) {
-	background-color: transparent !important;
+	background: transparent !important;
 }
 
 .visual-groups .frugal-ui-components.icons:not(.forcing-default-styles) {
@@ -225,7 +225,7 @@ NAVIGATION
 
 /* Stage-based */
 .frugal-ui-components.scenes {
-	background-color: var(--background);
+	background: var(--background);
 	border-right: 1px solid var(--lines);
 }
 
