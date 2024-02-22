@@ -65,26 +65,28 @@
 
 	--padding-xs: 0.4rem 0.4rem;
 	--padding-sm: 0.6rem 0.6rem;
-	--padding-md: 0.6rem 0.9rem;
+	--padding-md: 0.6rem var(--text-indent);
 	--padding-lg: 0.9rem 0.9rem;
 
 	--gap: 0.5rem;
 	--gap-sm: 0.25rem;
 
 	--font-size: 1rem;
+	--text-indent: .9rem;
 }
 
 @media (pointer: fine) {
 	:root {
 		--padding-xs: 0.2rem 0.2rem;
-		--padding-sm: 0.3rem 0.3rem;
-		--padding-md: 0.4rem 0.5rem;
-		--padding-lg: 0.5rem 0.5rem;
+		--padding-sm: 0.4rem 0.4rem;
+		--padding-md: 0.4rem var(--text-indent);
+		--padding-lg: 0.6rem 0.6rem;
 
-		--gap: 0.4rem;
-		--gap-sm: 0.25rem;
+		--gap: 0.25rem;
+		--gap-sm: 0.125rem;
 
-		--font-size: 0.9rem;
+		--font-size: 0.85rem;
+		--text-indent: .6rem;
 	}
 }
 
@@ -256,6 +258,11 @@ summary.frugal-ui-components:not(.icons) {
 	display: flex;
 	display: flex;
 	flex-direction: column;
+
+	text-indent: var(--text-indent);
+	padding: var(--padding-md);
+	padding-left: 0px;
+	padding-right: 0px;
 }
 
 /* List */
