@@ -4,6 +4,7 @@ import AccessibilityRoleMap from './assets/roles.js';
 import './styles/base.css';
 import './styles/fonts.css';
 import './styles/theme.css';
+import './styles/theme-implementation.css';
 
 /*
  * MAIN

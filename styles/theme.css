@@ -1,252 +1,92 @@
-/* 
-BASIC 
- */
-.frugal-ui-components {
-	accent-color: var(--accent);
-	color: var(--text);
+/*
+    SPACING
+*/
+:root {
+	--corners: 0.2rem;
+
+	--padding-xs: 0.4rem 0.4rem;
+	--padding-sm: 0.6rem 0.6rem;
+	--padding-md: 0.6rem var(--text-indent);
+	--padding-lg: 0.9rem 0.9rem;
+
+	--gap: 0.5rem;
+	--gap-sm: 0.25rem;
+
+	--font-size: 1rem;
+	--text-indent: .9rem;
 }
 
-html {
-	background: var(--background);
-}
+@media (pointer: fine) {
+	:root {
+		--padding-xs: 0.2rem 0.2rem;
+		--padding-sm: 0.4rem 0.4rem;
+		--padding-md: 0.4rem var(--text-indent);
+		--padding-lg: 0.6rem 0.6rem;
 
-/* 
-GROUPS 
- */
+		--gap: 0.25rem;
+		--gap-sm: 0.125rem;
 
-/* Checkable */
-.frugal-ui-components.checkable-items {
-	background-color: var(--checkable);
-}
-
-/* Typeable */
-.frugal-ui-components.inputs:not([type='checkbox']):not([type='radio']):not([type='range']),
-.frugal-ui-components.textareas,
-.frugal-ui-components.typeable-items {
-	background-color: var(--inset);
-	box-shadow: 0px 0px 2px var(--shadows) inset;
-
-	border: 1px solid var(--lines);
-
-	font-family: sans-md, sans-serif, sans;
-}
-
-/* 
-COMPONENTS
- */
-
-/* Box */
-.frugal-ui-components.boxes {
-	box-shadow: 0px 0px 3px var(--shadows) inset;
-	border: 1px solid var(--lines);
-
-	background-color: var(--inset);
-}
-
-/* Button-like */
-.frugal-ui-components.buttons,
-.frugal-ui-components.selects,
-.frugal-ui-components.submits {
-	font-family: mono-md, monospace, mono;
-	color: var(--on-clickable);
-
-	background-color: var(--clickable);
-	border: 1px solid var(--lines);
-}
-
-.frugal-ui-components.buttons {
-	background-color: transparent;
-}
-
-.buttons span.frugal-ui-components:not(.icons) {
-	font-family: inherit;
-}
-
-.frugal-ui-components.buttons-transparent {
-	border-color: transparent;
-}
-
-.frugal-ui-components.buttons.buttons-primary,
-.frugal-ui-components.submits {
-	background: var(--accent);
-	color: var(--on-accent);
-	border-color: var(--accent-border);
-}
-
-.frugal-ui-components.buttons.buttons-destructive {
-	background: var(--destructive);
-	color: var(--on-destructive);
-	border-color: var(--destructive-border);
-}
-
-summary.frugal-ui-components:active,
-.frugal-ui-components.navigation-links:active,
-.frugal-ui-components.buttons:not([disabled]):active,
-.frugal-ui-components.buttons-pressed {
-	background: var(--pressed);
-	color: var(--on-clickable);
-	border-color: var(--clickable-border);
-	box-shadow: 0px 0px 2px var(--shadows) inset;
-}
-
-.button-groups .frugal-ui-components.buttons:not(.buttons-pressed) {
-	box-shadow: none;
-}
-
-/* CommandShell */
-@media (pointer: coarse) {
-	.command-shells {
-		display: none;
+		--font-size: 0.85rem;
+		--text-indent: .6rem;
 	}
-}
-
-.command-shells input.frugal-ui-component {
-	padding: var(--padding-xs) !important;
-}
-
-.command-shells input.frugal-ui-components:focus {
-	background: var(--accent) !important;
-	color: var(--on-accent) !important;
-}
-
-.command-shells input[invalid].frugal-ui-components {
-	background: var(--inset) !important;
-	color: var(--error) !important;
-}
-
-/* Headings */
-.frugal-ui-components:is(
-h1,
-h2,
-h3,
-h4,
-h5) {
-	font-family: headings, mono-md, monospace, mono !important;
-	text-transform: uppercase;
-}
-
-h1.frugal-ui-components {
-	font-size: x-large;
-}
-
-h2.frugal-ui-components {
-	font-size: larger;
-}
-
-h3.frugal-ui-components {
-	font-size: large;
-}
-
-h4.frugal-ui-components {
-	font-size: small;
-}
-
-h5.frugal-ui-components {
-	font-size: x-small;
-}
-
-/* Label */
-.frugal-ui-components.labels {
-	font-size: small;
-}
-
-.list-items > .frugal-ui-components, .list-items > div > .frugal-ui-components {
-	color: inherit;
-}
-
-.frugal-ui-components.list-items[aria-selected='true'] {
-	background: var(--pressed);
-	color: var(--on-clickable);
-}
-
-/* Overlays */
-.frugal-ui-components.popover-contents {
-	background-color: var(--background-alt);
-	box-shadow: 0px 0px 7px var(--shadows);
-
-	border: 1px solid var(--lines);
-}
-
-.frugal-ui-components.sheet-contents {
-	background-color: var(--background);
-}
-
-/* Separator */
-.frugal-ui-components.separators {
-	border: none;
-	border-bottom: 1px solid var(--lines);
-}
-
-/* Textarea */
-.frugal-ui-components.textareas {
-	resize: none;
-}
-
-/* VisualGroup */
-.frugal-ui-components.visual-groups,
-.frugal-ui-components.accordions {
-	background-color: var(--background-alt);
-}
-
-.visual-groups
-	.frugal-ui-components:is(.buttons, .selects, .inputs, .textareas, .submits):not(.forcing-default-styles) {
-	border: none !important;
-	box-shadow: none !important;
-}
-
-.visual-groups
-	.frugal-ui-components:is(.buttons, .selects, .inputs, .textareas, .submits):not(
-		.forcing-default-styles
-	):not(:active) {
-	background-color: transparent !important;
-}
-
-.visual-groups .frugal-ui-components.icons:not(.forcing-default-styles) {
-	font-size: 1rem;
-}
-
-.visual-groups > .frugal-ui-components:is(.ordered-containers:last-child > :not(.last-item), *:not(.ordered-containers) :not(:last-child):not(.last-item)):not(.forcing-default-styles) {
-	border-bottom: 1px solid var(--lines) !important;
-}
-
-.visual-groups > .frugal-ui-components:is(.ordered-containers:first-child .first-item, :not(.ordered-containers) > *:first-child) {
-	border-top-left-radius: var(--corners);
-	border-top-right-radius: var(--corners);
-}
-
-.visual-groups > .frugal-ui-components:is(.ordered-containers:last-child .last-item, :not(.ordered-containers) > *:last-child) {
-	border-bottom-left-radius: var(--corners);
-	border-bottom-right-radius: var(--corners);
 }
 
 /*
-NAVIGATION
+    COLOR
 */
+:root {
+    --background: hsl(0, 0%, 98%);
+    --background-alt: hsl(0, 0%, 94%);
 
-/* Stage-based */
-.frugal-ui-components.scenes {
-	background-color: var(--background);
-	border-right: 1px solid var(--lines);
+    --text: rgb(19, 19, 19);
+
+    --inset: hsl(253, 24%, 95%);
+
+    --clickable: hsl(240, 100%, 97%);
+    --on-clickable: hsl(237, 100%, 59%);
+    --clickable-border: hsl(237, 100%, 59%);
+
+    --pressed: hsl(240, 100%, 94%);
+
+    --destructive: hsl(0, 100%, 98%);
+    --on-destructive: hsl(0, 100%, 43%);
+    --destructive-border: hsl(0, 100%, 43%);
+
+    --accent: hsl(156, 100%, 97%);
+    --on-accent: hsl(165, 100%, 34%);
+    --accent-border: hsl(165, 100%, 34%);
+
+    --shadows: hsla(0, 0%, 0%, 0.15);
+    --lines: hsla(0, 0%, 0%, 0.2);
+    --backdrop: hsla(0, 0%, 0%, 0.6);
+
+    --error: hsl(0, 100%, 55%);
+    --success: hsl(140, 43%, 53%);
 }
 
-/* Tab-based */
-.tab-views > .frugal-ui-components.stacks-horizontal {
-	border-top: 1px solid var(--lines);
-}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: hsl(0, 0%, 16%);
+        --background-alt: hsl(0, 0%, 18%);
 
-@media (max-width: 520px) {
-	.tab-views > .stacks-horizontal .frugal-ui-components.buttons {
-		gap: 0.2rem;
-	}
-}
+        --text: rgb(255, 255, 255);
 
-@media (min-width: 850px) {
-	.tab-views > .frugal-ui-components.stacks-horizontal {
-		border-top: none;
-		border-bottom: 1px solid var(--lines);
-	}
+        --inset: hsl(0, 0%, 12%);
 
-	.tab-views > .stacks-horizontal .buttons span.frugal-ui-components {
-		font-size: small;
-	}
+        --clickable: hsl(240, 100%, 20%);
+        --on-clickable: hsl(237, 100%, 85%);
+        --clickable-border: hsl(237, 100%, 30%);
+
+        --pressed: hsl(240, 100%, 12%);
+
+        --destructive: hsl(0, 100%, 17%);
+        --on-destructive: hsl(0, 100%, 87%);
+        --destructive-border: hsl(0, 100%, 30%);
+
+        --accent: hsl(156, 100%, 8%);
+        --on-accent: hsl(165, 100%, 85%);
+        --accent-border: hsl(165, 100%, 18%);
+
+        --success: hsl(140, 100%, 63%);
+    }
 }

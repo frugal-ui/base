@@ -2,36 +2,6 @@
     BASIC
 */
 
-:root {
-	--corners: 0.2rem;
-
-	--padding-xs: 0.4rem 0.4rem;
-	--padding-sm: 0.6rem 0.6rem;
-	--padding-md: 0.6rem var(--text-indent);
-	--padding-lg: 0.9rem 0.9rem;
-
-	--gap: 0.5rem;
-	--gap-sm: 0.25rem;
-
-	--font-size: 1rem;
-	--text-indent: .9rem;
-}
-
-@media (pointer: fine) {
-	:root {
-		--padding-xs: 0.2rem 0.2rem;
-		--padding-sm: 0.4rem 0.4rem;
-		--padding-md: 0.4rem var(--text-indent);
-		--padding-lg: 0.6rem 0.6rem;
-
-		--gap: 0.25rem;
-		--gap-sm: 0.125rem;
-
-		--font-size: 0.85rem;
-		--text-indent: .6rem;
-	}
-}
-
 .frugal-ui-components {
 	box-sizing: border-box;
 	font-size: var(--font-size);
