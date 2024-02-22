@@ -559,15 +559,7 @@ export interface Component<ValueType> extends HTMLElement, Styleable {
 	 */
 	setAccessibilityRole: (roleName: keyof AccessibilityRoleMap) => this;
 	allowKeyboardFocus: () => this;
-	/**
-	 * Sets in-animation.
-	 */
-	animateIn: (animationName?: string) => this;
-	/**
-	 * Animates out and removed component.
-	 */
-	animateOut: () => Promise<void>;
-
+	
 	//attributes
 	/**
 	 * Sets HTML id.
@@ -794,62 +786,6 @@ export function Component<ValueType>(
 	component.allowKeyboardFocus = () => {
 		component.setAttr('tabIndex', 0);
 		return component;
-	};
-
-	//animation
-	function prepareAnimation() {
-		//get dimensions for animation
-		const width = component.offsetWidth;
-		const height = component.offsetHeight;
-
-		component.style.setProperty('--element-width', `${width}px`);
-		component.style.setProperty('--element-height', `${height}px`);
-	}
-	component.animateIn = (animationName = 'standard') => {
-		const shouldAnimate =
-			window.matchMedia('(prefers-reduced-motion)').matches == false;
-
-		if (shouldAnimate) {
-			//allow retreiving dimentions
-			document.body.appendChild(component);
-			prepareAnimation();
-			component.remove();
-
-			component
-				.addToClass(`animation-${animationName}`)
-				.addToClass('in-hidden-animation-state')
-				.addToClass('animating-in');
-
-			setTimeout(
-				() => component.removeFromClass('in-hidden-animation-state'),
-				1,
-			);
-
-			setTimeout(() => component.removeFromClass('animating-in'), 300);
-		}
-
-		return component;
-	};
-	component.animateOut = () => {
-		return new Promise((resolve) => {
-			function remove() {
-				component.remove();
-				resolve();
-			}
-
-			const shouldAnimate =
-				window.matchMedia('(prefers-reduced-motion)').matches == false;
-			if (shouldAnimate) {
-				prepareAnimation();
-				component
-					.addToClass('animating-out')
-					.addToClass('in-hidden-animation-state');
-
-				setTimeout(() => remove(), 300);
-			} else {
-				remove();
-			}
-		});
 	};
 
 	//attributes
@@ -1662,10 +1598,7 @@ export function List<T extends Identifiable & Sortable>(
 					function removeItemView(
 						itemView: Component<any> | Element,
 					) {
-						const removeFn =
-							(itemView as Component<any>).animateOut ??
-							itemView.remove;
-						removeFn();
+						itemView.remove()
 					}
 
 					//add new items
@@ -1715,7 +1648,6 @@ export function List<T extends Identifiable & Sortable>(
 												startDrag(e, itemData, self),
 											);
 								})
-								.animateIn('list-item');
 
 							listView.append(newItemView);
 						});
@@ -1741,7 +1673,6 @@ export function ListItem(...children: Component<any>[]) {
 	return Div(...children)
 		.addToClass('list-items')
 		.setAccessibilityRole('listitem')
-		.animateIn('list-item');
 }
 
 /* Meter */
