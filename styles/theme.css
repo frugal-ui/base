@@ -2,91 +2,150 @@
     SPACING
 */
 :root {
-	--corners: 0.2rem;
+    --corners: 0.4rem;
 
-	--padding-xs: 0.4rem 0.4rem;
-	--padding-sm: 0.6rem 0.6rem;
-	--padding-md: 0.6rem var(--text-indent);
-	--padding-lg: 0.9rem 0.9rem;
+    --padding-xs: 0.4rem 0.4rem;
+    --padding-sm: 0.6rem 0.6rem;
+    --padding-md: 0.6rem var(--text-indent);
+    --padding-lg: 0.9rem 0.9rem;
 
-	--gap: 0.5rem;
-	--gap-sm: 0.25rem;
+    --gap: 0.5rem;
+    --gap-sm: 0.25rem;
 
-	--font-size: 1rem;
-	--text-indent: .9rem;
+    --font-size: 1rem;
+    --text-indent: 0.9rem;
 }
 
 @media (pointer: fine) {
-	:root {
-		--padding-xs: 0.2rem 0.2rem;
-		--padding-sm: 0.4rem 0.4rem;
-		--padding-md: 0.4rem var(--text-indent);
-		--padding-lg: 0.6rem 0.6rem;
+    :root {
+        --padding-xs: 0.2rem 0.2rem;
+        --padding-sm: 0.4rem 0.4rem;
+        --padding-md: 0.4rem var(--text-indent);
+        --padding-lg: 0.6rem 0.6rem;
 
-		--gap: 0.25rem;
-		--gap-sm: 0.125rem;
+        --gap: 0.25rem;
+        --gap-sm: 0.125rem;
 
-		--font-size: 0.85rem;
-		--text-indent: .6rem;
-	}
+        --font-size: 0.85rem;
+        --text-indent: 0.6rem;
+    }
 }
 
 /*
     COLOR
 */
 :root {
-    --background: hsl(0, 0%, 98%);
-    --background-alt: hsl(0, 0%, 94%);
+    /* primary */
+    --primary-hue: 24deg;
+    --primary-sat: 60%;
+    --primary-luma: 15%;
 
-    --text: rgb(19, 19, 19);
+    --background-sat: var(--primary-sat);
+    --background-luma: var(--primary-luma);
 
-    --inset: hsl(253, 24%, 95%);
+    --surface-sat: calc(var(--background-sat) - 10%);
+    --surface-luma: calc(var(--primary-luma) * 1.5);
 
-    --clickable: hsl(240, 100%, 97%);
-    --on-clickable: hsl(237, 100%, 59%);
-    --clickable-border: hsl(237, 100%, 59%);
+    --foreground-sat: calc(var(--background-sat) * 0.5);
+    --foreground-luma: calc((100% - var(--primary-luma)) * 0.9);
 
-    --pressed: hsl(240, 100%, 94%);
+    --surface-opacity: 0.8;
+    --line-opacity: 0.2;
 
-    --destructive: hsl(0, 100%, 98%);
-    --on-destructive: hsl(0, 100%, 43%);
-    --destructive-border: hsl(0, 100%, 43%);
+    /* bad */
+    --bad-hue: 0deg;
+    --bad-sat: 100%;
+    --bad-background-sat: calc(var(--primary-sat) * 0.5);
+    --bad-luma: calc(var(--foreground-luma) * 0.5 + var(--primary-luma) * 0.5);
+    --bad-background-luma: calc(100% - var(--bad-luma) * 0.6);
+    --bad-background-opacity: calc(var(--surface-opacity) * 0.2);
 
-    --accent: hsl(156, 100%, 97%);
-    --on-accent: hsl(165, 100%, 34%);
-    --accent-border: hsl(165, 100%, 34%);
+    /* apply */
+    --background: linear-gradient(
+        24deg,
+        hsla(
+            var(--primary-hue),
+            calc(var(--background-sat) + 6%),
+            calc(var(--background-luma) - 4%)
+        ),
+        hsla(var(--primary-hue), var(--background-sat), var(--background-luma))
+    );
+    --surface: hsla(
+        var(--primary-hue),
+        var(--surface-sat),
+        var(--surface-luma),
+        var(--surface-opacity)
+    );
+    --inset: hsla(
+        var(--primary-hue),
+        var(--surface-sat),
+        var(--surface-luma),
+        var(--surface-opacity)
+    );
+    --hover: hsla(
+        var(--primary-hue),
+        var(--surface-sat),
+        calc(var(--surface-luma) * 0.5),
+        var(--surface-opacity)
+    );
+    --pressed: hsla(
+        var(--primary-hue),
+        var(--surface-sat),
+        calc(var(--surface-luma) * 0.5 - 5%),
+        var(--surface-opacity)
+    );
 
-    --shadows: hsla(0, 0%, 0%, 0.15);
-    --lines: hsla(0, 0%, 0%, 0.2);
-    --backdrop: hsla(0, 0%, 0%, 0.6);
+    --primary: hsla(
+        var(--primary-hue),
+        var(--primary-sat),
+        var(--surface-luma),
+        var(--surface-opacity)
+    );
+    --on-primary: hsla(
+        var(--primary-hue),
+        var(--foreground-sat),
+        var(--foreground-luma)
+    );
+    --primary-border: hsla(
+        var(--primary-hue),
+        var(--foreground-sat),
+        var(--foreground-luma),
+        var(--line-opacity)
+    );
 
-    --error: hsl(0, 100%, 55%);
-    --success: hsl(140, 43%, 53%);
-}
+    --destructive: hsla(
+        var(--bad-hue),
+        var(--bad-background-sat),
+        var(--bad-background-luma),
+        var(--bad-background-opacity)
+    );
+    --on-destructive: hsla(var(--bad-hue), var(--bad-sat), var(--bad-luma));
+    --destructive-border: hsla(
+        var(--bad-hue),
+        var(--bad-sat),
+        var(--bad-luma),
+        var(--line-opacity)
+    );
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: hsl(0, 0%, 16%);
-        --background-alt: hsl(0, 0%, 18%);
+    --text: hsla(
+        var(--primary-hue),
+        var(--foreground-sat),
+        var(--foreground-luma)
+    );
+    --placeholder: hsla(
+        var(--primary-hue),
+        var(--foreground-sat),
+        var(--foreground-luma),
+        0.4
+    );
+    --lines: hsla(
+        var(--primary-hue),
+        var(--foreground-sat),
+        var(--foreground-luma),
+        var(--line-opacity)
+    );
 
-        --text: rgb(255, 255, 255);
+    --error: hsla(var(--bad-hue), var(--bad-sat), var(--bad-luma));
 
-        --inset: hsl(0, 0%, 12%);
-
-        --clickable: hsl(240, 100%, 20%);
-        --on-clickable: hsl(237, 100%, 85%);
-        --clickable-border: hsl(237, 100%, 30%);
-
-        --pressed: hsl(240, 100%, 12%);
-
-        --destructive: hsl(0, 100%, 17%);
-        --on-destructive: hsl(0, 100%, 87%);
-        --destructive-border: hsl(0, 100%, 30%);
-
-        --accent: hsl(156, 100%, 8%);
-        --on-accent: hsl(165, 100%, 85%);
-        --accent-border: hsl(165, 100%, 18%);
-
-        --success: hsl(140, 100%, 63%);
-    }
+    --shadows: hsla(0, 0%, 0%, 0.15, 0.5);
 }

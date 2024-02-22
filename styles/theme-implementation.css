@@ -1,13 +1,22 @@
 /* 
 BASIC 
  */
-.frugal-ui-components {
-	accent-color: var(--accent);
-	color: var(--text);
+*::placeholder {
+    color: var(--placeholder);
 }
 
-html {
-	background: var(--background);
+.frugal-ui-components {
+    primary-color: var(--primary);
+    color: var(--text);
+    accent-color: var(--primary);
+}
+
+html,
+.frugal-ui-components.scenes,
+.frugal-ui-components.sheet-contents {
+    background: var(--background);
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 /* 
@@ -16,19 +25,21 @@ GROUPS
 
 /* Checkable */
 .frugal-ui-components.checkable-items {
-	background: var(--checkable);
+    background: var(--checkable);
 }
 
 /* Typeable */
-.frugal-ui-components.inputs:not([type='checkbox']):not([type='radio']):not([type='range']),
+.frugal-ui-components.inputs:not([type='checkbox']):not([type='radio']):not(
+        [type='range']
+    ),
 .frugal-ui-components.textareas,
 .frugal-ui-components.typeable-items {
-	background: var(--inset);
-	box-shadow: 0px 0px 2px var(--shadows) inset;
+    background: var(--inset);
+    box-shadow: 0px 0px 2px var(--shadows) inset;
 
-	border: 1px solid var(--lines);
+    border: 1px solid var(--lines);
 
-	font-family: sans-md, sans-serif, sans;
+    font-family: sans-md, sans-serif, sans;
 }
 
 /* 
@@ -37,186 +48,205 @@ COMPONENTS
 
 /* Box */
 .frugal-ui-components.boxes {
-	box-shadow: 0px 0px 3px var(--shadows) inset;
-	border: 1px solid var(--lines);
+    box-shadow: 0px 0px 3px var(--shadows) inset;
+    border: 1px solid var(--lines);
 
-	background: var(--inset);
+    background: var(--inset);
 }
 
 /* Button-like */
 .frugal-ui-components.buttons,
 .frugal-ui-components.selects,
 .frugal-ui-components.submits {
-	font-family: mono-md, monospace, mono;
-	color: var(--on-clickable);
+    font-family: mono-md, monospace, mono;
+    color: var(--on-primary);
 
-	background: var(--clickable);
-	border: 1px solid var(--lines);
+    background: var(--primary);
+    border: 1px solid var(--lines);
 }
 
 .frugal-ui-components.buttons {
-	background: transparent;
+    background: transparent;
 }
 
 .buttons span.frugal-ui-components:not(.icons) {
-	font-family: inherit;
+    font-family: inherit;
 }
 
 .frugal-ui-components.buttons-transparent {
-	border-color: transparent;
+    border-color: transparent;
 }
 
 .frugal-ui-components.buttons.buttons-primary,
 .frugal-ui-components.submits {
-	background: var(--accent);
-	color: var(--on-accent);
-	border-color: var(--accent-border);
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary-border);
 }
 
 .frugal-ui-components.buttons.buttons-destructive {
-	background: var(--destructive);
-	color: var(--on-destructive);
-	border-color: var(--destructive-border);
+    background: var(--destructive);
+    color: var(--on-destructive);
+    border-color: var(--destructive-border);
 }
 
+summary.frugal-ui-components:hover,
+.frugal-ui-components.navigation-links:hover,
+.frugal-ui-components.buttons:not([disabled]):hover {
+    background: var(--hover);
+    color: var(--on-primary);
+    border-color: var(--primary-border);
+    box-shadow: 0px 0px 2px var(--shadows) inset;
+}
 summary.frugal-ui-components:active,
 .frugal-ui-components.navigation-links:active,
 .frugal-ui-components.buttons:not([disabled]):active,
 .frugal-ui-components.buttons-pressed {
-	background: var(--pressed);
-	color: var(--on-clickable);
-	border-color: var(--clickable-border);
-	box-shadow: 0px 0px 2px var(--shadows) inset;
+    background: var(--pressed);
 }
 
 .button-groups .frugal-ui-components.buttons:not(.buttons-pressed) {
-	box-shadow: none;
+    box-shadow: none;
 }
 
 /* CommandShell */
 @media (pointer: coarse) {
-	.command-shells {
-		display: none;
-	}
+    .command-shells {
+        display: none;
+    }
 }
 
 .command-shells input.frugal-ui-component {
-	padding: var(--padding-xs) !important;
+    padding: var(--padding-xs) !important;
 }
 
 .command-shells input.frugal-ui-components:focus {
-	background: var(--accent) !important;
-	color: var(--on-accent) !important;
+    background: var(--primary) !important;
+    color: var(--on-primary) !important;
 }
 
 .command-shells input[invalid].frugal-ui-components {
-	background: var(--inset) !important;
-	color: var(--error) !important;
+    background: var(--inset) !important;
+    color: var(--error) !important;
 }
 
 /* Headings */
-.frugal-ui-components:is(
-h1,
-h2,
-h3,
-h4,
-h5) {
-	font-family: headings, mono-md, monospace, mono !important;
-	text-transform: uppercase;
+.frugal-ui-components:is(h1, h2, h3, h4, h5) {
+    font-family: headings, mono-md, monospace, mono !important;
+    text-transform: uppercase;
 }
 
 h1.frugal-ui-components {
-	font-size: x-large;
+    font-size: x-large;
 }
 
 h2.frugal-ui-components {
-	font-size: larger;
+    font-size: larger;
 }
 
 h3.frugal-ui-components {
-	font-size: large;
+    font-size: large;
 }
 
 h4.frugal-ui-components {
-	font-size: small;
+    font-size: small;
 }
 
 h5.frugal-ui-components {
-	font-size: x-small;
+    font-size: x-small;
 }
 
 /* Label */
 .frugal-ui-components.labels {
-	font-size: small;
+    font-size: small;
 }
 
-.list-items > .frugal-ui-components, .list-items > div > .frugal-ui-components {
-	color: inherit;
+.list-items > .frugal-ui-components,
+.list-items > div > .frugal-ui-components {
+    color: inherit;
 }
 
 .frugal-ui-components.list-items[aria-selected='true'] {
-	background: var(--pressed);
-	color: var(--on-clickable);
+    background: var(--pressed);
+    color: var(--on-primary);
 }
 
 /* Overlays */
 .frugal-ui-components.popover-contents {
-	background: var(--background-alt);
-	box-shadow: 0px 0px 7px var(--shadows);
+    background: var(--surface);
+    box-shadow: 0px 0px 7px var(--shadows);
 
-	border: 1px solid var(--lines);
-}
-
-.frugal-ui-components.sheet-contents {
-	background: var(--background);
+    border: 1px solid var(--lines);
 }
 
 /* Separator */
 .frugal-ui-components.separators {
-	border: none;
-	border-bottom: 1px solid var(--lines);
+    border: none;
+    border-bottom: 1px solid var(--lines);
 }
 
 /* Textarea */
 .frugal-ui-components.textareas {
-	resize: none;
+    resize: none;
 }
 
 /* VisualGroup */
 .frugal-ui-components.visual-groups,
 .frugal-ui-components.accordions {
-	background: var(--background-alt);
+    background: var(--surface);
 }
 
 .visual-groups
-	.frugal-ui-components:is(.buttons, .selects, .inputs, .textareas, .submits):not(.forcing-default-styles) {
-	border: none !important;
-	box-shadow: none !important;
+    .frugal-ui-components:is(
+        .buttons,
+        .selects,
+        .inputs,
+        .textareas,
+        .submits
+    ):not(.forcing-default-styles) {
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .visual-groups
-	.frugal-ui-components:is(.buttons, .selects, .inputs, .textareas, .submits):not(
-		.forcing-default-styles
-	):not(:active) {
-	background: transparent !important;
+    .frugal-ui-components:is(
+        .buttons,
+        .selects,
+        .inputs,
+        .textareas,
+        .submits
+    ):not(.forcing-default-styles):not(:active) {
+    background: transparent !important;
 }
 
 .visual-groups .frugal-ui-components.icons:not(.forcing-default-styles) {
-	font-size: 1rem;
+    font-size: 1rem;
 }
 
-.visual-groups > .frugal-ui-components:is(.ordered-containers:last-child > :not(.last-item), *:not(.ordered-containers) :not(:last-child):not(.last-item)):not(.forcing-default-styles) {
-	border-bottom: 1px solid var(--lines) !important;
+.visual-groups
+    > .frugal-ui-components:is(
+        .ordered-containers:last-child > :not(.last-item),
+        *:not(.ordered-containers) :not(:last-child):not(.last-item)
+    ):not(.forcing-default-styles) {
+    border-bottom: 1px solid var(--lines) !important;
 }
 
-.visual-groups > .frugal-ui-components:is(.ordered-containers:first-child .first-item, :not(.ordered-containers) > *:first-child) {
-	border-top-left-radius: var(--corners);
-	border-top-right-radius: var(--corners);
+.visual-groups
+    > .frugal-ui-components:is(
+        .ordered-containers:first-child .first-item,
+        :not(.ordered-containers) > *:first-child
+    ) {
+    border-top-left-radius: var(--corners);
+    border-top-right-radius: var(--corners);
 }
 
-.visual-groups > .frugal-ui-components:is(.ordered-containers:last-child .last-item, :not(.ordered-containers) > *:last-child) {
-	border-bottom-left-radius: var(--corners);
-	border-bottom-right-radius: var(--corners);
+.visual-groups
+    > .frugal-ui-components:is(
+        .ordered-containers:last-child .last-item,
+        :not(.ordered-containers) > *:last-child
+    ) {
+    border-bottom-left-radius: var(--corners);
+    border-bottom-right-radius: var(--corners);
 }
 
 /*
@@ -225,28 +255,27 @@ NAVIGATION
 
 /* Stage-based */
 .frugal-ui-components.scenes {
-	background: var(--background);
-	border-right: 1px solid var(--lines);
+    border-right: 1px solid var(--lines);
 }
 
 /* Tab-based */
 .tab-views > .frugal-ui-components.stacks-horizontal {
-	border-top: 1px solid var(--lines);
+    border-top: 1px solid var(--lines);
 }
 
 @media (max-width: 520px) {
-	.tab-views > .stacks-horizontal .frugal-ui-components.buttons {
-		gap: 0.2rem;
-	}
+    .tab-views > .stacks-horizontal .frugal-ui-components.buttons {
+        gap: 0.2rem;
+    }
 }
 
 @media (min-width: 850px) {
-	.tab-views > .frugal-ui-components.stacks-horizontal {
-		border-top: none;
-		border-bottom: 1px solid var(--lines);
-	}
+    .tab-views > .frugal-ui-components.stacks-horizontal {
+        border-top: none;
+        border-bottom: 1px solid var(--lines);
+    }
 
-	.tab-views > .stacks-horizontal .buttons span.frugal-ui-components {
-		font-size: small;
-	}
+    .tab-views > .stacks-horizontal .buttons span.frugal-ui-components {
+        font-size: small;
+    }
 }
