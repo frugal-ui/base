@@ -36,9 +36,9 @@
 */
 :root {
     /* primary */
-    --primary-hue: 24deg;
-    --primary-sat: 60%;
-    --primary-luma: 15%;
+    --primary-hue: 230deg;
+    --primary-sat: 20%;
+    --primary-luma: 20%;
 
     --background-sat: var(--primary-sat);
     --background-luma: var(--primary-luma);
