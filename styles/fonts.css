@@ -1,9 +1,4 @@
 @font-face {
-	font-family: headings;
-	src: url(fonts/melete/Melete-Medium.otf);
-}
-
-@font-face {
 	font-family: mono-rg;
 	src: url(fonts/plex-mono/IBMPlexMono-Regular.ttf);
 }

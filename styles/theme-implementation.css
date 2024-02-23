@@ -132,28 +132,7 @@ summary.frugal-ui-components:active,
 
 /* Headings */
 .frugal-ui-components:is(h1, h2, h3, h4, h5) {
-    font-family: headings, mono-md, monospace, mono !important;
-    text-transform: uppercase;
-}
-
-h1.frugal-ui-components {
-    font-size: x-large;
-}
-
-h2.frugal-ui-components {
-    font-size: larger;
-}
-
-h3.frugal-ui-components {
-    font-size: large;
-}
-
-h4.frugal-ui-components {
-    font-size: small;
-}
-
-h5.frugal-ui-components {
-    font-size: x-small;
+    font-family: sans-bd !important;
 }
 
 /* Label */
