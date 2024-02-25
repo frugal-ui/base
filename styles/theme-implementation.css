@@ -29,12 +29,14 @@ GROUPS
 }
 
 /* Typeable */
+.frugal-ui-components.selects,
 .frugal-ui-components.inputs:not([type='checkbox']):not([type='radio']):not(
         [type='range']
     ),
 .frugal-ui-components.textareas,
 .frugal-ui-components.typeable-items {
     background: var(--inset);
+    height: var(--control-height);
     box-shadow: 0px 0px 2px var(--shadows) inset;
 
     border: 1px solid var(--lines);
@@ -58,7 +60,6 @@ COMPONENTS
 
 /* Button-like */
 .frugal-ui-components.buttons,
-.frugal-ui-components.selects,
 .frugal-ui-components.submits {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
         Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
@@ -96,6 +97,7 @@ COMPONENTS
 
 summary.frugal-ui-components:hover,
 .frugal-ui-components.navigation-links:hover,
+.frugal-ui-components.submits:not([disabled]):hover,
 .frugal-ui-components.buttons:not([disabled]):hover {
     background: var(--hover);
     color: var(--on-primary);
@@ -104,6 +106,7 @@ summary.frugal-ui-components:hover,
 }
 summary.frugal-ui-components:active,
 .frugal-ui-components.navigation-links:active,
+.frugal-ui-components.submits:not([disabled]):active,
 .frugal-ui-components.buttons:not([disabled]):active,
 .frugal-ui-components.buttons-pressed {
     background: var(--pressed);
@@ -118,10 +121,6 @@ summary.frugal-ui-components:active,
     .command-shells {
         display: none;
     }
-}
-
-.command-shells input.frugal-ui-component {
-    padding: var(--padding-xs) !important;
 }
 
 .command-shells input.frugal-ui-components:focus {

@@ -4,31 +4,18 @@
 :root {
     --corners: 0.4rem;
 
-    --padding-xs: 0.4rem 0.4rem;
-    --padding-sm: 0.6rem 0.6rem;
-    --padding-md: 0.6rem var(--text-indent);
-    --padding-lg: 0.9rem 0.9rem;
+    --spacing-h-outer: 1rem;
+    --spacing-h-inner: .8rem;
 
-    --gap: 0.5rem;
-    --gap-sm: 0.25rem;
+    --spacing-v-outer: 1rem;
+    --spacing-v-inner: .5rem;
 
     --font-size: 1rem;
     --text-indent: 0.9rem;
-}
+    --control-height: 2.5rem;
 
-@media (pointer: fine) {
-    :root {
-        --padding-xs: 0.2rem 0.2rem;
-        --padding-sm: 0.4rem 0.4rem;
-        --padding-md: 0.4rem var(--text-indent);
-        --padding-lg: 0.6rem 0.6rem;
-
-        --gap: 0.25rem;
-        --gap-sm: 0.125rem;
-
-        --font-size: 0.85rem;
-        --text-indent: 0.6rem;
-    }
+    --gap: 0.5rem;
+    --gap-sm: 0.25rem;
 }
 
 /*

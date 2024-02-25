@@ -3,52 +3,50 @@
 */
 
 .frugal-ui-components {
-	box-sizing: border-box;
-	font-size: var(--font-size);
+    box-sizing: border-box;
+    font-size: var(--font-size);
+    margin: 0px;
+    padding: 0px;
 }
 
 .frugal-ui-components:not(.icons) {
-	font-family: sans-rg, sans-serif, sans;
+    font-family: sans-rg, sans-serif, sans;
+}
+
+pre.frugal-ui-components:not(.icons) {
+    font-family: ui-monospace, Menlo, Monaco, Cascadia Code, Segoe UI Mono,
+        Source Code Pro;
 }
 
 html,
 body {
-	width: 100%;
-	height: 100%;
-	margin: 0rem;
-	overflow: hidden;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    margin: 0px;
 }
 
 .frugal-ui-components[hidden] {
-	display: none !important;
-}
-
-.frugal-ui-components.using-default-padding {
-	padding: var(--padding-md);
-}
-
-.frugal-ui-components.using-default-padding:is(
-		.stacks-vertical,
-		.stacks-horizontal
-	) {
-	padding: var(--padding-lg);
+    display: none !important;
 }
 
 .frugal-ui-components.draggable-items {
-	-webkit-user-drag: none;
-	-webkit-user-select: none;
-	user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 button.frugal-ui-components[disabled],
 input.frugal-ui-components[disabled] {
-	opacity: 0.2;
-	cursor: not-allowed;
+    opacity: 0.2;
+    cursor: not-allowed;
 }
 
-pre.frugal-ui-components {
-	font-family: mono-rg;
-	margin: 0rem;
+.frugal-ui-components.using-inner-padding {
+    padding: var(--spacing-v-inner) var(--spacing-h-inner);
+}
+.frugal-ui-components.using-outer-padding {
+    padding: var(--spacing-v-outer) var(--spacing-h-outer);
 }
 
 /*
@@ -57,311 +55,297 @@ pre.frugal-ui-components {
 
 /* Accordion */
 summary.frugal-ui-components:not(.icons) {
-	cursor: default;
-	font-family: mono-bd;
-	padding: var(--padding-xs);
-	border-radius: var(--corners);
+    cursor: default;
+    border-radius: var(--corners);
 }
 
 /* Checkable */
 .frugal-ui-components.draggable-items.dragging {
-	transform: scale(0.95);
-	border-radius: var(--corners);
+    transform: scale(0.95);
+    border-radius: var(--corners);
 }
 
 /* Box */
 .frugal-ui-components.boxes {
-	overflow: auto !important;
+    overflow: auto !important;
 
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 
-	border-radius: var(--corners);
+    border-radius: var(--corners);
 }
 
 /* Button-like */
 .frugal-ui-components.buttons,
-.frugal-ui-components.selects,
 .frugal-ui-components.submits {
-	border-radius: var(--corners);
-	padding: var(--padding-md);
-}
-
-.frugal-ui-components.buttons {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--gap);
+    border-radius: var(--corners);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap);
+    height: var(--control-height);
 }
 
 .buttons span.frugal-ui-components {
-	color: inherit;
-	cursor: inherit;
+    color: inherit;
+    cursor: inherit;
 }
 
 .buttons span.frugal-ui-components:empty {
-	display: none;
+    display: none;
 }
 
 /* ButtonGroup */
 .frugal-ui-components.button-groups {
-	border-radius: var(--corners);
-	display: flex;
+    border-radius: var(--corners);
+    display: flex;
 }
 
 .button-groups .frugal-ui-components.buttons {
-	width: 100%;
-	flex: 1;
-	border-radius: 0rem;
+    width: 100%;
+    flex: 1;
+    border-radius: 0rem;
 
-	border-left-width: 0px;
-	border-right-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
 }
 
 .button-groups > .frugal-ui-components.buttons:first-child {
-	border-top-left-radius: var(--corners);
-	border-bottom-left-radius: var(--corners);
+    border-top-left-radius: var(--corners);
+    border-bottom-left-radius: var(--corners);
 
-	border-left-width: 1px;
+    border-left-width: 1px;
 }
 
 .button-groups > .frugal-ui-components.buttons:last-child {
-	border-top-right-radius: var(--corners);
-	border-bottom-right-radius: var(--corners);
+    border-top-right-radius: var(--corners);
+    border-bottom-right-radius: var(--corners);
 
-	border-right-width: 1px;
+    border-right-width: 1px;
 }
 
 .frugal-ui-components.buttons:has(.button-texts:empty) {
-	flex: 0;
-	padding: var(--padding-sm);
+    flex: 0;
 }
 
 /* Header */
 .frugal-ui-components.headers {
-	padding: var(--padding-md);
-	min-height: 3.75rem;
+    min-height: 3.75rem;
 }
 
 .headers h5.frugal-ui-components {
-	flex-shrink: 1;
+    flex-shrink: 1;
 }
 
 /* Headings */
 .frugal-ui-components:is(h1, h2, h3, h4, h5) {
-	margin: 0rem;
-
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Icon */
 .frugal-ui-components.icons {
-	font-size: 1.2rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Label */
 .frugal-ui-components.labels {
-	display: flex;
-	display: flex;
-	flex-direction: column;
-
-	text-indent: var(--text-indent);
-	padding: var(--padding-md);
-	padding-left: 0px;
-	padding-right: 0px;
+    display: flex;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--gap) / 2);
 }
 
 /* List */
 .frugal-ui-components.stacks-vertical[role='list'] {
-	justify-content: start;
+    justify-content: start;
 }
 
 /* ListItem */
 .frugal-ui-components.list-items {
-	width: 100%;
-	padding: var(--padding-md);
+    width: 100%;
 
-	display: flex;
-	flex-shrink: 0;
+    display: flex;
+    flex-shrink: 0;
 
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .list-items > .frugal-ui-components {
-	text-align: left;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: 100%;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 /* Overlays */
 .frugal-ui-components.popover-contents {
-	border-radius: var(--corners);
-	z-index: 1;
+    border-radius: var(--corners);
+    z-index: 1;
 }
 
 .popover-containers[open] > .frugal-ui-components.popover-contents {
-	animation: appear 0.2s;
+    animation: appear 0.2s;
 }
 
 .frugal-ui-components.sheet-containers:not([open]) {
-	visibility: hidden;
-	animation: delay-hide 0.2s;
+    visibility: hidden;
+    animation: delay-hide 0.2s;
 }
 
 .frugal-ui-components.sheet-containers[open] {
-	opacity: 1;
-	visibility: visible;
-	pointer-events: all;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
 }
 
 .frugal-ui-components.sheet-containers {
-	border: none;
+    border: none;
 
-	position: fixed;
-	top: 0rem;
-	left: 0rem;
+    position: fixed;
+    top: 0rem;
+    left: 0rem;
 
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 
-	display: flex;
-	align-items: end;
+    display: flex;
+    align-items: end;
 
-	padding: 0rem;
+    padding: 0rem;
 
-	opacity: 0;
-	pointer-events: none;
+    opacity: 0;
+    pointer-events: none;
 
-	transition: opacity 0.2s;
+    transition: opacity 0.2s;
 
-	z-index: 1;
+    z-index: 1;
 }
 
 .frugal-ui-components.sheet-contents {
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 
-	transform: translateY(1rem);
-	transition: transform 0.2s;
+    transform: translateY(1rem);
+    transition: transform 0.2s;
 }
 
 .sheet-containers[open] > .frugal-ui-components.sheet-contents {
-	transform: translateY(0);
+    transform: translateY(0);
 }
 
 /* Popover */
 .frugal-ui-components.popover-containers {
-	display: flex;
-	align-items: center;
-	justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .frugal-ui-components.popover-contents {
-	position: fixed;
-	top: 0px;
-	left: 0px;
-	visibility: hidden;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    visibility: hidden;
 }
 
 .frugal-ui-components.popover-containers[open] > .popover-contents {
-	visibility: visible;
+    visibility: visible;
 }
 
 /* ScrollArea */
 .frugal-ui-components.scroll-areas {
-	overflow: auto;
+    overflow: auto;
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 /* Separator */
 .frugal-ui-components.separators {
-	width: 100%;
-	margin: 0rem;
+    width: 100%;
 }
 
 /* Spacer */
 .frugal-ui-components.spacers {
-	display: flex;
-	width: 100%;
-	height: 100%;
-	flex: 1;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex: 1;
 }
 
 /* Stacks */
 .frugal-ui-components.stacks-vertical,
 .frugal-ui-components.stacks-horizontal {
-	display: flex;
-	flex: 1;
+    display: flex;
+    flex: 1;
 
-	width: 100%;
-	height: auto;
+    width: 100%;
 
-	align-items: center;
-	justify-content: center;
+    align-items: center;
+    justify-content: center;
 
-	overflow: visible;
+    overflow: visible;
 }
 
 .frugal-ui-components.stacks-vertical {
-	flex-direction: column;
-	align-items: stretch;
-	height: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    height: 100%;
 }
 
 .frugal-ui-components.stacks-horizontal {
-	flex-direction: row;
+    flex-direction: row;
+    height: auto;
 }
 
 /* Textual */
 span.frugal-ui-components {
-	text-align: center;
+    text-align: center;
 }
 
 .frugal-ui-components:is(h1, h2, h3, h4, h5) {
-	flex-shrink: 0;
+    flex-shrink: 0;
 }
 
 /* Typeable */
+.frugal-ui-components.selects,
 .frugal-ui-components.inputs:not([type='checkbox']):not([type='radio']):not(
-		[type='range']
-	),
+        [type='range']
+    ),
 .frugal-ui-components.textareas,
 .frugal-ui-components.typeable-items {
-	padding: var(--padding-md);
-	border-radius: var(--corners);
+    border-radius: var(--corners);
 }
 
 /* VisualGroup */
 .frugal-ui-components.accordions,
 .frugal-ui-components.visual-groups {
-	width: 100%;
-	height: auto;
-	flex: 0;
-	border-radius: var(--corners);
+    width: 100%;
+    height: auto;
+    flex: 0;
+    border-radius: var(--corners);
 }
 
 .frugal-ui-components.visual-groups > * {
-	border-radius: 0rem;
+    border-radius: 0rem;
 }
 
 .frugal-ui-components.visual-groups
-	:is(.buttons, .selects, .inputs, .textareas):not(.forcing-default-styles) {
-	width: 100% !important;
-	justify-content: start !important;
+    :is(.buttons, .submits, .selects, .inputs, .textareas):not(
+        .forcing-default-styles
+    ) {
+    width: 100% !important;
+    justify-content: start !important;
 }
 
 /*
@@ -370,92 +354,94 @@ span.frugal-ui-components {
 
 /* Stage-based */
 .frugal-ui-components.stages {
-	position: relative;
+    position: relative;
 
-	display: flex;
-	align-items: stretch;
+    display: flex;
+    align-items: stretch;
 
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 
-	overflow: hidden;
+    overflow: hidden;
 }
 
 .frugal-ui-components.stages:has(.frugal-ui-components.scenes-column) {
-	overflow-x: auto;
+    overflow-x: auto;
 }
 
 .frugal-ui-components.scenes {
-	display: flex;
-	flex-shrink: 0;
+    display: flex;
+    flex-shrink: 0;
 
-	width: 20rem;
-	max-width: 100%;
-	height: 100%;
+    width: 20rem;
+    max-width: 100%;
+    height: 100%;
 }
 
 .frugal-ui-components.scenes.scenes-full,
 .frugal-ui-components.scenes.scenes-navigation,
 .frugal-ui-components.scenes.scenes-content {
-	position: absolute;
-	width: 100%;
+    position: absolute;
+    width: 100%;
 }
 
 .frugal-ui-components.navigation-links span {
-	white-space: nowrap;
-	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 @media (min-width: 850px) {
-	.frugal-ui-components.scenes {
-		--navigation-width: 18rem;
-	}
+    .frugal-ui-components.scenes {
+        --navigation-width: 18rem;
+    }
 
-	.frugal-ui-components.scenes-navigation {
-		max-width: var(--navigation-width);
-		left: 0rem;
-	}
+    .frugal-ui-components.scenes-navigation {
+        max-width: var(--navigation-width);
+        left: 0rem;
+    }
 
-	.frugal-ui-components.scenes-content {
-		max-width: calc(100% - var(--navigation-width));
-		left: var(--navigation-width);
-	}
+    .frugal-ui-components.scenes-content {
+        max-width: calc(100% - var(--navigation-width));
+        left: var(--navigation-width);
+    }
 }
 
 /* Tab-based */
 .frugal-ui-components.tab-views {
-	flex-direction: column-reverse;
+    flex-direction: column-reverse;
 }
 
-.frugal-ui-components.tab-views > div {
-	height: 100%;
-	flex: 1;
-	display: flex;
+.frugal-ui-components.tab-views > .tab-list {
+    height: var(--control-height);
+}
+
+.frugal-ui-components.tab-views > .tab-view-container {
+    height: calc(100% - var(--control-height));
 }
 
 .tab-views > .stacks-horizontal > .frugal-ui-components.button-groups {
-	display: grid;
-	width: 100%;
-	grid-template-columns: repeat(auto-fit, minmax(1rem, 1fr));
-	justify-content: center;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(1rem, 1fr));
+    justify-content: center;
 }
 
 @media (max-width: 520px) {
-	.tab-views > .stacks-horizontal .frugal-ui-components.buttons {
-		flex-direction: column-reverse;
-	}
+    .tab-views > .stacks-horizontal .frugal-ui-components.buttons {
+        flex-direction: column-reverse;
+    }
 }
 
 @media (min-width: 850px) {
-	.frugal-ui-components.tab-views {
-		flex-direction: column;
-	}
+    .frugal-ui-components.tab-views {
+        flex-direction: column;
+    }
 
-	.tab-views > .stacks-horizontal > .frugal-ui-components.button-groups {
-		grid-template-columns: repeat(auto-fit, minmax(12rem, 1rem));
-	}
+    .tab-views > .stacks-horizontal > .frugal-ui-components.button-groups {
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1rem));
+    }
 }
 
 /*
@@ -464,29 +450,8 @@ span.frugal-ui-components {
 
 /* Stage-based */
 .navigation-links > .frugal-ui-components.stacks-horizontal {
-	justify-content: start;
-	gap: var(--gap);
-}
-
-/* Tab-based */
-.tab-views > .frugal-ui-components.stacks-horizontal {
-	padding: var(--padding-md);
-}
-
-@media (max-width: 520px) {
-	.tab-views > .stacks-horizontal .frugal-ui-components.buttons {
-		gap: 0.2rem;
-	}
-}
-
-@media (min-width: 850px) {
-	.tab-views > .frugal-ui-components.stacks-horizontal {
-		padding: var(--padding-xs);
-	}
-
-	.tab-views > .stacks-horizontal .frugal-ui-components.buttons {
-		padding: var(--padding-xs);
-	}
+    justify-content: start;
+    gap: var(--gap);
 }
 
 /* 
@@ -494,19 +459,19 @@ span.frugal-ui-components {
  */
 
 @media (max-width: 520px) {
-	.frugal-ui-components.hides-responsively.screen-mobile {
-		display: none;
-	}
+    .frugal-ui-components.hides-responsively.screen-mobile {
+        display: none;
+    }
 }
 
 @media (min-width: 520px) and (max-width: 850px) {
-	.frugal-ui-components.hides-responsively.screen-tablet {
-		display: none;
-	}
+    .frugal-ui-components.hides-responsively.screen-tablet {
+        display: none;
+    }
 }
 
 @media (min-width: 850px) {
-	.frugal-ui-components.hides-responsively.screen-desktop {
-		display: none;
-	}
+    .frugal-ui-components.hides-responsively.screen-desktop {
+        display: none;
+    }
 }
