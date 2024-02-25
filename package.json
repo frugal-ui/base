@@ -26,7 +26,6 @@
   "homepage": "https://github.com/frugal-ui/base#readme",
   "dependencies": {
     "@types/node": "^20.2.3",
-    "@types/uuid": "^9.0.1",
-    "uuid": "^9.0.0"
+    "@types/uuid": "^9.0.1"
   }
 }
