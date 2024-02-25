@@ -1,17 +1,17 @@
 /*
-	REACTIVITY
+	DATA
 */
 // STATE
 /**
  * Function that can subscribe to a State.
  * When the State updates, this function is called.
  */
-type StateSubscription<T> = (newValue: T) => void;
+export type StateSubscription<T> = (newValue: T) => void;
 
 /**
  * Configuration for a StateProxy.
  */
-interface StateProxyCfg<T, P> {
+export interface StateProxyCfg<T, P> {
     /**
      * Converts a value with type of the Proxy<P> to the type of the State<T>
      * This function may be omitted if the proxy State will be read only.
@@ -25,7 +25,7 @@ interface StateProxyCfg<T, P> {
  * A State's purpose is to hold a value of type T and allow getting and setting this value.
  * Every time the value is changed, the the State triggers all subscribing functions (cf. StateSubscription).
  */
-class State<T> {
+export class State<T> {
     private _value: T;
     private _bindings = new Set<StateSubscription<T>>();
 
