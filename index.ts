@@ -93,29 +93,33 @@ export class State<T> {
  * Allows to select and deselect items of type T.
  * Selecting and deselecting items will call subscriptions.
  */
-export class SelectionState<T> extends State<undefined> {
-	private _selection = new Set<T>();
+export class SelectionState<T> extends State<T[]> {
+    private _selection = new Set<T>();
+
+    constructor() {
+        super([]);
+    }
 
     /**
      * Adds items to the selection and call subscriptions
      */
     select(...items: T[]): void {
         items.forEach((item) => this._selection.add(item));
-        this.callSubscriptions();
+        this.update();
     }
     /**
      * Removes items from the selection and call subscriptions
      */
     deselect(...items: T[]): void {
         items.forEach((item) => this._selection.delete(item));
-        this.callSubscriptions();
+        this.update();
     }
     /**
      * Clears the selection and call subscriptions and call subscriptions
      */
     clear(): void {
         this._selection.clear();
-        this.callSubscriptions();
+        this.update();
     }
 
     /**
@@ -124,10 +128,15 @@ export class SelectionState<T> extends State<undefined> {
     checkIsSelected(item: T): boolean {
         return this._selection.has(item);
     }
-	/**
-	 * Returns selected items
-	 */
-	getItems(): T[] {
-		return [...this._selection.values()];
+    /**
+     * Returns selected items
+     */
+    getItems(): T[] {
+        return [...this._selection.values()];
+    }
+
+	private update() {
+		// automatically calls subscriptions
+		this.value = this.getItems();
 	}
 }
