@@ -49,20 +49,20 @@ class State<T> {
     /**
      * Calls all subscribing functions
      */
-    callSubscriptions() {
+    callSubscriptions(): void {
         this._bindings.forEach((fn) => fn(this._value));
     }
 
     /**
      * Adds a subscribing function (StateSubscription)
      */
-    subscribe(fn: StateSubscription<T>) {
+    subscribe(fn: StateSubscription<T>): void {
         this._bindings.add(fn);
     }
     /**
      * Removes a subscribing function (StateSubscription)
      */
-    unsubscribe(fn: StateSubscription<T>) {
+    unsubscribe(fn: StateSubscription<T>): void {
         this._bindings.delete(fn);
     }
 
