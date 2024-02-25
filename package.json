@@ -18,8 +18,8 @@
     "reactive",
     "component"
   ],
-  "author": "viridian035",
-  "license": "MIT",
+  "author": "Marlon Erler",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/frugal-ui/base/issues"
   },
@@ -28,7 +28,6 @@
     "@types/node": "^20.2.3",
     "@types/uuid": "^9.0.1",
     "css-property-names": "^1.0.5",
-    "material-icons": "^1.13.7",
     "uuid": "^9.0.0"
   }
 }
