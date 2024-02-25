@@ -21,7 +21,14 @@ input,
 textarea,
 select,
 .surface {
-    border: var(--line-width) var(--line-style) var(--lines);
+    border-width: var(--line-width);
+    border-style: var(--line-style);
+}
+
+:is(input, textarea):focus,
+.selected {
+    outline-width: var(--outline-width);
+    outline-style: var(--line-style);
 }
 
 hr {
@@ -69,8 +76,13 @@ select,
     background: var(--surface-hover);
 }
 
-:is(button, select, .surface.clickable):active {
+:is(button, select, .surface.clickable):active,
+:is(input, textarea):focus {
     background: var(--surface-active);
+}
+
+:is(input, textarea):focus {
+    outline-color: var(--primary);
 }
 
 :is(button, input, textarea, select, .surface).primary {

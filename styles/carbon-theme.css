@@ -13,6 +13,7 @@
 :root {
     --corner-radius: 0px;
     --line-width: 1px;
+    --outline-width: 4px;
     --line-style: solid;
 }
 
@@ -60,7 +61,7 @@
     --background: #ffffff;
 
     --surface: #f4f4f4;
-    --on-surface: #525252;
+    --on-surface: #161616;
     --surface-border: #f4f4f4;
     --surface-hover: #e8e8e8;
     --surface-pressed: #c6c6c6;
