@@ -3,6 +3,12 @@
 */
 // STATE
 /**
+ * Function that can subscribe to a State.
+ * When the State updates, this function is called.
+ */
+type StateSubscription<T> = (newValue: T) => void;
+
+/**
  * A State's purpose is to hold a value of type T and allow getting and setting this value.
  * Every time the value is changed, the the State triggers all subscribing functions (cf. StateSubscription).
  */
@@ -14,32 +20,30 @@ class State<T> {
         this._value = initialValue;
     }
 
-	/**
-	 * Gets the current value of the state
-	 */
+    /**
+     * Gets the current value of the state
+     */
     get value(): T {
         return this._value;
     }
-	/**
-	 * Sets a new value for the state and calls all subscribing functions
-	 */
+    /**
+     * Sets a new value for the state and calls all subscribing functions
+     */
     set value(newValue: T) {
         this._value = newValue;
         this._bindings.forEach((fn) => fn(this._value));
     }
 
-	/**
-	 * Adds a subscribing function (StateSubscription)
-	 */
+    /**
+     * Adds a subscribing function (StateSubscription)
+     */
     subscribe(fn: StateSubscription<T>) {
         this._bindings.add(fn);
     }
-	/**
-	 * Removes a subscribing function (StateSubscription)
-	 */
+    /**
+     * Removes a subscribing function (StateSubscription)
+     */
     unsubscribe(fn: StateSubscription<T>) {
         this._bindings.delete(fn);
     }
 }
-
-type StateSubscription<T> = (newValue: T) => void;
