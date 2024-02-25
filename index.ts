@@ -5,11 +5,20 @@ import { PrefixedCSSPropertyNames } from './assets/css-property-names';
 /*
 	UTILITY
 */
+/**
+ * Stringifiable object.
+ * Has .toString() => string method.
+ */
 export interface Stringifiable {
     toString(): string;
 }
+/**
+ * Object of type T or State<T>
+ */
 export type ValueObject<T> = T | State<T>;
-
+/**
+ * Universally Unique Identifier
+ */
 export class UUID implements Stringifiable {
     readonly value: string;
 
@@ -32,16 +41,33 @@ export class UUID implements Stringifiable {
         this.value = uuid;
     }
 
+    /**
+     * @returns UUID as string
+     */
     toString() {
         return this.value;
     }
 }
 
-function unwrapValue<T>(valueObject: ValueObject<T>): T {
+/**
+ * Converts ValueObject<T> to T:
+ * If the ValueObject<T> is a State<T>, the the State's value is returned
+ * If the ValueObject is T, the ValueObject itself is returned
+ * @param valueObject ValueObject to convert
+ * @returns Value of ValueObject
+ */
+export function unwrapValue<T>(valueObject: ValueObject<T>): T {
     if (valueObject instanceof State) return valueObject.value;
     return valueObject;
 }
-function unwrapState<T>(valueObject: ValueObject<T>): State<T> {
+/**
+ * Converts ValueObject<T> to State<T>:
+ * If the ValueObject<T> is a State<T>, the the State itself is returned
+ * If the ValueObject is T, a State is created with the ValueObject as value
+ * @param valueObject ValueObject to convert
+ * @returns State
+ */
+export function unwrapState<T>(valueObject: ValueObject<T>): State<T> {
     if (valueObject instanceof State) return valueObject;
     return new State(valueObject);
 }
@@ -107,12 +133,14 @@ export class State<T> {
 
     /**
      * Adds a subscribing function (StateSubscription)
+     * @param fn Function to call on change
      */
     subscribe(fn: StateSubscription<T>): void {
         this._bindings.add(fn);
     }
     /**
      * Removes a subscribing function (StateSubscription)
+     * @param fn Function to remove from subscriptions
      */
     unsubscribe(fn: StateSubscription<T>): void {
         this._bindings.delete(fn);
@@ -122,6 +150,8 @@ export class State<T> {
      * Creates a new State<P> bound to the state this method is called on.
      * When State<P> changes, it's value is converted and used to update this State<T>.
      * When this State<T> changes, it's value is converted and used to update the new State<P>.
+     * @param cfg Configuration for proxy
+     * @returns New proxy State
      */
     createProxy<P>(cfg: StateProxyCfg<T, P>): State<P> {
         const proxyState = new State<P>(cfg.convertToProxy(this._value));
@@ -151,6 +181,7 @@ export class SelectionState<T> extends State<T[]> {
 
     /**
      * Adds items to the selection and call subscriptions
+     * @param items Items to add to selection
      */
     select(...items: T[]): void {
         items.forEach((item) => this._selection.add(item));
@@ -158,6 +189,7 @@ export class SelectionState<T> extends State<T[]> {
     }
     /**
      * Removes items from the selection and call subscriptions
+     * @Param items Items to remove from selection
      */
     deselect(...items: T[]): void {
         items.forEach((item) => this._selection.delete(item));
@@ -173,12 +205,14 @@ export class SelectionState<T> extends State<T[]> {
 
     /**
      * Checks if an item is selected
+     * @param item Item to check
      */
     checkIsSelected(item: T): boolean {
         return this._selection.has(item);
     }
     /**
      * Returns selected items
+     * @returns All selected items as Array
      */
     getItems(): T[] {
         return [...this._selection.values()];
@@ -194,15 +228,24 @@ export class SelectionState<T> extends State<T[]> {
 	INTERFACE
 */
 // TYPES
+/**
+ * Element with each key of the PrefixedCSSPropertyNames map being a function to set that style.
+ * For instance, Styleable.cssWidth(value: Stringifiable) would set the width style.
+ */
 export type Styleable = {
     [property in keyof typeof PrefixedCSSPropertyNames]: (
         value: Stringifiable,
     ) => Component<any>;
 };
+/**
+ * HTML Event handler
+ */
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 
 // COMONENT
-/** HTML Element. */
+/**
+ * HTML Element
+ */
 export interface Component<V> extends HTMLElement, Styleable {
     /**
      * Value of the Component
