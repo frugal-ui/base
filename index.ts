@@ -417,7 +417,7 @@ export function Component<ValueType>(
         const state = unwrapState(value);
 
         component.subscribeToState(state, (newValue) => {
-            component.setAttr(key, newValue.toString());
+            component.setAttribute(key, newValue.toString());
         });
 
         return component;
