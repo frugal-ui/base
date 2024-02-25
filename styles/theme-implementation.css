@@ -1,0 +1,97 @@
+/* fonts */
+html {
+    font-family: var(--font-standard);
+}
+
+pre,
+code {
+    font-family: var(--font-mono);
+}
+
+/* basic */
+button,
+input,
+textarea,
+select {
+    border-radius: var(--corner-radius);
+}
+
+button,
+input,
+textarea,
+select,
+.surface {
+    border: var(--line-width) var(--line-width) var(--lines);
+}
+
+/* paddings */
+header,
+main,
+footer {
+    padding: var(--padding-v-lg) var(--padding-h-outer);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+p,
+button,
+input,
+textarea,
+select,
+.padding-inner {
+    padding: var(--padding-v-md) var(--padding-h-inner);
+}
+
+/* colors */
+html {
+    background: var(--background);
+    color: var(--text);
+}
+
+button,
+input,
+textarea,
+select,
+.surface {
+    background: var(--surface);
+    color: var(--on-surface);
+}
+
+:is(button, select, .surface.clickable):hover {
+    background: var(--surface-hover);
+}
+
+:is(button, select, .surface.clickable):active {
+    background: var(--surface-active);
+}
+
+:is(button, input, textarea, select, .surface).primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary-border);
+}
+
+:is(button, select, .surface.clickable).primary:hover {
+    background: var(--primary-hover);
+}
+
+:is(button, select, .surface.clickable).primary:active {
+    background: var(--primary-active);
+}
+
+:is(button, input, textarea, select, .surface).destructive {
+    background: var(--destructive);
+    color: var(--on-destructive);
+    border-color: var(--destructive-border);
+}
+
+:is(button, select, .surface.clickable).destructive:hover {
+    background: var(--destructive-hover);
+}
+
+:is(button, select, .surface.clickable).destructive:active {
+    background: var(--destructive-active);
+}

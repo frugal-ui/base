@@ -1,3 +1,6 @@
+import './styles/reset.css';
+import './styles/theme-implementation.css';
+
 // IMPORTS
 import AccessibilityRoleMap from './assets/roles';
 import { PrefixedCSSPropertyNames } from './assets/css-property-names';
