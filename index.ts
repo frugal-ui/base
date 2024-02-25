@@ -86,3 +86,50 @@ export class State<T> {
         return proxyState;
     }
 }
+
+// SELECTION
+/**
+ * State whose value is a Set<T> representing the selected items.
+ * Allows to select and deselect items of type T.
+ * Selecting and deselecting items will call subscriptions.
+ */
+export class Selection<T> extends State<Set<T>> {
+    constructor() {
+        super(new Set<T>());
+    }
+
+    /**
+     * Adds items to the selection and call subscriptions
+     */
+    select(...items: T[]): void {
+        items.forEach((item) => this.value.add(item));
+        this.callSubscriptions();
+    }
+    /**
+     * Removes items from the selection and call subscriptions
+     */
+    deselect(...items: T[]): void {
+        items.forEach((item) => this.value.delete(item));
+        this.callSubscriptions();
+    }
+    /**
+     * Clears the selection and call subscriptions and call subscriptions
+     */
+    clear(): void {
+        this.value.clear();
+        this.callSubscriptions();
+    }
+
+    /**
+     * Checks if an item is selected
+     */
+    checkIsSelected(item: T): boolean {
+        return this.value.has(item);
+    }
+	/**
+	 * Returns selected items
+	 */
+	getItems(): T[] {
+		return [...this.value.values()];
+	}
+}
