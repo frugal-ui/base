@@ -13,7 +13,7 @@
 :root {
     --corner-radius: 0px;
     --line-width: 1px;
-    --border-style: solid;
+    --line-style: solid;
 }
 
 /* paddings */
@@ -49,7 +49,8 @@
 :root {
     /* basic */
     --text: #161616;
-    --placeholder: #a8a8a8;
+    --text-secondary: #525252;
+    --text-placeholder: #a8a8a8;
     --lines: #e0e0e0;
 
     --error: red;
@@ -59,6 +60,8 @@
     --background: #ffffff;
 
     --surface: #f4f4f4;
+    --on-surface: #525252;
+    --surface-border: #f4f4f4;
     --surface-hover: #e8e8e8;
     --surface-pressed: #c6c6c6;
 

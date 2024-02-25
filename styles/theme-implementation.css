@@ -21,7 +21,11 @@ input,
 textarea,
 select,
 .surface {
-    border: var(--line-width) var(--line-width) var(--lines);
+    border: var(--line-width) var(--line-style) var(--lines);
+}
+
+hr {
+    border-bottom: var(--line-width) var(--line-style) var(--lines);
 }
 
 /* paddings */
@@ -58,6 +62,7 @@ select,
 .surface {
     background: var(--surface);
     color: var(--on-surface);
+    border-color: var(--surface-border);
 }
 
 :is(button, select, .surface.clickable):hover {
