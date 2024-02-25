@@ -12,8 +12,11 @@ type StateSubscription<T> = (newValue: T) => void;
  * Configuration for a StateProxy.
  */
 interface StateProxyCfg<T, P> {
-    /** Converts a value with type of the Proxy<P> to the type of the State<T> */
-    convertToOriginal: (proxyValue: P) => T;
+    /**
+     * Converts a value with type of the Proxy<P> to the type of the State<T>
+     * This function may be omitted if the proxy State will be read only.
+     */
+    convertToOriginal?: (proxyValue: P) => T;
     /** Converts a value with type of the State<T> to the type of the Proxy<P> */
     convertToProxy: (originalValue: T) => P;
 }
@@ -76,9 +79,10 @@ class State<T> {
         this.subscribe(
             (newValue) => (proxyState.value = cfg.convertToProxy(newValue)),
         );
-        proxyState.subscribe(
-            (newValue) => (this.value = cfg.convertToOriginal(newValue)),
-        );
+        proxyState.subscribe((newValue) => {
+            if (!cfg.convertToOriginal) return;
+            this.value = cfg.convertToOriginal(newValue);
+        });
         return proxyState;
     }
 }
