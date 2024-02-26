@@ -541,10 +541,10 @@ export function Container(tagName: keyof HTMLElementTagNameMap, ...children: Com
     return Component(tagName).addItems(...children);
 }
 
-export function VStack(...children: Component<any>[]): Component<unknown> {
-    return Container("div", ...children).addToClass("stacks-vertical");
-}
-
 export function HStack(...children: Component<any>[]): Component<unknown> {
     return Container("div", ...children).addToClass("stacks-horizontal");
+}
+
+export function VStack(...children: Component<any>[]): Component<unknown> {
+    return Container("div", ...children).addToClass("stacks-vertical");
 }
