@@ -25,10 +25,15 @@ select,
     border-style: var(--line-style);
 }
 
+label.surface:has(:focus),
 :is(input, textarea):focus,
 .selected {
     outline-width: var(--outline-width);
     outline-style: var(--line-style);
+}
+
+label.surface :focus {
+    outline-width: 0px;
 }
 
 hr {
@@ -36,9 +41,6 @@ hr {
 }
 
 .icons {
-    width: var(--icon-size);
-    height: var(--icon-size);
-
     -webkit-mask-size: cover;
     mask-size: cover;
 }
@@ -49,10 +51,6 @@ hr {
 }
 
 label {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-
     font-size: small;
     text-indent: var(--padding-h-inner);
 }
@@ -111,6 +109,7 @@ select,
     background: var(--surface-active);
 }
 
+label.surface:has(:focus),
 :is(input, textarea):focus {
     outline-color: var(--primary);
 }
@@ -151,11 +150,35 @@ select,
     background-color: var(--surface);
 }
 
-label {
+label,
+label.surface {
     color: var(--text-secondary);
 }
 
 /* layout */
+.icons {
+    width: var(--icon-size);
+    height: var(--icon-size);
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+label input {
+    margin-top: var(--spacing-01);
+}
+
+label.surface {
+    padding-top: var(--padding-v-lg);
+}
+
+label.surface input {
+    padding-bottom: var(--padding-v-lg);
+}
+
 .stacks-vertical,
 .stacks-horizontal {
     display: flex;
