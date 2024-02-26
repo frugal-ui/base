@@ -112,3 +112,13 @@ select,
 :is(button, select, .surface.clickable).destructive:active {
     background: var(--destructive-active);
 }
+
+/* layout */
+.stacks-vertical,
+.stacks-horizontal {
+    display: flex;
+}
+
+.stacks-vertical {
+    flex-direction: column;
+}
