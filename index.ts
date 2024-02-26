@@ -616,6 +616,13 @@ export function Image(src: ValueObject<string>): Component<unknown> {
         .addToClass('images-background');
 }
 
+export function Label(
+    text: ValueObject<string>,
+    labeledItem: Component<any>,
+): Component<unknown> {
+    return Text('label', text).addItems(labeledItem);
+}
+
 /**
  * Generic text of the defined type (tag)
  * @param tagName TagName of the text
