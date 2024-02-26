@@ -5,6 +5,7 @@ import {
     CSSPropertyNames,
     PrefixedCSSPropertyNames,
 } from './assets/css-property-names';
+import { InputTypeMap, InputTypes } from './assets/input-types';
 
 // IMPORTS
 import AccessibilityRoleMap from './assets/roles';
@@ -614,6 +615,17 @@ export function Image(src: ValueObject<string>): Component<unknown> {
     return Component('div')
         .cssBackgroundImage(url)
         .addToClass('images-background');
+}
+
+export function Input<T>(
+    type: keyof InputTypeMap,
+    value: ValueObject<T>,
+    placeholder?: ValueObject<string>,
+): Component<T> {
+    return Component('input')
+        .setAttr('type', type)
+        .setValue(value)
+        .setAttr('placeholder', placeholder) as Component<T>;
 }
 
 /**
