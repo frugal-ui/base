@@ -581,6 +581,14 @@ export function HStack(...children: Component<any>[]): Component<unknown> {
     return Container('div', ...children).addToClass('stacks-horizontal');
 }
 
+/**
+ * Image.
+ * Behind the scenes, this is a div with a background image.
+ * The image is set to size:cover and position:center.
+ * 
+ * You have to set the height manually.
+ * @param src Source of the image, relative to index.css
+ */
 export function Image(src: ValueObject<string>): Component<unknown> {
     const srcState = unwrapState(src);
     const backgroundStyle = srcState.createProxy({
