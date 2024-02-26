@@ -616,6 +616,11 @@ export function Image(src: ValueObject<string>): Component<unknown> {
         .addToClass('images-background');
 }
 
+/**
+ * HTML Label
+ * @param text Label text
+ * @param labeledItem Item to be labeled. Will be appended to label
+ */
 export function Label(
     text: ValueObject<string>,
     labeledItem: Component<any>,
