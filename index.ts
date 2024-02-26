@@ -581,6 +581,17 @@ export function HStack(...children: Component<any>[]): Component<unknown> {
     return Container('div', ...children).addToClass('stacks-horizontal');
 }
 
+export function Image(src: ValueObject<string>): Component<unknown> {
+    const srcState = unwrapState(src);
+    const backgroundStyle = srcState.createProxy({
+        convertToProxy: (originalValue) => `url('${originalValue}')`,
+    });
+
+    return Component('div')
+        .cssBackgroundImage(backgroundStyle)
+        .addToClass('images-background');
+}
+
 /**
  * Generic text of the defined type (tag)
  * @param tagName TagName of the text

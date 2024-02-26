@@ -121,6 +121,10 @@ select,
     background: var(--destructive-active);
 }
 
+.images-background {
+    background-color: var(--surface);
+}
+
 /* layout */
 .stacks-vertical,
 .stacks-horizontal {
@@ -129,4 +133,10 @@ select,
 
 .stacks-vertical {
     flex-direction: column;
+}
+
+/* other */
+.images-background {
+    background-size: cover;
+    background-position: center;
 }
