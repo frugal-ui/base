@@ -537,13 +537,23 @@ export function Component<ValueType>(
 }
 
 // SPECIFIC
+/**
+ * HTML Anchor (<a>) element
+ * @param address Address to open when clicked / value of the [href] attribute
+ * @param label Text to be displayed
+ */
 export function Anchor(
     address: ValueObject<Stringifiable>,
     label: ValueObject<Stringifiable>,
-) {
+): Component<unknown> {
     return Text('a', label).setAttr('href', address);
 }
 
+/**
+ * Generic container of the defined type (tag)
+ * @param tagName TagName of the container
+ * @param children Children to append
+ */
 export function Container(
     tagName: keyof HTMLElementTagNameMap,
     ...children: Component<any>[]
@@ -551,10 +561,19 @@ export function Container(
     return Component(tagName).addItems(...children);
 }
 
+/**
+ * Container that horizontally stacks its children via flexbox
+ * @param children Children to append
+ */
 export function HStack(...children: Component<any>[]): Component<unknown> {
     return Container('div', ...children).addToClass('stacks-horizontal');
 }
 
+/**
+ * Generic text of the defined type (tag)
+ * @param tagName TagName of the text
+ * @param value Text to be displayed
+ */
 export function Text(
     tagName: keyof HTMLElementTagNameMap,
     value: ValueObject<Stringifiable>,
@@ -562,6 +581,10 @@ export function Text(
     return Component(tagName).setText(value);
 }
 
+/**
+ * Container that vertically stacks its children via flexbox
+ * @param children Children to append
+ */
 export function VStack(...children: Component<any>[]): Component<unknown> {
     return Container('div', ...children).addToClass('stacks-vertical');
 }
