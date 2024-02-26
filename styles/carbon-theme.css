@@ -76,6 +76,8 @@
 :root {
     /* basic */
     --text: #161616;
+    --text-anchor: #0f62fe;
+    --text-anchor-hover: #0043ce;
     --text-secondary: #525252;
     --text-placeholder: #a8a8a8;
     --lines: #e0e0e0;
@@ -109,6 +111,8 @@
     :root {
         /* basic */
         --text: #f4f4f4;
+        --text-anchor: #78a9ff;
+        --text-anchor-hover: #a6c8ff;
         --text-secondary: #c6c6c6;
         --text-placeholder: #6f6f6f;
         --lines: #393939;

@@ -537,6 +537,13 @@ export function Component<ValueType>(
 }
 
 // SPECIFIC
+export function Anchor(
+    address: ValueObject<Stringifiable>,
+    label: ValueObject<Stringifiable>,
+) {
+    return Text('a', label).setAttr('href', address);
+}
+
 export function Container(
     tagName: keyof HTMLElementTagNameMap,
     ...children: Component<any>[]

@@ -62,6 +62,14 @@ html {
     color: var(--text);
 }
 
+a {
+    color: var(--text-anchor);
+}
+
+a:hover {
+    color: var(--text-anchor-hover);
+}
+
 button,
 input,
 textarea,
