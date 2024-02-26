@@ -2,13 +2,13 @@ import './styles/reset.css';
 import './styles/theme-implementation.css';
 
 import {
-    CSSPropertyNames,
+    CSSPropertyNameMap,
+    PrefixedCSSPropertyNameMap,
     PrefixedCSSPropertyNames,
 } from './assets/css-property-names';
-import { InputTypeMap, InputTypes } from './assets/input-types';
 
-// IMPORTS
 import AccessibilityRoleMap from './assets/roles';
+import { InputTypeMap } from './assets/input-types';
 
 /*
 	UTILITY
@@ -368,11 +368,11 @@ export interface CheckableComponent<T> extends Component<T> {
 export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
 
 /**
- * Element with each key of the PrefixedCSSPropertyNames map being a function to set that style.
- * For instance, Styleable.cssWidth(value: Stringifiable) would set the width style.
+ * Element with methods to easily modify styles.
+ * For instance, Styleable.cssWidth(value: ValueObject<Stringifiable>) would set the width style.
  */
 export type Styleable = {
-    [property in keyof typeof PrefixedCSSPropertyNames]: (
+    [property in keyof PrefixedCSSPropertyNameMap]: (
         value: ValueObject<Stringifiable>,
     ) => Component<any>;
 };
@@ -389,8 +389,8 @@ export function Component<ValueType>(
     //styles
     Object.entries(PrefixedCSSPropertyNames).forEach((entry) => {
         const prefixedCssPropertyName =
-            entry[0] as keyof typeof PrefixedCSSPropertyNames;
-        const cssPropertyName = entry[1] as keyof typeof CSSPropertyNames;
+            entry[0] as keyof PrefixedCSSPropertyNameMap;
+        const cssPropertyName = entry[1] as keyof CSSPropertyNameMap;
 
         component[prefixedCssPropertyName] = (
             newStyle: ValueObject<Stringifiable>,
