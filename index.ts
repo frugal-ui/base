@@ -1,9 +1,13 @@
 import './styles/reset.css';
 import './styles/theme-implementation.css';
 
+import {
+    CSSPropertyNames,
+    PrefixedCSSPropertyNames,
+} from './assets/css-property-names';
+
 // IMPORTS
 import AccessibilityRoleMap from './assets/roles';
-import { PrefixedCSSPropertyNames } from './assets/css-property-names';
 
 /*
 	UTILITY
@@ -232,21 +236,6 @@ export class SelectionState<T> extends State<T[]> {
 */
 // TYPES
 /**
- * Element with each key of the PrefixedCSSPropertyNames map being a function to set that style.
- * For instance, Styleable.cssWidth(value: Stringifiable) would set the width style.
- */
-export type Styleable = {
-    [property in keyof typeof PrefixedCSSPropertyNames]: (
-        value: Stringifiable,
-    ) => Component<any>;
-};
-/**
- * HTML Event handler
- */
-export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
-
-// COMONENT
-/**
  * HTML Element
  */
 export interface Component<V> extends HTMLElement, Styleable {
@@ -372,6 +361,22 @@ export interface CheckableComponent<T> extends Component<T> {
     checked: boolean;
 }
 
+/**
+ * HTML Event handler
+ */
+export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
+
+/**
+ * Element with each key of the PrefixedCSSPropertyNames map being a function to set that style.
+ * For instance, Styleable.cssWidth(value: Stringifiable) would set the width style.
+ */
+export type Styleable = {
+    [property in keyof typeof PrefixedCSSPropertyNames]: (
+        value: ValueObject<Stringifiable>,
+    ) => Component<any>;
+};
+
+// IMPLEMENTATION
 export function Component<ValueType>(
     tagName: keyof HTMLElementTagNameMap,
 ): Component<ValueType> {
@@ -381,11 +386,18 @@ export function Component<ValueType>(
     ) as unknown as Component<ValueType>;
 
     //styles
-    Object.entries(PrefixedCSSPropertyNames).forEach((prefixedCSSProperty) => {
-        const componentAsAny = component as any;
-        const [prefixed, normal] = prefixedCSSProperty;
-        componentAsAny[prefixed] = (newStyle: Stringifiable) => {
-            componentAsAny.style[normal] = newStyle;
+    Object.entries(PrefixedCSSPropertyNames).forEach((entry) => {
+        const prefixedCssPropertyName =
+            entry[0] as keyof typeof PrefixedCSSPropertyNames;
+        const cssPropertyName = entry[1] as keyof typeof CSSPropertyNames;
+
+        component[prefixedCssPropertyName] = (
+            newStyle: ValueObject<Stringifiable>,
+        ) => {
+            const state = unwrapState(newStyle);
+            component.subscribeToState(state, (newValue) => {
+                (component.style as any)[cssPropertyName] = newValue;
+            });
             return component;
         };
     });
