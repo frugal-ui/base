@@ -1,3 +1,4 @@
 **/*.js
 **/*.sw*
 bun.lockb
+.DS_Store

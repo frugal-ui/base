@@ -35,6 +35,11 @@ hr {
     border-bottom: var(--line-width) var(--line-style) var(--lines);
 }
 
+.icons {
+    width: var(--icon-size);
+    height: var(--icon-size);
+}
+
 /* paddings */
 header,
 main,
@@ -121,6 +126,10 @@ select,
     background: var(--destructive-active);
 }
 
+.icons {
+    background-color: var(--text);
+}
+
 .images-background {
     background-color: var(--surface);
 }
@@ -136,6 +145,11 @@ select,
 }
 
 /* other */
+.icons {
+    -webkit-mask-size: cover;
+    mask-size: cover;
+}
+
 .images-background {
     background-size: cover;
     background-position: center;

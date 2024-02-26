@@ -41,6 +41,8 @@
     --outline-width: 4px;
     --line-style: solid;
     --glass-blur: 0px;
+
+    --icon-size: 1rem;
 }
 
 /* paddings */

@@ -582,21 +582,37 @@ export function HStack(...children: Component<any>[]): Component<unknown> {
 }
 
 /**
+ * Icon (image with specific styles).
+ * FrugalUI does not include an icon library, you have to obtain your icons manually.
+ *
+ * -> The IBM carbon icon library is recommened.
+ * -> SVGs are strongly recommended here.
+ * @param path
+ */
+export function Icon(path: ValueObject<string>): Component<unknown> {
+    const pathState = unwrapState(path);
+    const url = pathState.createProxy({
+        convertToProxy: (path) => `url('${path}')`,
+    });
+    return Component('div').addToClass('icons').cssWebkitMaskImage(url);
+}
+
+/**
  * Image.
  * Behind the scenes, this is a div with a background image.
  * The image is set to size:cover and position:center.
- * 
- * You have to set the height manually.
+ *
+ * -> You have to set the height manually.
  * @param src Source of the image, relative to index.css
  */
 export function Image(src: ValueObject<string>): Component<unknown> {
     const srcState = unwrapState(src);
-    const backgroundStyle = srcState.createProxy({
-        convertToProxy: (originalValue) => `url('${originalValue}')`,
+    const url = srcState.createProxy({
+        convertToProxy: (src) => `url('${src}')`,
     });
 
     return Component('div')
-        .cssBackgroundImage(backgroundStyle)
+        .cssBackgroundImage(url)
         .addToClass('images-background');
 }
 
