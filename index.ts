@@ -537,14 +537,24 @@ export function Component<ValueType>(
 }
 
 // SPECIFIC
-export function Container(tagName: keyof HTMLElementTagNameMap, ...children: Component<any>[]): Component<unknown> {
+export function Container(
+    tagName: keyof HTMLElementTagNameMap,
+    ...children: Component<any>[]
+): Component<unknown> {
     return Component(tagName).addItems(...children);
 }
 
 export function HStack(...children: Component<any>[]): Component<unknown> {
-    return Container("div", ...children).addToClass("stacks-horizontal");
+    return Container('div', ...children).addToClass('stacks-horizontal');
+}
+
+export function Text(
+    tagName: keyof HTMLElementTagNameMap,
+    value: ValueObject<Stringifiable>,
+) {
+    return Component(tagName).setText(value);
 }
 
 export function VStack(...children: Component<any>[]): Component<unknown> {
-    return Container("div", ...children).addToClass("stacks-vertical");
+    return Container('div', ...children).addToClass('stacks-vertical');
 }
