@@ -161,6 +161,10 @@ label.surface {
     height: var(--icon-size);
 }
 
+.grid {
+    display: grid;
+}
+
 label {
     display: flex;
     flex-direction: column;

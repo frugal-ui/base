@@ -594,6 +594,28 @@ export function Container(
 }
 
 /**
+ * Div with display: grid propery.
+ * The column width is between the provided minimum and 1fr.
+ * Columns are repeated using auto-fit.
+ * @param minimumColumnWidth Minimum width of column.
+ */
+export function Grid(
+    minimumColumnWidth: ValueObject<Stringifiable>,
+    ...children: Component<any>[]
+): Component<unknown> {
+    const minState = unwrapState(minimumColumnWidth);
+
+    const columnStyle = minState.createProxy({
+        convertToProxy: (minWidth) =>
+            `repeat(auto-fit, minmax(${minWidth}, 1fr))`,
+    });
+
+    return Container('div', ...children)
+        .addToClass('grid')
+        .cssGridTemplateColumns(columnStyle);
+}
+
+/**
  * Container that horizontally stacks its children via flexbox
  * @param children Children to append
  */
@@ -692,7 +714,7 @@ export function Textarea(
 }
 
 /**
- * Div with surface background color.
+ * Div with background: var(--surface) property.
  * @param children Children to append
  */
 export function Tile(...children: Component<any>[]): Component<unknown> {
