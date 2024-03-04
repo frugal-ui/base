@@ -562,6 +562,25 @@ export function Anchor(
     return Text('a', label).setAttr('href', address);
 }
 
+export enum ButtonStyles {
+    Standard = 'standard',
+    Primary = 'primary',
+    Destructive = 'destructive',
+}
+/**
+ * HTML Button element
+ * @param text Text in the button
+ * @param action Action to perform when clicked
+ * @param style Style of button
+ */
+export function Button(
+    text: ValueObject<Stringifiable>,
+    action: () => void,
+    style: ButtonStyles = ButtonStyles.Standard,
+): Component<unknown> {
+    return Text('button', text).on('click', action).addToClass(style);
+}
+
 /**
  * Generic container of the defined type (tag)
  * @param tagName TagName of the container
