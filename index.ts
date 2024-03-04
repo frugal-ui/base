@@ -673,7 +673,7 @@ export function Label(
 export function Text(
     tagName: keyof HTMLElementTagNameMap,
     value: ValueObject<Stringifiable>,
-) {
+): Component<unknown> {
     return Component(tagName).setText(value);
 }
 
@@ -685,10 +685,18 @@ export function Text(
 export function Textarea(
     value: ValueObject<Stringifiable>,
     placeholder: ValueObject<string> = '',
-) {
+): Component<string> {
     return Component('textarea')
         .setValue(value)
-        .setAttr('placeholder', placeholder);
+        .setAttr('placeholder', placeholder) as Component<string>;
+}
+
+/**
+ * Div with surface background color.
+ * @param children Children to append
+ */
+export function Tile(...children: Component<any>[]): Component<unknown> {
+    return Container('div', ...children).addToClass('surface');
 }
 
 /**
