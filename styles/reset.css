@@ -18,6 +18,7 @@
     background: none;
 
     list-style: none;
+    resize: none;
 }
 
 html * {

@@ -636,10 +636,16 @@ export function Image(src: ValueObject<string>): Component<unknown> {
         .addToClass('images-background');
 }
 
+/**
+ * HTML Input
+ * @param type Type of input
+ * @param value Value of input
+ * @param placeholder Placeholder
+ */
 export function Input<T>(
     type: keyof InputTypeMap,
     value: ValueObject<T>,
-    placeholder?: ValueObject<string>,
+    placeholder: ValueObject<string> = '',
 ): Component<T> {
     return Component('input')
         .setAttr('type', type)
@@ -669,6 +675,20 @@ export function Text(
     value: ValueObject<Stringifiable>,
 ) {
     return Component(tagName).setText(value);
+}
+
+/**
+ * HTML Textarea
+ * @param value Value of textarea
+ * @param placeholder Placeholder
+ */
+export function Textarea(
+    value: ValueObject<Stringifiable>,
+    placeholder: ValueObject<string> = '',
+) {
+    return Component('textarea')
+        .setValue(value)
+        .setAttr('placeholder', placeholder);
 }
 
 /**
