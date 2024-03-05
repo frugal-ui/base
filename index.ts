@@ -185,9 +185,9 @@ export class State<T> {
  * Has special methods for adding and deleting items.
  * Allows to efficiently catch the addition or removal of items.
  */
-export class ListModel<T> extends State<Set<T>> {
+export class ListModel<T extends Identifiable> extends State<Set<T>> {
     private additionHandlers = new Set<StateSubscription<T>>();
-    private deletionHandlers = new Map<T, StateSubscription<T>>();
+    private deletionHandlers = new Map<UUID, StateSubscription<T>>();
 
     constructor() {
         super(new Set<T>());
@@ -211,10 +211,11 @@ export class ListModel<T> extends State<Set<T>> {
     delete(...items: T[]) {
         items.forEach((item) => {
             this.value.delete(item);
+            const uuid = item.uuid;
 
-            if (!this.deletionHandlers.has(item)) return;
-            this.deletionHandlers.get(item)!(item);
-            this.deletionHandlers.delete(item);
+            if (!this.deletionHandlers.has(uuid)) return;
+            this.deletionHandlers.get(uuid)!(item);
+            this.deletionHandlers.delete(uuid);
         });
     }
 
@@ -232,7 +233,7 @@ export class ListModel<T> extends State<Set<T>> {
      * @param handler Function to call when item is removed
      */
     handleRemoval(item: T, handler: StateSubscription<T>) {
-        this.deletionHandlers.set(item, handler);
+        this.deletionHandlers.set(item.uuid, handler);
     }
 }
 
@@ -720,7 +721,9 @@ export function Image(src: ValueObject<string>): GenericComponent {
         convertToProxy: (src) => `url('${src}')`,
     });
 
-    return Component('div').cssBackgroundImage(url).addToClass('images-background');
+    return Component('div')
+        .cssBackgroundImage(url)
+        .addToClass('images-background');
 }
 
 /**
@@ -757,7 +760,7 @@ export function Label(
  * @param model ListState to view items of
  * @param map Function that maps each item to it's view
  */
-export function ListView<T>(
+export function ListView<T extends Identifiable>(
     model: ListModel<T>,
     map: (item: T) => Component<any>,
 ): GenericComponent {
