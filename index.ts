@@ -14,8 +14,13 @@ import { InputTypeMap } from './assets/input-types';
 	UTILITY
 */
 /**
- * Stringifiable object.
- * Has .toString() => string method.
+ * Has a UUID
+ */
+export interface Identifiable {
+    uuid: UUID;
+}
+/**
+ * Has .toString() => string method
  */
 export interface Stringifiable {
     toString(): string;
