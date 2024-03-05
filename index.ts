@@ -418,6 +418,11 @@ export interface Component<V> extends HTMLElement, Styleable {
 }
 
 /**
+ * Component with unknown value
+ */
+export type GenericComponent = Component<unknown>;
+
+/**
  * Component with checked: boolean property.
  */
 export interface CheckableComponent<T> extends Component<T> {
@@ -620,7 +625,7 @@ export function Component<ValueType>(
 export function Anchor(
     address: ValueObject<Stringifiable>,
     label: ValueObject<Stringifiable>,
-): Component<unknown> {
+): GenericComponent {
     return Text('a', label).setAttr('href', address);
 }
 
@@ -639,7 +644,7 @@ export function Button(
     text: ValueObject<Stringifiable>,
     action: () => void,
     style: ButtonStyles = ButtonStyles.Standard,
-): Component<unknown> {
+): GenericComponent {
     return Text('button', text).on('click', action).addToClass(style);
 }
 
@@ -651,7 +656,7 @@ export function Button(
 export function Container(
     tagName: keyof HTMLElementTagNameMap,
     ...children: Component<any>[]
-): Component<unknown> {
+): GenericComponent {
     return Component(tagName).addItems(...children);
 }
 
@@ -664,7 +669,7 @@ export function Container(
 export function Grid(
     minimumColumnWidth: ValueObject<Stringifiable>,
     ...children: Component<any>[]
-): Component<unknown> {
+): GenericComponent {
     const minState = unwrapState(minimumColumnWidth);
 
     const columnStyle = minState.createProxy({
@@ -681,7 +686,7 @@ export function Grid(
  * Container that horizontally stacks its children via flexbox
  * @param children Children to append
  */
-export function HStack(...children: Component<any>[]): Component<unknown> {
+export function HStack(...children: Component<any>[]): GenericComponent {
     return Container('div', ...children).addToClass('stacks-horizontal');
 }
 
@@ -693,7 +698,7 @@ export function HStack(...children: Component<any>[]): Component<unknown> {
  * -> SVGs are strongly recommended here.
  * @param path
  */
-export function Icon(path: ValueObject<string>): Component<unknown> {
+export function Icon(path: ValueObject<string>): GenericComponent {
     const pathState = unwrapState(path);
     const url = pathState.createProxy({
         convertToProxy: (path) => `url('${path}')`,
@@ -709,15 +714,13 @@ export function Icon(path: ValueObject<string>): Component<unknown> {
  * -> You have to set the height manually.
  * @param src Source of the image, relative to index.css
  */
-export function Image(src: ValueObject<string>): Component<unknown> {
+export function Image(src: ValueObject<string>): GenericComponent {
     const srcState = unwrapState(src);
     const url = srcState.createProxy({
         convertToProxy: (src) => `url('${src}')`,
     });
 
-    return Component('div')
-        .cssBackgroundImage(url)
-        .addToClass('images-background');
+    return Component('div').cssBackgroundImage(url).addToClass('images-background');
 }
 
 /**
@@ -745,24 +748,24 @@ export function Input<T>(
 export function Label(
     text: ValueObject<string>,
     labeledItem: Component<any>,
-): Component<unknown> {
+): GenericComponent {
     return Text('label', text).addItems(labeledItem);
 }
 
 /**
  * Div that dynamically lists items of a ListState.
- * @param listState ListState to view items of
+ * @param model ListState to view items of
  * @param map Function that maps each item to it's view
  */
-export function List<T>(
-    listState: ListModel<T>,
+export function ListView<T>(
+    model: ListModel<T>,
     map: (item: T) => Component<any>,
-): Component<unknown> {
-    return Container('div').access((self) => {
-        listState.handleNewItem((newItem) => {
-            const itemView = map(newItem);
-            listState.handleRemoval(newItem, () => itemView.remove());
-            self.addItems(itemView);
+): GenericComponent {
+    return Container('div').access((listView) => {
+        model.handleNewItem((item) => {
+            const itemView = map(item);
+            model.handleRemoval(item, () => itemView.remove());
+            listView.addItems(itemView);
         });
     });
 }
@@ -782,7 +785,7 @@ export function Separator() {
 export function Text(
     tagName: keyof HTMLElementTagNameMap,
     value: ValueObject<Stringifiable>,
-): Component<unknown> {
+): GenericComponent {
     return Component(tagName).setText(value);
 }
 
@@ -804,7 +807,7 @@ export function Textarea(
  * Div with background: var(--surface) property.
  * @param children Children to append
  */
-export function Tile(...children: Component<any>[]): Component<unknown> {
+export function Tile(...children: Component<any>[]): GenericComponent {
     return Container('div', ...children).addToClass('surface');
 }
 
@@ -812,6 +815,6 @@ export function Tile(...children: Component<any>[]): Component<unknown> {
  * Container that vertically stacks its children via flexbox
  * @param children Children to append
  */
-export function VStack(...children: Component<any>[]): Component<unknown> {
+export function VStack(...children: Component<any>[]): GenericComponent {
     return Container('div', ...children).addToClass('stacks-vertical');
 }
