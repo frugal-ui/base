@@ -179,6 +179,41 @@ export class State<T> {
     }
 }
 
+// LIST
+export class ListState<T> extends State<Set<T>> {
+    private additionHandlers = new Set<StateSubscription<T>>();
+    private deletionHandlers = new Map<T, StateSubscription<T>>();
+
+    constructor() {
+        super(new Set<T>());
+    }
+
+    add(...items: T[]) {
+        items.forEach((item) => {
+            this.value.add(item);
+            this.additionHandlers.forEach((handler) => handler(item));
+        });
+    }
+
+    delete(...items: T[]) {
+        items.forEach((item) => {
+            this.value.delete(item);
+
+            if (!this.deletionHandlers.has(item)) return;
+            this.deletionHandlers.get(item)!(item);
+            this.deletionHandlers.delete(item);
+        });
+    }
+
+    handleNewItem(handler: StateSubscription<T>) {
+        this.additionHandlers.add(handler);
+    }
+
+    handleRemoval(item: T, handler: StateSubscription<T>) {
+        this.deletionHandlers.set(item, handler);
+    }
+}
+
 // SELECTION
 /**
  * State whose value is a Set<T> representing the selected items.
@@ -690,6 +725,24 @@ export function Label(
     labeledItem: Component<any>,
 ): Component<unknown> {
     return Text('label', text).addItems(labeledItem);
+}
+
+/**
+ * Div that dynamically lists items of a ListState.
+ * @param listState ListState to view items of
+ * @param map Function that maps each item to it's view
+ */
+export function List<T>(
+    listState: ListState<T>,
+    map: (item: T) => Component<any>,
+): Component<unknown> {
+    return Container('div').access((self) => {
+        listState.handleNewItem((newItem) => {
+            const itemView = map(newItem);
+            listState.handleRemoval(newItem, () => itemView.remove());
+            self.addItems(itemView);
+        });
+    });
 }
 
 /**
