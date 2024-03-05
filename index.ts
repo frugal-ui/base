@@ -688,6 +688,13 @@ export function Label(
 }
 
 /**
+ * Horizontal line (HTML hr)
+ */
+export function Separator() {
+    return Component('hr');
+}
+
+/**
  * Generic text of the defined type (tag)
  * @param tagName TagName of the text
  * @param value Text to be displayed
