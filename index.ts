@@ -180,7 +180,12 @@ export class State<T> {
 }
 
 // LIST
-export class ListState<T> extends State<Set<T>> {
+/**
+ * State<T> containing a Set<T>.
+ * Has special methods for adding and deleting items.
+ * Allows to efficiently catch the addition or removal of items.
+ */
+export class ListModel<T> extends State<Set<T>> {
     private additionHandlers = new Set<StateSubscription<T>>();
     private deletionHandlers = new Map<T, StateSubscription<T>>();
 
@@ -188,6 +193,10 @@ export class ListState<T> extends State<Set<T>> {
         super(new Set<T>());
     }
 
+    /**
+     * Add items to the ListModel
+     * @param items Items to add
+     */
     add(...items: T[]) {
         items.forEach((item) => {
             this.value.add(item);
@@ -195,6 +204,10 @@ export class ListState<T> extends State<Set<T>> {
         });
     }
 
+    /**
+     * Remove items from the ListModel
+     * @param items Items to remove
+     */
     delete(...items: T[]) {
         items.forEach((item) => {
             this.value.delete(item);
@@ -205,10 +218,19 @@ export class ListState<T> extends State<Set<T>> {
         });
     }
 
+    /**
+     * Add handler for new items
+     * @param handler Function to call for every new item
+     */
     handleNewItem(handler: StateSubscription<T>) {
         this.additionHandlers.add(handler);
     }
 
+    /**
+     * Add handler for when a specific item is removed
+     * @param item Item to handle removal of
+     * @param handler Function to call when item is removed
+     */
     handleRemoval(item: T, handler: StateSubscription<T>) {
         this.deletionHandlers.set(item, handler);
     }
@@ -220,7 +242,7 @@ export class ListState<T> extends State<Set<T>> {
  * Allows to select and deselect items of type T.
  * Selecting and deselecting items will call subscriptions.
  */
-export class SelectionState<T> extends State<T[]> {
+export class SelectionModel<T> extends State<T[]> {
     private _selection = new Set<T>();
 
     constructor() {
@@ -733,7 +755,7 @@ export function Label(
  * @param map Function that maps each item to it's view
  */
 export function List<T>(
-    listState: ListState<T>,
+    listState: ListModel<T>,
     map: (item: T) => Component<any>,
 ): Component<unknown> {
     return Container('div').access((self) => {
