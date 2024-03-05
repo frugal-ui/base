@@ -76,6 +76,11 @@ select,
     padding: var(--padding-v-md) var(--padding-h-inner);
 }
 
+/* spacing */
+.grid {
+    gap: var(--spacing-01);
+}
+
 /* colors */
 html {
     background: var(--background);
