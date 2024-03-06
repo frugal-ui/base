@@ -765,13 +765,15 @@ export function ListView<T extends Identifiable>(
     model: ListModel<T>,
     map: (item: T) => Component<any>,
 ): GenericComponent {
-    return Container('div').access((listView) => {
-        model.handleNewItem((item) => {
-            const itemView = map(item);
-            model.handleRemoval(item, () => itemView.remove());
-            listView.addItems(itemView);
+    return Container('div')
+        .addToClass('list-view')
+        .access((listView) => {
+            model.handleNewItem((item) => {
+                const itemView = map(item);
+                model.handleRemoval(item, () => itemView.remove());
+                listView.addItems(itemView);
+            });
         });
-    });
 }
 
 /**
@@ -832,7 +834,7 @@ export function VStack(...children: Component<any>[]): GenericComponent {
  */
 export class Stage {
     scenes = new Set<Scene<any>>();
-    view = Container('div');
+    view = Container('div').addToClass('stage');
 
     /**
      * Builds a Scene and adds it to the Stage
@@ -881,7 +883,7 @@ export class Scene<T> {
     };
 
     constructor(data: T, stage: Stage) {
-        this.view = this.draw(data);
+        this.view = this.draw(data).addToClass('scene');
         this.stage = stage;
     }
 }

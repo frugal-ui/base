@@ -77,7 +77,8 @@ select,
 }
 
 /* spacing */
-.grid {
+.grid,
+.list-view {
     gap: var(--spacing-01);
 }
 
@@ -87,8 +88,12 @@ hr {
 
 /* colors */
 html {
-    background: var(--background);
     color: var(--text);
+}
+
+html,
+.stage .scene {
+    background: var(--background);
 }
 
 a {
@@ -192,6 +197,11 @@ label.surface input {
     padding-bottom: var(--padding-v-lg);
 }
 
+.list-view {
+    display: flex;
+    flex-direction: column;
+}
+
 .stacks-vertical,
 .stacks-horizontal {
     display: flex;
@@ -199,4 +209,20 @@ label.surface input {
 
 .stacks-vertical {
     flex-direction: column;
+}
+
+.stage {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+
+    width: 100%;
+    height: 100%;
+}
+
+.scene {
+    grid-column-start: 1;
+    grid-row-start: 1;
+    grid-column-end: 2;
+    grid-row-end: 2;
 }
