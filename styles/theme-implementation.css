@@ -181,7 +181,7 @@ option:checked:not([disabled]):active,
 }
 
 .images-background {
-    background-color: var(--surface);
+    background: var(--surface);
 }
 
 label,
