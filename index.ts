@@ -20,6 +20,10 @@ export interface Identifiable {
     uuid: UUID;
 }
 /**
+ * Key-value-pair with key being a string
+ */
+export type LabeledMap<T> = { [key: string]: T };
+/**
  * Has .toString() => string method
  */
 export interface Stringifiable {
@@ -240,7 +244,7 @@ export class ListModel<T extends Identifiable> extends State<Set<T>> {
 // SELECTION
 /**
  * State whose value is a Set<T> representing the selected items.
- * Allows to select and deselect items of type T.
+ * Allows to select and deselect multiple items of type T.
  * Selecting and deselecting items will call subscriptions.
  */
 export class SelectionModel<T> extends State<Set<T>> {
@@ -327,31 +331,34 @@ export interface Component<V> extends HTMLElement, Styleable {
     /**
      * Sets HTML attribute
      */
-    setAttr: (key: string, value?: ValueObject<Stringifiable>) => this;
+    setAttr: (key: Stringifiable, value?: ValueObject<Stringifiable>) => this;
     /**
      * Removes HTML attribute
      */
-    rmAttr: (key: string) => this;
+    rmAttr: (key: Stringifiable) => this;
     /**
      * Toggles HTML attribute based on condition
      */
-    toggleAttr: (key: string, condition: ValueObject<boolean>) => this;
+    toggleAttr: (key: Stringifiable, condition: ValueObject<boolean>) => this;
     /**
      * Resets HTML className
      */
-    addToClass: (value: string) => this;
+    addToClass: (value: Stringifiable) => this;
     /**
      * Toggles HTML className
      */
-    resetClasses: (value: string) => this;
+    resetClasses: (value: Stringifiable) => this;
     /**
      * Removes HTML className
      */
-    removeFromClass: (value: string) => this;
+    removeFromClass: (value: Stringifiable) => this;
     /**
      * Toggles HTML className based on condition
      */
-    toggleClass: (value: string, condition: ValueObject<boolean>) => this;
+    toggleClass: (
+        value: Stringifiable,
+        condition: ValueObject<boolean>,
+    ) => this;
 
     //children
     /**
@@ -491,21 +498,21 @@ export function Component<ValueType>(
         const state = unwrapState(value);
 
         component.subscribeToState(state, (newValue) => {
-            component.setAttribute(key, newValue.toString());
+            component.setAttribute(key.toString(), newValue.toString());
         });
 
         return component;
     };
     component.rmAttr = (key) => {
-        component.removeAttribute(key);
+        component.removeAttribute(key.toString());
         return component;
     };
     component.toggleAttr = (key, condition) => {
         const subscribe = unwrapState(condition);
 
         component.subscribeToState(subscribe, (newValue) => {
-            if (newValue == true) component.setAttribute(key, '');
-            else component.removeAttribute(key);
+            if (newValue == true) component.setAttribute(key.toString(), '');
+            else component.removeAttribute(key.toString());
         });
 
         return component;
@@ -515,18 +522,18 @@ export function Component<ValueType>(
         return component;
     };
     component.removeFromClass = (className) => {
-        component.classList.remove(className);
+        component.classList.remove(className.toString());
         return component;
     };
     component.addToClass = (className) => {
-        component.classList.add(className);
+        component.classList.add(className.toString());
         return component;
     };
     component.toggleClass = (className, condition) => {
         const state = unwrapState(condition);
 
         component.subscribeToState(state, (newValue) => {
-            component.classList.toggle(className, newValue);
+            component.classList.toggle(className.toString(), newValue);
         });
 
         return component;
@@ -766,6 +773,37 @@ export function ListView<T extends Identifiable>(
                 listView.addItems(itemView);
             });
         });
+}
+
+/**
+ * HTML OptGroup
+ * @param label Label of the OptGroup
+ * @param children Options to add
+ */
+export function OptGroup(
+    label: ValueObject<Stringifiable>,
+    ...children: GenericComponent[]
+): GenericComponent {
+    return Container('optgroup', ...children).setAttr('label', label);
+}
+
+/**
+ * HTML Option
+ * @param label Text to display
+ * @param value Value of the option
+ */
+export function Option(
+    label: ValueObject<Stringifiable>,
+    value: ValueObject<Stringifiable>,
+): GenericComponent {
+    return Text('option', label).setAttr('value', value);
+}
+
+export function Select(
+    value: ValueObject<string>,
+    ...children: GenericComponent[]
+): GenericComponent {
+    return Container('select', ...children).setValue(value);
 }
 
 /**
