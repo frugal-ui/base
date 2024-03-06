@@ -50,9 +50,14 @@ hr {
     background-position: center;
 }
 
-label {
+label,
+optgroup {
     font-size: small;
     text-indent: var(--padding-h-inner);
+}
+
+option {
+    text-indent: initial;
 }
 
 /* paddings */
@@ -71,7 +76,8 @@ p,
 button,
 input,
 textarea,
-select,
+select:not([size]):not([multiple]),
+option,
 .padding-inner {
     padding: var(--padding-v-md) var(--padding-h-inner);
 }
@@ -87,7 +93,8 @@ hr {
 }
 
 /* colors */
-html {
+html,
+option {
     color: var(--text);
 }
 
@@ -114,11 +121,21 @@ select,
     border-color: var(--surface-border);
 }
 
-:is(button, select, .surface.clickable):hover {
+:is(
+        button,
+        select:not([size]):not([multiple]),
+        .surface.clickable,
+        option:not([disabled])
+    ):hover {
     background: var(--surface-hover);
 }
 
-:is(button, select, .surface.clickable):active,
+:is(
+        button,
+        select:not([size]):not([multiple]),
+        .surface.clickable,
+        option:not([disabled])
+    ):active,
 :is(input, textarea):focus {
     background: var(--surface-active);
 }
@@ -128,16 +145,19 @@ label.surface:has(:focus),
     outline-color: var(--primary);
 }
 
+option:checked,
 :is(button, input, textarea, select, .surface).primary {
     background: var(--primary);
     color: var(--on-primary);
     border-color: var(--primary-border);
 }
 
+option:checked:not([disabled]):hover,
 :is(button, select, .surface.clickable).primary:hover {
     background: var(--primary-hover);
 }
 
+option:checked:not([disabled]):active,
 :is(button, select, .surface.clickable).primary:active {
     background: var(--primary-active);
 }
@@ -165,7 +185,8 @@ label.surface:has(:focus),
 }
 
 label,
-label.surface {
+label.surface,
+optgroup {
     color: var(--text-secondary);
 }
 
@@ -185,6 +206,14 @@ body {
 
 .grid {
     display: grid;
+}
+
+optgroup:not(:first-child) {
+    padding-top: var(--spacing-03);
+}
+
+optgroup {
+    padding-bottom: var(--spacing-03);
 }
 
 label {
