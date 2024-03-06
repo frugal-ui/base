@@ -238,17 +238,14 @@ export class ListModel<T extends Identifiable> extends State<Set<T>> {
 }
 
 // SELECTION
-//TODO rebuild
 /**
  * State whose value is a Set<T> representing the selected items.
  * Allows to select and deselect items of type T.
  * Selecting and deselecting items will call subscriptions.
  */
-export class SelectionModel<T> extends State<T[]> {
-    private _selection = new Set<T>();
-
+export class SelectionModel<T> extends State<Set<T>> {
     constructor() {
-        super([]);
+        super(new Set<T>());
     }
 
     /**
@@ -256,23 +253,23 @@ export class SelectionModel<T> extends State<T[]> {
      * @param items Items to add to selection
      */
     select(...items: T[]): void {
-        items.forEach((item) => this._selection.add(item));
-        this.update();
+        items.forEach((item) => this.value.add(item));
+        this.callSubscriptions();
     }
     /**
      * Removes items from the selection and call subscriptions
      * @Param items Items to remove from selection
      */
     deselect(...items: T[]): void {
-        items.forEach((item) => this._selection.delete(item));
-        this.update();
+        items.forEach((item) => this.value.delete(item));
+        this.callSubscriptions();
     }
     /**
      * Clears the selection and call subscriptions and call subscriptions
      */
     clear(): void {
-        this._selection.clear();
-        this.update();
+        this.value.clear();
+        this.callSubscriptions();
     }
 
     /**
@@ -280,19 +277,14 @@ export class SelectionModel<T> extends State<T[]> {
      * @param item Item to check
      */
     checkIsSelected(item: T): boolean {
-        return this._selection.has(item);
+        return this.value.has(item);
     }
     /**
      * Returns selected items
      * @returns All selected items as Array
      */
     getItems(): T[] {
-        return [...this._selection.values()];
-    }
-
-    private update() {
-        // automatically calls subscriptions
-        this.value = this.getItems();
+        return [...this.value.values()];
     }
 }
 
