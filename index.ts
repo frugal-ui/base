@@ -821,3 +821,66 @@ export function Tile(...children: Component<any>[]): GenericComponent {
 export function VStack(...children: Component<any>[]): GenericComponent {
     return Container('div', ...children).addToClass('stacks-vertical');
 }
+
+/*
+    NAVIGATION
+*/
+/**
+ * A stage contains scenes.
+ * Depending on the scene configuration and screen size, one or multiple scenes may be visible at a time.
+ */
+export class Stage {
+    scenes = new Set<Scene<any>>();
+    view = Container('div');
+
+    /**
+     * Builds a Scene and adds it to the Stage
+     * @param constructor Scene constructor
+     * @param data Data to build the scene from
+     */
+    addScene<T>(constructor: typeof Scene<T>, data: T): void {
+        const scene = new constructor(data, this);
+        this.scenes.add(scene);
+        this.view.append(scene.view);
+    }
+
+    /**
+     * Removes a Scene from the Stage
+     * @param scene Scene to remove
+     */
+    closeScene(scene: Scene<any>): void {
+        scene.view.remove();
+        this.scenes.delete(scene);
+    }
+}
+
+/**
+ * Dynamically created container.
+ * Scenes are designed for a certain data type <T>.
+ * When creating a new Scene, data of this type is provided to construct the scene.
+ * Scenes must be added to a Stage.
+ */
+export class Scene<T> {
+    view: GenericComponent;
+    stage: Stage;
+
+    /**
+     * Function that draws the UI
+     * @param data Data used to construct the scene
+     */
+    draw(data: T): GenericComponent {
+        return Text('span', '(empty scene)');
+    }
+
+    /**
+     * Closes this Scene
+     */
+    close = () => {
+        this.stage.closeScene(this);
+    };
+
+    constructor(data: T, stage: Stage) {
+        this.view = this.draw(data);
+        this.stage = stage;
+    }
+}
