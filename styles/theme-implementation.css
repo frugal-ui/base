@@ -19,6 +19,15 @@ select {
 button,
 input,
 textarea,
+select {
+    appearance: none;
+    --webkit-appearance: none;
+    --moz-appearance: none;
+}
+
+button,
+input,
+textarea,
 select,
 .surface {
     border-width: var(--line-width);
@@ -38,11 +47,6 @@ label.surface :focus {
 
 hr {
     border-bottom: var(--line-width) var(--line-style) var(--lines);
-}
-
-.icons {
-    -webkit-mask-size: cover;
-    mask-size: cover;
 }
 
 .images-background {
@@ -176,10 +180,6 @@ option:checked:not([disabled]):active,
     background: var(--destructive-active);
 }
 
-.icons {
-    background-color: var(--text);
-}
-
 .images-background {
     background-color: var(--surface);
 }
@@ -199,7 +199,7 @@ body {
     min-width: 100%;
 }
 
-.icons {
+.icon {
     width: var(--icon-size);
     height: var(--icon-size);
 }
@@ -239,9 +239,26 @@ label.surface input {
     flex-direction: column;
 }
 
+.select-wrapper select:not([size]):not([multiple]) {
+    padding-right: calc(var(--icon-size) * 2);
+}
+
+.select-wrapper select:not([size]):not([multiple]) + .icon {
+    width: 12px;
+    height: 12px;
+    margin-left: calc(-1 * var(--icon-size) * 1.5);
+}
+
+.select-wrapper select:is([size], [multiple]) + .icon {
+    display: none;
+}
+
 .stacks-vertical,
-.stacks-horizontal {
+.stacks-horizontal,
+.icon {
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .stacks-vertical {
@@ -278,4 +295,9 @@ label.surface input {
         grid-column-start: 1;
         grid-column-end: 2;
     }
+}
+
+svg {
+    width: 100%;
+    height: 100%;
 }

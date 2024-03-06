@@ -390,7 +390,7 @@ export interface Component<V> extends HTMLElement, Styleable {
     /**
      * Sets innerHTML
      */
-    setHTML: (text: ValueObject<string>) => this;
+    setHTML: (text: ValueObject<Stringifiable>) => this;
 
     //events
     /**
@@ -591,7 +591,7 @@ export function Component<ValueType>(
         const state = unwrapState(text);
 
         component.subscribeToState(state, (newValue) => {
-            component.innerHTML = newValue;
+            component.innerHTML = newValue.toString();
         });
 
         return component;
@@ -692,19 +692,13 @@ export function HStack(...children: Component<any>[]): GenericComponent {
 }
 
 /**
- * Icon (image with specific styles).
- * FrugalUI does not include an icon library, you have to obtain your icons manually.
- *
- * -> The IBM carbon icon library is recommened.
- * -> SVGs are strongly recommended here.
- * @param path
+ * Icon using SVG code.
+ * @param svgCode Entire SVG code, including the <svg> tag
  */
-export function Icon(path: ValueObject<string>): GenericComponent {
-    const pathState = unwrapState(path);
-    const url = pathState.createProxy({
-        convertToProxy: (path) => `url('${path}')`,
-    });
-    return Component('div').addToClass('icons').cssWebkitMaskImage(url);
+export function Icon(svgCode: ValueObject<Stringifiable>): GenericComponent {
+    const codeState = unwrapState(svgCode);
+
+    return Component('span').setHTML(codeState).addToClass('icon');
 }
 
 /**
@@ -803,7 +797,19 @@ export function Select(
     value: ValueObject<string>,
     ...children: GenericComponent[]
 ): GenericComponent {
-    return Container('select', ...children).setValue(value);
+    return HStack(
+        Container('select', ...children).setValue(value),
+        Icon(`<?xml version="1.0" encoding="UTF-8"?>
+        <svg width="10px" height="5px" viewBox="0 0 10 5" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+            <title>caret--down</title>
+            <desc>Created with Sketch.</desc>
+            <defs></defs>
+            <g id="caret--down" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <polygon id="caret" fill="currentcolor" points="0 0 5 4.99774791 10 0"></polygon>
+            </g>
+        </svg>`),
+    ).addToClass('select-wrapper');
 }
 
 /**
