@@ -238,6 +238,7 @@ export class ListModel<T extends Identifiable> extends State<Set<T>> {
 }
 
 // SELECTION
+//TODO rebuild
 /**
  * State whose value is a Set<T> representing the selected items.
  * Allows to select and deselect items of type T.
