@@ -693,6 +693,7 @@ export function HStack(...children: Component<any>[]): GenericComponent {
 
 /**
  * Icon using SVG code.
+ * Make sure to use currentcolor as stroke color.
  * @param svgCode Entire SVG code, including the <svg> tag
  */
 export function Icon(svgCode: ValueObject<Stringifiable>): GenericComponent {
