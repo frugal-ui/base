@@ -836,6 +836,9 @@ export class Stage {
     scenes = new Set<Scene<any>>();
     view = Container('div').addToClass('stage');
 
+    /**
+     * @param split If true, the first scene will be used as "sidebar" on the left.
+     */
     constructor(split: boolean = false) {
         if (split == true) this.view.addToClass('splitting');
     }
