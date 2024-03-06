@@ -836,6 +836,10 @@ export class Stage {
     scenes = new Set<Scene<any>>();
     view = Container('div').addToClass('stage');
 
+    constructor(split: boolean = false) {
+        if (split == true) this.view.addToClass('splitting');
+    }
+
     /**
      * Builds a Scene and adds it to the Stage
      * @param constructor Scene constructor
