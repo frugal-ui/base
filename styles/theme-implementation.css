@@ -16,6 +16,10 @@ select {
     border-radius: var(--corner-radius);
 }
 
+input[type='radio'] {
+    border-radius: 100%;
+}
+
 button,
 input,
 textarea,
@@ -84,7 +88,7 @@ p,
 button,
 input,
 textarea,
-select:not([size]):not([multiple]),
+select[size='0']:not([multiple]),
 option,
 .padding-inner {
     padding: var(--padding-v-md) var(--padding-h-inner);
@@ -135,7 +139,7 @@ select,
 
 :is(
         button,
-        select:not([size]):not([multiple]),
+        select[size='0']:not([multiple]),
         .surface.clickable,
         option:not([disabled]),
         input[type='checkbox']:not(:checked),
@@ -146,7 +150,7 @@ select,
 
 :is(
         button,
-        select:not([size]):not([multiple]),
+        select[size='0']:not([multiple]),
         .surface.clickable,
         option:not([disabled]),
         input[type='checkbox']:not(:checked),
@@ -275,17 +279,23 @@ label.surface input {
     flex-direction: column;
 }
 
-.select-wrapper select:not([size]):not([multiple]) {
-    padding-right: calc(var(--icon-size) * 2);
+.select-wrapper {
+    position: relative;
 }
 
-.select-wrapper select:not([size]):not([multiple]) + .icon {
+.select-wrapper select[size='0']:not([multiple]) {
+    padding-right: calc(var(--icon-size) * 2.5);
+}
+
+.select-wrapper select[size='0']:not([multiple]) + .icon {
     width: 12px;
     height: 12px;
-    margin-left: calc(-1 * var(--icon-size) * 1.5);
+
+    position: absolute;
+    right: var(--padding-h-inner);
 }
 
-.select-wrapper select:is([size], [multiple]) + .icon {
+.select-wrapper select:not([size='0']):is([size], [multiple]) + .icon {
     display: none;
 }
 

@@ -241,57 +241,6 @@ export class ListModel<T extends Identifiable> extends State<Set<T>> {
     }
 }
 
-// SELECTION
-/**
- * State whose value is a Set<T> representing the selected items.
- * Allows to select and deselect multiple items of type T.
- * Selecting and deselecting items will call subscriptions.
- */
-export class SelectionModel<T> extends State<Set<T>> {
-    constructor() {
-        super(new Set<T>());
-    }
-
-    /**
-     * Adds items to the selection and call subscriptions
-     * @param items Items to add to selection
-     */
-    select(...items: T[]): void {
-        items.forEach((item) => this.value.add(item));
-        this.callSubscriptions();
-    }
-    /**
-     * Removes items from the selection and call subscriptions
-     * @Param items Items to remove from selection
-     */
-    deselect(...items: T[]): void {
-        items.forEach((item) => this.value.delete(item));
-        this.callSubscriptions();
-    }
-    /**
-     * Clears the selection and call subscriptions and call subscriptions
-     */
-    clear(): void {
-        this.value.clear();
-        this.callSubscriptions();
-    }
-
-    /**
-     * Checks if an item is selected
-     * @param item Item to check
-     */
-    checkIsSelected(item: T): boolean {
-        return this.value.has(item);
-    }
-    /**
-     * Returns selected items
-     * @returns All selected items as Array
-     */
-    getItems(): T[] {
-        return [...this.value.values()];
-    }
-}
-
 /*
 	INTERFACE
 */
@@ -840,12 +789,17 @@ export function Option(
     return Text('option', label).setAttr('value', value);
 }
 
+/**
+ * HTML Select
+ * @param value State defining the current value of the selection
+ * @param children Children of the <select> tag
+ */
 export function Select(
     value: ValueObject<string>,
     ...children: GenericComponent[]
 ): GenericComponent {
     return HStack(
-        Container('select', ...children).setValue(value),
+        SelectBox(value, 0, ...children),
         Icon(`<?xml version="1.0" encoding="UTF-8"?>
         <svg width="10px" height="5px" viewBox="0 0 10 5" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
             <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
@@ -857,6 +811,52 @@ export function Select(
             </g>
         </svg>`),
     ).addToClass('select-wrapper');
+}
+
+/**
+ * HTML Select with [size] attribute, will be displayed as list box
+ * @param value State defining the current value of the selection
+ * @param size Number of options to show at a time
+ * @param children Children of the <select> tag
+ */
+export function SelectBox(
+    value: ValueObject<string>,
+    size: ValueObject<number>,
+    ...children: GenericComponent[]
+): GenericComponent {
+    return Container('select', ...children)
+        .setValue(value)
+        .setAttr('size', size);
+}
+
+/**
+ Radio
+ * @param selection State defining the current value of the radio group
+ * @param name Name of radio group
+ * @param label Text to display
+ * @param value Value attribute
+ */
+export function Radio(
+    selection: State<string>,
+    name: ValueObject<Stringifiable>,
+    label: ValueObject<Stringifiable>,
+    value: ValueObject<Stringifiable>,
+): GenericComponent {
+    return Label(
+        label,
+        Input('radio', value)
+            .setAttr('name', name)
+            .subscribeToState(
+                selection,
+                (newValue, self) =>
+                    ((self as any as HTMLInputElement).checked =
+                        newValue == value),
+            )
+            .on('change', (self) => {
+                if ((self as any as HTMLInputElement).checked)
+                    selection.value = value.toString();
+            }),
+    ).addToClass('has-checkbox-or-radio');
 }
 
 /**
