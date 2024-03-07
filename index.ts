@@ -816,8 +816,15 @@ export function Select(
 /**
  * Horizontal line (HTML hr)
  */
-export function Separator() {
+export function Separator(): GenericComponent {
     return Component('hr');
+}
+
+/**
+ * Flexibly takes up all remaining space
+ */
+export function Spacer(): GenericComponent {
+    return Component('span').addToClass('spacer');
 }
 
 /**
