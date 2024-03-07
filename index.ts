@@ -628,19 +628,32 @@ export function Checkbox(
 
     return Label(
         label,
-        Input('checkbox', value)
-            .subscribeToState(
-                checkedState,
-                (checked, self) =>
-                    ((self as any as HTMLInputElement).checked = checked),
-            )
-            .on(
-                'change',
-                (self) =>
-                    (checkedState.value = (
-                        self as any as HTMLInputElement
-                    ).checked),
-            ),
+        Container(
+            'div',
+            Input('checkbox', value)
+                .subscribeToState(
+                    checkedState,
+                    (newValue, self) =>
+                        ((self as any as HTMLInputElement).checked = newValue),
+                )
+                .on(
+                    'change',
+                    (self) =>
+                        (checkedState.value = (
+                            self as any as HTMLInputElement
+                        ).checked),
+                ),
+            Icon(`<?xml version="1.0" encoding="UTF-8"?>
+            <svg width="10px" height="8px" viewBox="0 0 10 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+                <title>checkmark</title>
+                <desc>Created with Sketch.</desc>
+                <defs></defs>
+                <g id="checkmark" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <polygon id="Path-7" fill="currentcolor" fill-rule="nonzero" points="8.49778895 5.32907052e-15 10 1.50221105 3.67222048 7.82999057 1.19015908e-13 4.1577701 1.50221105 2.65555905 3.67222048 4.82556848"></polygon>
+                </g>
+            </svg>`),
+        ),
     ).addToClass('has-checkbox-or-radio');
 }
 
@@ -844,18 +857,22 @@ export function Radio(
 ): GenericComponent {
     return Label(
         label,
-        Input('radio', value)
-            .setAttr('name', name)
-            .subscribeToState(
-                selection,
-                (newValue, self) =>
-                    ((self as any as HTMLInputElement).checked =
-                        newValue == value),
-            )
-            .on('change', (self) => {
-                if ((self as any as HTMLInputElement).checked)
-                    selection.value = value.toString();
-            }),
+        Container(
+            'div',
+            Input('radio', value)
+                .setAttr('name', name)
+                .subscribeToState(
+                    selection,
+                    (newValue, self) =>
+                        ((self as any as HTMLInputElement).checked =
+                            newValue == value),
+                )
+                .on('change', (self) => {
+                    if ((self as any as HTMLInputElement).checked)
+                        selection.value = value.toString();
+                }),
+            Component('div').addToClass('circle'),
+        ),
     ).addToClass('has-checkbox-or-radio');
 }
 

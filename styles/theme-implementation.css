@@ -16,7 +16,8 @@ select {
     border-radius: var(--corner-radius);
 }
 
-input[type='radio'] {
+input[type='radio'],
+label.has-checkbox-or-radio div .circle {
     border-radius: 100%;
 }
 
@@ -36,6 +37,10 @@ select,
 .surface {
     border-width: var(--line-width);
     border-style: var(--line-style);
+}
+
+label.has-checkbox-or-radio :checked + :is(.icon, .circle) {
+    display: block;
 }
 
 label.surface:has(:focus),
@@ -100,7 +105,8 @@ option,
     gap: var(--spacing-sm);
 }
 
-hr {
+hr,
+label.has-checkbox-or-radio {
     margin: var(--spacing-md) 0px;
 }
 
@@ -174,6 +180,14 @@ option:checked,
     border-color: var(--primary-border);
 }
 
+label.has-checkbox-or-radio div .circle {
+    background: var(--on-primary);
+}
+
+label.has-checkbox-or-radio :checked + .icon {
+    color: var(--on-primary);
+}
+
 :is(
         option:checked:not([disabled]),
         input[type='checkbox']:checked,
@@ -236,6 +250,7 @@ input[type='radio'] {
     height: var(--checkbox-size);
 
     padding: 0px;
+    margin: 0px;
 }
 
 .grid {
@@ -264,6 +279,33 @@ label.has-checkbox-or-radio {
     flex-direction: row-reverse;
     align-items: center;
     justify-content: start;
+}
+
+label.has-checkbox-or-radio div {
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+label.has-checkbox-or-radio div :is(.circle, .icon) {
+    position: absolute;
+}
+
+label.has-checkbox-or-radio div :is(.circle, .icon) {
+    width: 70%;
+    height: 70%;
+    aspect-ratio: 1/1;
+
+    display: none;
+}
+
+label.has-checkbox-or-radio div .circle {
+    width: 60%;
+    height: 60%;
 }
 
 label.surface {
