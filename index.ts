@@ -403,12 +403,15 @@ export interface Component<V> extends HTMLElement, Styleable {
 
     //states
     /**
-     * Subscribes to a State and calls the StateSubscription immediately.
+     * Subscribes to a State and calls the ComponentStateSubscription immediately.
      * @param state State to subscribe to
-     * @param fn StateSubscription to trigger on change of State
+     * @param fn ComponentStateSubscription to trigger on change of State
      * @returns Component (this)
      */
-    subscribeToState: <T>(state: State<T>, fn: StateSubscription<T>) => this;
+    subscribeToState: <T>(
+        state: State<T>,
+        fn: ComponentStateSubscription<T>,
+    ) => this;
 }
 
 /**
@@ -429,6 +432,17 @@ export interface CheckableComponent<T> extends Component<T> {
  * @param e Event
  */
 export type ComponentEventHandler<V> = (self: Component<V>, e: Event) => void;
+
+/**
+ * Function a Component uses to subscribe to a State
+ * When the State updates, this function is called
+ * @param newValue New value of the state
+ * @param self The subscribing component
+ */
+export type ComponentStateSubscription<T> = (
+    newValue: T,
+    self: Component<any>,
+) => void;
 
 /**
  * Element with methods to easily modify styles.
@@ -610,8 +624,8 @@ export function Component<ValueType>(
 
     //state
     component.subscribeToState = (state, fn) => {
-        state.subscribe(fn);
-        fn(state.value);
+        state.subscribe((newValue) => fn(newValue, component));
+        fn(state.value, component);
         return component;
     };
 
@@ -648,6 +662,31 @@ export function Button(
     style: ButtonStyles = ButtonStyles.Standard,
 ): GenericComponent {
     return Text('button', text).on('click', action).addToClass(style);
+}
+
+export function Checkbox(
+    isChecked: ValueObject<boolean>,
+    label: ValueObject<Stringifiable>,
+    value: ValueObject<Stringifiable>,
+): GenericComponent {
+    const checkedState = unwrapState(isChecked);
+
+    return Label(
+        label,
+        Input('checkbox', value)
+            .subscribeToState(
+                checkedState,
+                (checked, self) =>
+                    ((self as any as HTMLInputElement).checked = checked),
+            )
+            .on(
+                'change',
+                (self) =>
+                    (checkedState.value = (
+                        self as any as HTMLInputElement
+                    ).checked),
+            ),
+    );
 }
 
 /**
@@ -745,7 +784,7 @@ export function Input<T>(
  * @param labeledItem Item to be labeled. Will be appended to label
  */
 export function Label(
-    text: ValueObject<string>,
+    text: ValueObject<Stringifiable>,
     labeledItem: Component<any>,
 ): GenericComponent {
     return Text('label', text).addItems(labeledItem);
