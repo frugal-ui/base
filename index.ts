@@ -339,7 +339,7 @@ export interface Component<V> extends HTMLElement, Styleable {
     /**
      * Toggles HTML attribute based on condition
      */
-    toggleAttr: (key: Stringifiable, condition: ValueObject<boolean>) => this;
+    toggleAttr: (key: Stringifiable, condition?: ValueObject<boolean>) => this;
     /**
      * Resets HTML className
      */
@@ -357,7 +357,7 @@ export interface Component<V> extends HTMLElement, Styleable {
      */
     toggleClass: (
         value: Stringifiable,
-        condition: ValueObject<boolean>,
+        condition?: ValueObject<boolean>,
     ) => this;
 
     //children
@@ -398,14 +398,7 @@ export interface Component<V> extends HTMLElement, Styleable {
      */
     on: (
         eventName: keyof HTMLElementEventMap,
-        handler: ComponentEventHandler,
-    ) => this;
-    /**
-     * Removes eventListener
-     */
-    removeListener: (
-        eventName: keyof HTMLElementEventMap,
-        handler: ComponentEventHandler,
+        handler: ComponentEventHandler<V>,
     ) => this;
 
     //states
@@ -432,8 +425,10 @@ export interface CheckableComponent<T> extends Component<T> {
 
 /**
  * HTML Event handler
+ * @param self Component the event is called on
+ * @param e Event
  */
-export type ComponentEventHandler = (this: HTMLElement, e: Event) => void;
+export type ComponentEventHandler<V> = (self: Component<V>, e: Event) => void;
 
 /**
  * Element with methods to easily modify styles.
@@ -508,6 +503,11 @@ export function Component<ValueType>(
         return component;
     };
     component.toggleAttr = (key, condition) => {
+        if (!condition) {
+            component.toggleAttribute(key.toString());
+            return component;
+        }
+
         const subscribe = unwrapState(condition);
 
         component.subscribeToState(subscribe, (newValue) => {
@@ -530,6 +530,11 @@ export function Component<ValueType>(
         return component;
     };
     component.toggleClass = (className, condition) => {
+        if (!condition) {
+            component.classList.toggle(className.toString());
+            return component;
+        }
+
         const state = unwrapState(condition);
 
         component.subscribeToState(state, (newValue) => {
@@ -599,11 +604,7 @@ export function Component<ValueType>(
 
     //events
     component.on = (eventName, handler) => {
-        component.addEventListener(eventName, handler);
-        return component;
-    };
-    component.removeListener = (eventName, handler) => {
-        component.addEventListener(eventName, handler);
+        component.addEventListener(eventName, (e) => handler(component, e));
         return component;
     };
 
