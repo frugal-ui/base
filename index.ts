@@ -664,6 +664,12 @@ export function Button(
     return Text('button', text).on('click', action).addToClass(style);
 }
 
+/**
+ * Checkbox
+ * @param isChecked State determining whether or not the checkbox is checked
+ * @param label Text to display
+ * @param value Value attribute
+ */
 export function Checkbox(
     isChecked: ValueObject<boolean>,
     label: ValueObject<Stringifiable>,
