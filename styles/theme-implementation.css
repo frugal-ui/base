@@ -54,10 +54,14 @@ hr {
     background-position: center;
 }
 
+label:not(.has-checkbox-or-radio),
+optgroup {
+    text-indent: var(--padding-h-inner);
+}
+
 label,
 optgroup {
     font-size: small;
-    text-indent: var(--padding-h-inner);
 }
 
 option {
@@ -96,6 +100,10 @@ hr {
     margin: var(--spacing-md) 0px;
 }
 
+label.has-checkbox-or-radio {
+    gap: var(--spacing-md);
+}
+
 /* colors */
 html,
 option {
@@ -129,7 +137,9 @@ select,
         button,
         select:not([size]):not([multiple]),
         .surface.clickable,
-        option:not([disabled])
+        option:not([disabled]),
+        input[type='checkbox']:not(:checked),
+        input[type='radio']:not(:checked)
     ):hover {
     background: var(--surface-hover);
 }
@@ -138,7 +148,9 @@ select,
         button,
         select:not([size]):not([multiple]),
         .surface.clickable,
-        option:not([disabled])
+        option:not([disabled]),
+        input[type='checkbox']:not(:checked),
+        input[type='radio']:not(:checked)
     ):active,
 :is(input, textarea):focus {
     background: var(--surface-active);
@@ -151,18 +163,27 @@ label.surface:has(:focus),
 }
 
 option:checked,
-:is(button, input, textarea, select, .surface).primary {
+:is(button, input, textarea, select, .surface).primary,
+:is(input[type='checkbox'], input[type='radio']):checked {
     background: var(--primary);
     color: var(--on-primary);
     border-color: var(--primary-border);
 }
 
-option:checked:not([disabled]):hover,
+:is(
+        option:checked:not([disabled]),
+        input[type='checkbox']:checked,
+        input[type='radio']:checked
+    ):hover,
 :is(button, select, .surface.clickable).primary:hover {
     background: var(--primary-hover);
 }
 
-option:checked:not([disabled]):active,
+:is(
+        option:checked:not([disabled]),
+        input[type='checkbox']:checked,
+        input[type='radio']:checked
+    ):active,
 :is(button, select, .surface.clickable).primary:active {
     background: var(--primary-active);
 }
@@ -205,6 +226,14 @@ body {
     height: var(--icon-size);
 }
 
+input[type='checkbox'],
+input[type='radio'] {
+    width: var(--checkbox-size);
+    height: var(--checkbox-size);
+
+    padding: 0px;
+}
+
 .grid {
     display: grid;
 }
@@ -225,6 +254,12 @@ label {
 
 label input {
     margin-top: var(--spacing-sm);
+}
+
+label.has-checkbox-or-radio {
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: start;
 }
 
 label.surface {

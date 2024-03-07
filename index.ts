@@ -686,7 +686,7 @@ export function Checkbox(
                         self as any as HTMLInputElement
                     ).checked),
             ),
-    );
+    ).addToClass('has-checkbox-or-radio');
 }
 
 /**
