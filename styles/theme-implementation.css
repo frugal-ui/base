@@ -37,7 +37,7 @@ select,
 label.surface:has(:focus),
 :is(input, textarea):focus,
 .selected {
-    outline-width: var(--outline-width);
+    outline-width: var(--spacing-sm);
     outline-style: var(--line-style);
 }
 
@@ -89,11 +89,11 @@ option,
 /* spacing */
 .grid,
 .list-view {
-    gap: var(--spacing-01);
+    gap: var(--spacing-sm);
 }
 
 hr {
-    margin: var(--spacing-03) 0px;
+    margin: var(--spacing-md) 0px;
 }
 
 /* colors */
@@ -145,7 +145,8 @@ select,
 }
 
 label.surface:has(:focus),
-:is(input, textarea):focus {
+:is(input, textarea):focus,
+.selected {
     outline-color: var(--primary);
 }
 
@@ -209,11 +210,11 @@ body {
 }
 
 optgroup:not(:first-child) {
-    padding-top: var(--spacing-03);
+    padding-top: var(--spacing-md);
 }
 
 optgroup {
-    padding-bottom: var(--spacing-03);
+    padding-bottom: var(--spacing-md);
 }
 
 label {
@@ -223,7 +224,7 @@ label {
 }
 
 label input {
-    margin-top: var(--spacing-01);
+    margin-top: var(--spacing-sm);
 }
 
 label.surface {

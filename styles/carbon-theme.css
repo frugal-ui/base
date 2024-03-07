@@ -38,7 +38,6 @@
 :root {
     --corner-radius: 0px;
     --line-width: 1px;
-    --outline-width: 4px;
     --line-style: solid;
     --glass-blur: 0px;
 
@@ -59,19 +58,8 @@
 
 /* spacing */
 :root {
-    --spacing-01: 0.125rem;
-    --spacing-02: 0.25rem;
-    --spacing-03: 0.5rem;
-    --spacing-04: 0.75rem;
-    --spacing-05: 1rem;
-    --spacing-06: 1.5rem;
-    --spacing-07: 2rem;
-    --spacing-08: 2.5rem;
-    --spacing-09: 3rem;
-    --spacing-10: 4rem;
-    --spacing-11: 5rem;
-    --spacing-12: 6rem;
-    --spacing-13: 10rem;
+    --spacing-sm: 0.125rem;
+    --spacing-md: 0.5rem;
 }
 
 /* colors */
