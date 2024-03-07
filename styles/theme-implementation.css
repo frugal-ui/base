@@ -259,15 +259,15 @@ label.surface input {
     height: 100%;
 }
 
-.stacks-vertical,
-.stacks-horizontal,
+.stack-vertical,
+.stack-horizontal,
 .icon {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.stacks-vertical {
+.stack-vertical {
     flex-direction: column;
 }
 

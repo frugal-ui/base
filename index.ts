@@ -684,11 +684,11 @@ export function Grid(
 }
 
 /**
- * Container that horizontally stacks its children via flexbox
+ * Container that horizontally stack its children via flexbox
  * @param children Children to append
  */
 export function HStack(...children: Component<any>[]): GenericComponent {
-    return Container('div', ...children).addToClass('stacks-horizontal');
+    return Container('div', ...children).addToClass('stack-horizontal');
 }
 
 /**
@@ -862,11 +862,11 @@ export function Tile(...children: Component<any>[]): GenericComponent {
 }
 
 /**
- * Container that vertically stacks its children via flexbox
+ * Container that vertically stack its children via flexbox
  * @param children Children to append
  */
 export function VStack(...children: Component<any>[]): GenericComponent {
-    return Container('div', ...children).addToClass('stacks-vertical');
+    return Container('div', ...children).addToClass('stack-vertical');
 }
 
 /*
